@@ -1,0 +1,15 @@
+.asm td, .asm tr,
+.asm th, .table thead tr th:last-child {
+    /* display: flex;
+    align-items: center;
+    justify-content: center; */
+    text-align: center !important;
+}
+
+.asm td input {
+    padding-left: 10px;
+}
+
+.this-sel {
+    max-width: 180px !important;
+}

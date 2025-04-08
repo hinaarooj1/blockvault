@@ -1,0 +1,103 @@
+#sidebar.bgdk {
+  /* background: rgb(0, 9, 107);
+    background: -moz-linear-gradient(
+    180deg,
+    rgba(0, 9, 107, 1) 0%,
+    rgba(1, 0, 41, 1) 0%,
+    rgba(1, 0, 44, 1) 0%,
+    rgba(1, 0, 44, 1) 46%,
+    rgba(0, 9, 107, 1) 75%,
+    rgba(1, 0, 41, 1) 90%
+  );
+  background: -webkit-linear-gradient(
+    180deg,
+    rgba(0, 9, 107, 1) 0%,
+    rgba(1, 0, 41, 1) 0%,
+    rgba(1, 0, 44, 1) 0%,
+    rgba(1, 0, 44, 1) 46%,
+    rgba(0, 9, 107, 1) 75%,
+    rgba(1, 0, 41, 1) 90%
+  );
+  background: linear-gradient(
+    180deg,
+    rgba(0, 9, 107, 1) 0%,
+    rgba(1, 0, 41, 1) 0%,
+    rgba(1, 0, 44, 1) 0%,
+    rgba(1, 0, 44, 1) 46%,
+    rgba(0, 9, 107, 1) 75%,
+    rgba(1, 0, 41, 1) 90%
+  );
+  backdrop-filter: 50px; */
+  border-right: none;
+  background-color: transparent !important;
+}
+.lgpe-4 {
+  padding-inline-end: 1rem;
+}
+.forthis {
+  top: 49px !important;
+  right: 36px !important;
+}
+.abstop {
+  position: absolute;
+  top: 0;
+  height: auto;
+}
+.card-f p,
+.card-f h4 {
+  color: white;
+}
+@media (max-width: 1024px) {
+  #sidebar.bgdk {
+    backdrop-filter: 30px;
+    padding-right: 20px !important;
+    background: rgb(0, 9, 107);
+    background: -moz-linear-gradient(
+      180deg,
+      rgba(0, 9, 107, 1) 0%,
+      rgba(1, 0, 41, 1) 0%,
+      rgba(1, 0, 44, 1) 0%,
+      rgba(1, 0, 44, 1) 46%,
+      rgba(0, 9, 107, 1) 75%,
+      rgba(1, 0, 41, 1) 90%
+    );
+    background: -webkit-linear-gradient(
+      180deg,
+      rgba(0, 9, 107, 1) 0%,
+      rgba(1, 0, 41, 1) 0%,
+      rgba(1, 0, 44, 1) 0%,
+      rgba(1, 0, 44, 1) 46%,
+      rgba(0, 9, 107, 1) 75%,
+      rgba(1, 0, 41, 1) 90%
+    );
+    background: linear-gradient(
+      180deg,
+      rgba(0, 9, 107, 1) 0%,
+      rgba(1, 0, 41, 1) 0%,
+      rgba(1, 0, 44, 1) 0%,
+      rgba(1, 0, 44, 1) 46%,
+      rgba(0, 9, 107, 1) 75%,
+      rgba(1, 0, 41, 1) 90%
+    );
+  }
+  #sidebar.bgdk.w-\[250px\] {
+    max-width: 280px !important;
+  }
+  .if-2 {
+    margin: auto !important;
+  }
+}
+@media (min-width: 1025px) {
+  .lg\:ms-\[250px\] {
+    margin-inline-start: 250px;
+  }
+  .lg\:ms-\[270px\] {
+    margin-inline-start: 270px;
+  }
+  .lgpe-4 {
+    padding: 0;
+  }
+}
+.w-\[250px\] {
+  max-width: 250px;
+}

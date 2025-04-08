@@ -1,0 +1,26 @@
+.widn img {
+  width: 30px;
+}
+
+.sasa {
+  color: #3736af;
+}
+
+.taj th,
+.tram td {
+  text-align: center !important;
+}
+
+.taj th.lefts,
+.tram td.lefts {
+  text-align: left !important;
+}
+
+.td-data:hover {
+  text-decoration: underline;
+}
+
+.td-data {
+  cursor: pointer;
+
+}

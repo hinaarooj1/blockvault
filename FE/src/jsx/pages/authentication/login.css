@@ -1,0 +1,646 @@
+body {
+    --layout-nav-zIndex: 1101;
+    --layout-nav-mobile-width: 320px;
+    --layout-header-blur: 8px;
+    --layout-header-zIndex: 1100;
+    --layout-header-mobile-height: 64px;
+    --layout-header-desktop-height: 72px;
+    --layout-auth-content-width: 420px;
+}
+
+
+.css-1iu2lsq {
+    padding: 40px 24px;
+    width: 100%;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    background-color: #141A21;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 2px 0px, rgba(0, 0, 0, 0.12) 0px 12px 24px -4px;
+    max-width: var(--layout-auth-content-width);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
+
+
+
+
+
+#root,
+#root__layout,
+body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 100%;
+    flex-direction: column;
+}
+
+[data-mui-color-scheme="dark"] .css-migdz::before {
+    opacity: 0.08;
+}
+
+.css-q2wzv6 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0px;
+    left: auto;
+    right: 0px;
+    color: inherit;
+    background-image: none;
+    background-color: transparent;
+    box-shadow: none;
+    z-index: var(--layout-header-zIndex);
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.css-uot54n {
+    position: relative;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    min-height: auto;
+    height: var(--layout-header-mobile-height);
+    transition: height 200ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.css-13uezk9 {
+    width: 100%;
+    margin-left: auto;
+    box-sizing: border-box;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    height: 100%;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+}
+
+.css-ga3xdk {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+.css-1ngw63v {
+    width: 40px;
+    height: 40px;
+}
+
+.css-19pabp7 {
+    width: 1px;
+    height: 10px;
+    flex-shrink: 0;
+    display: none;
+    position: relative;
+    -webkit-box-align: center;
+    align-items: center;
+    flex-direction: column;
+    margin-left: 20px;
+    margin-right: 20px;
+    background-color: currentcolor;
+    color: rgba(145 158 171 / 0.2);
+}
+
+.css-mxmcl7 {
+    display: flex;
+    flex: 1 1 auto;
+    -webkit-box-pack: center;
+    justify-content: center;
+}
+
+@media (min-width: 0px) {
+    .css-19aqap1 {
+        gap: 8px;
+    }
+}
+
+.css-vufwa1 {
+    padding: 40px 16px;
+    z-index: 9;
+    display: flex;
+    flex: 1 1 auto;
+    -webkit-box-align: center;
+    align-items: center;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    justify-content: center;
+}
+
+
+.css-126sty9 {
+    font-style: inherit;
+    font-variant: inherit;
+    font-weight: inherit;
+    font-stretch: inherit;
+    line-height: inherit;
+    font-family: inherit;
+    font-optical-sizing: inherit;
+    font-size-adjust: inherit;
+    font-kerning: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: currentcolor;
+    border: 0px;
+    box-sizing: content-box;
+    background: none;
+    height: 1.4375em;
+    margin: 0px;
+    -webkit-tap-highlight-color: transparent;
+    display: block;
+    min-width: 0px;
+    width: 100%;
+    animation-name: mui-auto-fill-cancel;
+    animation-duration: 10ms;
+    font-size: 0.9375rem;
+    padding: 16.5px 14px;
+}
+
+.css-1iu2lsq {
+    padding: 40px 24px;
+    width: 100%;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    background-color: #141A21;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 2px 0px, rgba(0, 0, 0, 0.12) 0px 12px 24px -4px;
+    max-width: var(--layout-auth-content-width);
+}
+
+.css-phm93g {
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    position: relative;
+    display: inline-flex;
+    margin-bottom: 24px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+
+
+.css-1u1jokr {
+
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.4375em;
+    color: #FFFFFF;
+    box-sizing: border-box;
+    cursor: text;
+    display: inline-flex;
+    -webkit-box-align: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    border-radius: 8px;
+}
+
+.css-15bf1b4 {
+    text-align: left;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    top: -5px;
+    left: 0px;
+    pointer-events: none;
+    min-width: 0%;
+    margin: 0px;
+    padding: 0px 8px;
+    border-radius: inherit;
+    border-style: solid;
+    border-width: 1px;
+    overflow: hidden;
+    border-color: rgba(145 158 171 / 0.2);
+    transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.css-14lo706 {
+    float: unset;
+    width: auto;
+    overflow: hidden;
+    display: block;
+    padding: 0px;
+    height: 11px;
+    font-size: 0.75em;
+    visibility: hidden;
+    max-width: 100%;
+    transition: max-width 100ms cubic-bezier(0, 0, 0.2, 1) 50ms;
+    white-space: nowrap;
+}
+
+.css-14lo706>span {
+    padding-left: 5px;
+    padding-right: 5px;
+    display: inline-block;
+    opacity: 0;
+    visibility: visible;
+}
+
+.css-1hdbc19 {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.css-1ast7b5 {
+    margin: 0px;
+
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.57143;
+    text-decoration: none;
+    color: inherit;
+    align-self: flex-end;
+}
+
+.css-feqhe6 {
+    display: inline-flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 0px;
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+    vertical-align: top;
+    width: 100%;
+}
+
+.css-jpp5th.MuiInputLabel-shrink {
+
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #919EAB;
+}
+
+@media (max-width: 599.95px) {
+    .css-1puc122 {
+        font-size: 1rem;
+    }
+}
+
+.css-w8wce8 {
+    display: flex;
+    height: 0.01em;
+    max-height: 2em;
+    -webkit-box-align: center;
+    align-items: center;
+    white-space: nowrap;
+    color: #919EAB;
+    margin-left: 8px;
+}
+
+.css-cnvj7y {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: inline-flex;
+}
+
+.css-15bf1b4 {
+    text-align: left;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    top: -5px;
+    left: 0px;
+    pointer-events: none;
+    min-width: 0%;
+    margin: 0px;
+    padding: 0px 8px;
+    border-radius: inherit;
+    border-style: solid;
+    border-width: 1px;
+    overflow: hidden;
+    border-color: rgba(145 158 171 / 0.2);
+    transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.css-w0pj6f {
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+    inset: 0px;
+    border-radius: inherit;
+}
+
+.css-1i03yle {
+    color: #1C252E !important;
+    background-color: #FFFFFF !important;
+}
+
+.css-1i03yle {
+    display: inline-flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    appearance: none;
+
+    font-weight: 700;
+    font-size: 0.9375rem;
+    line-height: 1.71429;
+    text-transform: unset;
+    min-width: 64px;
+    width: 100%;
+    box-shadow: none;
+
+    height: 48px;
+    outline: 0px;
+    border-width: 0px;
+    border-style: initial;
+    border-image: initial;
+    margin: 0px;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border-color: currentcolor;
+    transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1), border-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.new-login input:-webkit-autofill {
+    background-color: transparent !important;
+}
+
+input:-webkit-autofill {
+    appearance: none;
+    background-color: #141A21 !important;
+    color: black !important;
+    border-radius: 10px !important;
+}
+
+.new-login input:-internal-autofill-selected,
+.new-login input:active,
+.new-login input:focus {
+
+    background-color: #141A21 !important;
+    /* background-color: transparent !important; */
+}
+
+.new-login .css-1fk2kk1 {
+    border: none !important;
+}
+
+.thisnnf .form-control {
+    background-color: #141A21 !important;
+
+}
+
+.thisnnf .form-label,
+.thisnnf h4 {
+    color: #919EAB;
+}
+
+.thisnnf .card {
+    border: none;
+    background-color: #141A21 !important;
+
+}
+
+.thisnnf .card-body {}
+
+.thisnnf {
+    background-color: #25282c !important;
+
+}
+
+.new-login {
+    min-height: 100vh;
+    background-color: #25282c !important;
+}
+
+.css-1fk2kk1 {
+    display: inline-flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    background-color: transparent;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    appearance: none;
+
+    text-align: center;
+    font-size: 1.5rem;
+    color: #919EAB;
+    outline: 0px;
+    border-width: 0px;
+    border-style: initial;
+    border-color: initial;
+    border-image: initial;
+    margin: 0px -12px 0px 0px;
+    text-decoration: none;
+    flex: 0 0 auto;
+    padding: 8px;
+    border-radius: 50%;
+    overflow: visible;
+    transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.css-1puc122 {
+    font-style: inherit;
+    font-variant: inherit;
+    font-weight: inherit;
+    font-stretch: inherit;
+    line-height: inherit;
+    font-family: inherit;
+    font-optical-sizing: inherit;
+    font-size-adjust: inherit;
+    font-kerning: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: currentcolor;
+    border: 0px;
+    box-sizing: content-box;
+    background: none;
+    height: 1.4375em;
+    margin: 0px;
+    -webkit-tap-highlight-color: transparent;
+    display: block;
+    min-width: 0px;
+    width: 100%;
+    animation-name: mui-auto-fill-cancel;
+    animation-duration: 10ms;
+    font-size: 0.9375rem;
+    padding: 16.5px 0px 16.5px 14px;
+}
+
+.css-jpp5th {
+
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.57143;
+    color: #637381;
+    display: block;
+    transform-origin: left top;
+    text-overflow: ellipsis;
+    max-width: calc(133% - 32px);
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    transform: translate(14px, -9px) scale(0.75);
+    z-index: 1;
+    pointer-events: auto;
+    user-select: none;
+    padding: 0px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: color 200ms cubic-bezier(0, 0, 0.2, 1), transform 200ms cubic-bezier(0, 0, 0.2, 1), max-width 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.css-ssv83 {
+
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.4375em;
+    color: #FFFFFF;
+    box-sizing: border-box;
+    cursor: text;
+    display: inline-flex;
+    -webkit-box-align: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    border-radius: 8px;
+    padding-right: 14px;
+}
+
+.css-jpp5th {
+
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.57143;
+    color: #637381;
+    display: block;
+    transform-origin: left top;
+    text-overflow: ellipsis;
+    max-width: calc(133% - 32px);
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    transform: translate(14px, -9px) scale(0.75);
+    z-index: 1;
+    pointer-events: auto;
+    user-select: none;
+    padding: 0px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: color 200ms cubic-bezier(0, 0, 0.2, 1), transform 200ms cubic-bezier(0, 0, 0.2, 1), max-width 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.css-jpp5th.MuiInputLabel-shrink {
+
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #919EAB;
+}
+
+.css-feqhe6 {
+    display: inline-flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 0px;
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+    vertical-align: top;
+    width: 100%;
+}
+
+.css-1i43dhb {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.css-1vuw1wj {
+
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.57143;
+    color: #7635dc;
+    margin: 0px;
+    text-decoration: none;
+}
+
+.css-ffhzw7 {
+    margin: 0px;
+
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.57143;
+    color: #919EAB;
+}
+
+.css-fhxiwe {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.css-fp59aj {
+    margin: 0px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.125rem;
+    line-height: 1.5;
+}
+
+.css-zlqbjq {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    -webkit-box-align: center;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+
+.css-19aqap1 {
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+}
+
+.css-migdz::before {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    content: "";
+    opacity: 0.24;
+    position: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    /* background-image: url(/assets/background/background-3-blur.webp); */
+}

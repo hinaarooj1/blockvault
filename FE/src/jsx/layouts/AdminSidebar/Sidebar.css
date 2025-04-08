@@ -1,0 +1,42 @@
+.react-responsive-modal-modal {
+    border-radius: 10px;
+    min-width: 350px;
+}
+
+.react-responsive-modal-modal h1 {
+
+    margin: 0;
+}
+
+.react-responsive-modal-closeButton {
+    top: 20 !important;
+}
+
+.emaol- {
+    margin-top: 20px;
+    display: flex;
+    align-items: start;
+    flex-direction: column;
+}
+
+.emaol- label {
+    font-size: 17px;
+    margin-bottom: 5px;
+}
+
+.emaol- input {
+    width: 100%;
+    border-radius: 5px;
+    outline: none;
+    border: 1px solid gray;
+    padding: 8px 5px;
+}
+
+.bansa {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.bansa:disabled {
+    opacity: 0.5 !important;
+}
