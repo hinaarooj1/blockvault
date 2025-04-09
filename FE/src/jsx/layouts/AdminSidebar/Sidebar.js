@@ -242,7 +242,7 @@ const SideBar = (props) => {
                 </span>
               </NavLink>
             </li>
-            {authUser().user.role === "admin" ? (
+            {/* {authUser().user.role === "admin" ? (
               <li>
                 <NavLink
                   to="/admin/subadmin"
@@ -272,7 +272,7 @@ const SideBar = (props) => {
               </li>
             ) : (
               ""
-            )}
+            )} */}
             {authUser().user.role === "admin" ? (
               <li>
                 <NavLink
@@ -307,7 +307,7 @@ const SideBar = (props) => {
             ) : (
               ""
             )}
-            {authUser().user.role === "admin" ? (
+            {/* {authUser().user.role === "admin" ? (
               <li>
                 <NavLink
                   to="/admin/add-subadmin"
@@ -340,7 +340,7 @@ const SideBar = (props) => {
               </li>
             ) : (
               ""
-            )}
+            )} */}
             {authUser().user.role === "subadmin" ? (
               <li>
                 <button onClick={onOpenModal}

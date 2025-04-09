@@ -156,9 +156,9 @@ const useMenuList = () => {
 
         },
         {
-            title: 'Letter',
+            title: 'Legal Notice',
             classsChange: 'mm-active',
-            to: '/letter',
+            to: '/legal-notice',
             iconStyle: <i className="material-symbols-outlined">lab_profile</i>,
 
         },
