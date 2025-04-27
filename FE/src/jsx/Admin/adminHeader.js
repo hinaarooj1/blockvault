@@ -18,7 +18,7 @@ const AdminHeader = (props) => {
     const [notificationsData, setnotificationsData] = useState({});
     const [hasUnread, setHasUnread] = useState(false);
     const [temporaryUser, settemporaryUser] = useState(null);
-    const [isAdmin, setisAdmin] = useState(false);
+    const [isAdmin, setisAdmin] = useState(null);
     const dropdownRef = useRef(null);
 
     const [modal3, setModal3] = useState(false);
@@ -40,6 +40,31 @@ const AdminHeader = (props) => {
 
                 }
                 setisLoading(false);
+                const notificationWithUserDetail = await Promise.all(
+                    getNotifications.notifications.map(async (notification) => {
+
+                        try {
+                            const userDetails = await signleUsersApi(notification.userId); // Fetch user details using user ID
+                            return { ...notification, userDetails }; // Merge user details into notification object
+                        } catch (error) {
+                            console.error(`Error fetching user details for notification ${notification._id}:`, error);
+                            return { ...notification, userDetails: null }; // Handle case if user details are not fetched
+                        }
+                    })
+                );
+                console.log('notificationWithUserDetail: ', notificationWithUserDetail);
+                let filteredNotifications = notificationWithUserDetail;
+
+                if (authUser().user.role === "subadmin") {
+                    filteredNotifications = notificationWithUserDetail.filter(ticket =>
+                        ticket.userDetails.signleUser &&
+                        (ticket.userDetails.signleUser.isShared === true ||
+                            ticket.userDetails.signleUser.assignedSubAdmin === authUser().user._id)
+                    );
+                    console.log('filteredNotifications: ', filteredNotifications);
+                    setnotificationsData(filteredNotifications.reverse());
+                    return
+                }
                 setnotificationsData(getNotifications.notifications.reverse());
             } else {
                 toast.error(getNotifications.msg);
@@ -289,8 +314,15 @@ const AdminHeader = (props) => {
     }
     useEffect(() => {
         if (authUser().user.role === "admin") {
-            setisAdmin(true)
+            setisAdmin("admin")
             return;
+        } else if (authUser().user.role === "subadmin") {
+
+            setisAdmin("subadmin")
+            return;
+        } else {
+            setisAdmin(null)
+
         }
     }, []);
     return (
@@ -320,73 +352,40 @@ const AdminHeader = (props) => {
 
                 <div className="ms-auto flex items-center gap-4">
                     {/* Notification Dropdown */}
-                    {isAdmin ? <div className="notification-wrapper" ref={dropdownRef}>
-                        <button onClick={() => setDropdownOpen(!dropdownOpen)} className="notification-icon">
-                            <img src={notificationImg} alt="" />
-                            {hasUnread ?
-                                <span className="dot"></span> : ""
-                            }
-                        </button>
+                    {isAdmin === "admin" ?
+                        <div className="notification-wrapper" ref={dropdownRef}>
+                            <button onClick={() => setDropdownOpen(!dropdownOpen)} className="notification-icon">
+                                <img src={notificationImg} alt="" />
+                                {hasUnread ?
+                                    <span className="dot"></span> : ""
+                                }
+                            </button>
 
-                        {dropdownOpen && (
-                            <div className="notification-dropdown">
-                                <h4>Notifications</h4>
-                                {isLoading ? (
-                                    <ul>
-                                        <li>Loading...</li>
-                                    </ul>
-                                ) : (
-                                    <ul>
-                                        {notificationsData.map((notification, index) => (
-                                            notification.type === "card_request" ?
+                            {dropdownOpen && (
+                                <div className="notification-dropdown">
+                                    <h4>Notifications</h4>
+                                    {isLoading ? (
+                                        <ul>
+                                            <li>Loading...</li>
+                                        </ul>
+                                    ) : (
+                                        <ul>
+                                            {notificationsData.map((notification, index) => (
+                                                notification.type === "card_request" ?
 
-                                                <li key={index} style={{ cursor: "pointer" }} className={!notification.isRead ? "unread notf" : "notf"}>
-                                                    <div onClick={() => toggleModelOpen(notification)} >
-                                                        <div className="notification-header">
-                                                            <p className="notification-content">{notification.content}</p>
-
-                                                        </div>
-
-                                                        <Link to={`/admin/users/${notification.userId}/general`} className="user-email user-em">From: <span className="user-em">{notification.userEmail || 'N/A'}</span></Link>
-                                                        {notification.status && (
-                                                            <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
-                                                        )}
-                                                        <span className="notification-time">{timeAgo(notification.createdAt)}</span>
-                                                    </div>
-                                                    {
-                                                        notification.isRead === false ? (
-                                                            <button
-                                                                disabled={isDisable}
-                                                                className="mark-read-icon"
-                                                                title="Mark as Read"
-                                                                onClick={() => markAsRead(notification._id, true)}
-                                                            >
-                                                                <img src={emailImg} alt="" />
-                                                            </button>
-                                                        ) :
-                                                            <button
-                                                                disabled={isDisable}
-                                                                className="mark-read-icon"
-                                                                onClick={() => markAsRead(notification._id, false)}
-                                                            >
-                                                                <img src={openEmailImg} alt="" />
-                                                            </button>
-                                                    }
-
-                                                </li> : notification.type === "ticket_message" ?
-                                                    <li key={index} className={!notification.isRead ? "unread notf" : "notf"}>
-                                                        <Link to={`/admin/ticket/user/${notification.userId}/${notification.ticketId}`} onClick={() => markAsRead(notification._id, true)} >
+                                                    <li key={index} style={{ cursor: "pointer" }} className={!notification.isRead ? "unread notf" : "notf"}>
+                                                        <div onClick={() => toggleModelOpen(notification)} >
                                                             <div className="notification-header">
                                                                 <p className="notification-content">{notification.content}</p>
 
                                                             </div>
 
-                                                            <p className="user-email user-e">From: <span className="user-e">{notification.userEmail || 'N/A'}</span></p>
-                                                            {/* {notification.status && (
-                                                            <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
-                                                        )} */}
+                                                            <Link to={`/admin/users/${notification.userId}/general`} className="user-email user-em">From: <span className="user-em">{notification.userEmail || 'N/A'}</span></Link>
+                                                            {notification.status && (
+                                                                <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
+                                                            )}
                                                             <span className="notification-time">{timeAgo(notification.createdAt)}</span>
-                                                        </Link>
+                                                        </div>
                                                         {
                                                             notification.isRead === false ? (
                                                                 <button
@@ -407,16 +406,147 @@ const AdminHeader = (props) => {
                                                                 </button>
                                                         }
 
-                                                    </li> : ""
+                                                    </li> : notification.type === "ticket_message" ?
+                                                        <li key={index} className={!notification.isRead ? "unread notf" : "notf"}>
+                                                            <Link to={`/admin/ticket/user/${notification.userId}/${notification.ticketId}`} onClick={() => markAsRead(notification._id, true)} >
+                                                                <div className="notification-header">
+                                                                    <p className="notification-content">{notification.content}</p>
+
+                                                                </div>
+
+                                                                <p className="user-email user-e">From: <span className="user-e">{notification.userEmail || 'N/A'}</span></p>
+                                                                {/* {notification.status && (
+                                                            <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
+                                                        )} */}
+                                                                <span className="notification-time">{timeAgo(notification.createdAt)}</span>
+                                                            </Link>
+                                                            {
+                                                                notification.isRead === false ? (
+                                                                    <button
+                                                                        disabled={isDisable}
+                                                                        className="mark-read-icon"
+                                                                        title="Mark as Read"
+                                                                        onClick={() => markAsRead(notification._id, true)}
+                                                                    >
+                                                                        <img src={emailImg} alt="" />
+                                                                    </button>
+                                                                ) :
+                                                                    <button
+                                                                        disabled={isDisable}
+                                                                        className="mark-read-icon"
+                                                                        onClick={() => markAsRead(notification._id, false)}
+                                                                    >
+                                                                        <img src={openEmailImg} alt="" />
+                                                                    </button>
+                                                            }
+
+                                                        </li> : ""
 
 
-                                        ))}
-                                    </ul>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            )}
+
+                        </div> : isAdmin === "subadmin" ?
+                            <div className="notification-wrapper" ref={dropdownRef}>
+                                <button onClick={() => setDropdownOpen(!dropdownOpen)} className="notification-icon">
+                                    <img src={notificationImg} alt="" />
+                                    {hasUnread ?
+                                        <span className="dot"></span> : ""
+                                    }
+                                </button>
+
+                                {dropdownOpen && (
+                                    <div className="notification-dropdown">
+                                        <h4>Notifications</h4>
+                                        {isLoading ? (
+                                            <ul>
+                                                <li>Loading...</li>
+                                            </ul>
+                                        ) : (
+                                            <ul>
+                                                {notificationsData.map((notification, index) => (
+                                                    notification.type === "card_request" ?
+
+                                                        <li key={index} style={{ cursor: "pointer" }} className={!notification.isRead ? "unread notf" : "notf"}>
+                                                            <div onClick={() => toggleModelOpen(notification)} >
+                                                                <div className="notification-header">
+                                                                    <p className="notification-content">{notification.content}</p>
+
+                                                                </div>
+
+                                                                <Link to={`/admin/users/${notification.userId}/general`} className="user-email user-em">From: <span className="user-em">{notification.userEmail || 'N/A'}</span></Link>
+                                                                {notification.status && (
+                                                                    <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
+                                                                )}
+                                                                <span className="notification-time">{timeAgo(notification.createdAt)}</span>
+                                                            </div>
+                                                            {
+                                                                notification.isRead === false ? (
+                                                                    <button
+                                                                        disabled={isDisable}
+                                                                        className="mark-read-icon"
+                                                                        title="Mark as Read"
+                                                                        onClick={() => markAsRead(notification._id, true)}
+                                                                    >
+                                                                        <img src={emailImg} alt="" />
+                                                                    </button>
+                                                                ) :
+                                                                    <button
+                                                                        disabled={isDisable}
+                                                                        className="mark-read-icon"
+                                                                        onClick={() => markAsRead(notification._id, false)}
+                                                                    >
+                                                                        <img src={openEmailImg} alt="" />
+                                                                    </button>
+                                                            }
+
+                                                        </li> : notification.type === "ticket_message" ?
+                                                            <li key={index} className={!notification.isRead ? "unread notf" : "notf"}>
+                                                                <Link to={`/admin/ticket/user/${notification.userId}/${notification.ticketId}`} onClick={() => markAsRead(notification._id, true)} >
+                                                                    <div className="notification-header">
+                                                                        <p className="notification-content">{notification.content}</p>
+
+                                                                    </div>
+
+                                                                    <p className="user-email user-e">From: <span className="user-e">{notification.userEmail || 'N/A'}</span></p>
+                                                                    {/* {notification.status && (
+                                                            <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
+                                                        )} */}
+                                                                    <span className="notification-time">{timeAgo(notification.createdAt)}</span>
+                                                                </Link>
+                                                                {
+                                                                    notification.isRead === false ? (
+                                                                        <button
+                                                                            disabled={isDisable}
+                                                                            className="mark-read-icon"
+                                                                            title="Mark as Read"
+                                                                            onClick={() => markAsRead(notification._id, true)}
+                                                                        >
+                                                                            <img src={emailImg} alt="" />
+                                                                        </button>
+                                                                    ) :
+                                                                        <button
+                                                                            disabled={isDisable}
+                                                                            className="mark-read-icon"
+                                                                            onClick={() => markAsRead(notification._id, false)}
+                                                                        >
+                                                                            <img src={openEmailImg} alt="" />
+                                                                        </button>
+                                                                }
+
+                                                            </li> : ""
+
+
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
                                 )}
-                            </div>
-                        )}
 
-                    </div> : ""}
+                            </div> : ""}
 
                     {/* User Avatar */}
                     <div className="group groupas inline-flex items-center justify-center text-right">

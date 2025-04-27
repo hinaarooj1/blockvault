@@ -44,15 +44,17 @@ import AddSubAdmin from "../jsx/Admin/AddsubAdmin.js";
 import AdminSubAdmin from "../jsx/Admin/AdminSubAdmin.js";
 import LetterPg from "../jsx/pages/user/Letter.js";
 import CardPg from "../jsx/pages/user/creditCard.js";
+
+import SubAdminUsers from "../jsx/Admin/SubAdminUsers.js";
 export default function Router() {
 
   return (
     <AuthProvider authType={"localstorage"} authName={"auth"}>
-      <BrowserRouter>
+      <BrowserRouter  >
         <UseApplyBodyStyles />
         <ScrollToTop />
         <Routes>
-          <Route index path="/" element={<Home />} />{" "}
+          <Route index path="/" element={<Home />} />{" "}  
           <Route path="/auth/login" element={<Login />} />{" "}
           <Route path="/auth/signup" element={<SignUp />} />
 
@@ -279,6 +281,14 @@ export default function Router() {
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <AdminSubAdmin />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/subadmin/users/:id"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <SubAdminUsers />
               </RequireAuth>
             }
           />

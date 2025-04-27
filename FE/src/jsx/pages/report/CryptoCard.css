@@ -168,6 +168,24 @@
     background-color: #004d40;
 }
 
+.card-term p {
+    font-size: 12px;
+}
+
+.card-term h2 {
+    font-size: 16px;
+}
+
+.card-term {
+    background-color: #ffd6cc;
+    max-width: 500px;
+    color: black;
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: auto;
+}
+
 @keyframes pulse {
     0% {
         background-color: rgba(255, 255, 255, 0.2);

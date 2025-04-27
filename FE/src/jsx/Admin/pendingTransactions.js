@@ -72,6 +72,7 @@ const PendingTransactions = () => {
       //   "https://api.coindesk.com/v1/bpi/currentprice.json"
       // );
       const allTransactions = await getTransactionsApi();
+      
       if (allTransactions.success) {
         // setData(filter)
         let val = 0;
@@ -102,6 +103,24 @@ const PendingTransactions = () => {
     } finally {
     }
   };
+    const [timestamp, setTimestamp] = useState(null);
+    const [error, setError] = useState("");
+  
+    const handleChange = (e) => {
+      const value = e.target.value;
+      setTimestamp(value);
+    
+      // Regex for strict datetime-local format: YYYY-MM-DDTHH:MM
+      const datetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+    
+      if (!value) {
+        setError("Date is required.");
+      } else if (!datetimeRegex.test(value)) {
+        setError("Invalid date format. Enter date in correct format");
+      } else {
+        setError("");
+      }
+    };
   let toggleModal = async (data) => {
     setStatus(data.status);
     setType(data.type);
@@ -118,6 +137,8 @@ const PendingTransactions = () => {
       type: data.type,
       trxName: data.trxName,
     });
+    setTimestamp(new Date(data.createdAt).toISOString().slice(0, 16))
+    
     setModal(true);
     try {
       let _id = data._id;
@@ -166,6 +187,8 @@ const PendingTransactions = () => {
     let fromAddress = txid.fromAddress;
     let status = Status;
     let type = Type;
+    
+    let createdAt = timestamp;
     // Assuming Status is a string, trim it
 
     // Check if all required fields are non-empty after trimming
@@ -178,6 +201,7 @@ const PendingTransactions = () => {
       fromAddress === "" ||
       status === "" ||
       type === ""
+       || error !== ""
     ) {
       toast.error("All fields are required.");
       return;
@@ -195,6 +219,8 @@ const PendingTransactions = () => {
       type,
       fromAddress,
       status,
+
+      createdAt
     };
 
     try {
@@ -301,6 +327,268 @@ const PendingTransactions = () => {
             <div className="mx-auto w-full max-w-7xl">
 
               <AdminHeader toggle={toggleBar} pageName="Pending Transactions" />
+              <div className>
+                <div>
+                  <div className="mb-6 flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
+                    <div className="flex w-full items-center gap-4 sm:w-auto">
+                      <div className="relative w-full sm:w-auto">
+                        {/**/}
+                        <div className="group/nui-input relative">
+                          <input
+                            id="ninja-input-8"
+                            type="text"
+                            className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded-full"
+                            placeholder="Filter transactions..."
+                          />
+                          {/**/}
+                          {/**/}
+                          <div className="text-muted-400 group-focus-within/nui-input:text-primary-500 absolute start-0 top-0 flex items-center justify-center transition-colors duration-300 peer-disabled:cursor-not-allowed peer-disabled:opacity-75 h-10 w-10">
+                            <svg
+                              data-v-cd102a71
+                              xmlns="http://www.w3.org/2000/svg"
+                              xmlnsXlink="http://www.w3.org/1999/xlink"
+                              aria-hidden="true"
+                              role="img"
+                              className="icon h-[1.15rem] w-[1.15rem]"
+                              width="1em"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                            >
+                              <g
+                                fill="none"
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                              >
+                                <circle cx={11} cy={11} r={8} />
+                                <path d="m21 21l-4.3-4.3" />
+                              </g>
+                            </svg>
+                          </div>
+                          {/**/}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex w-full items-center justify-end gap-4 sm:w-auto" />
+                  </div>
+                  <div>
+                    {/*  */}
+                    {isLoading ? (
+                      <div className="mx-auto loading-pg w-full text-center max-w-xs">
+                        <div className="mx-auto max-w-xs new">
+                          <svg
+                            data-v-cd102a71
+                            xmlns="http://www.w3.org/2000/svg"
+                            xmlnsXlink="http://www.w3.org/1999/xlink"
+                            aria-hidden="true"
+                            role="img"
+                            className="icon h-12 w-12 text-primary-500"
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                              opacity=".25"
+                            />
+                            <path
+                              fill="currentColor"
+                              d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z"
+                            >
+                              <animateTransform
+                                attributeName="transform"
+                                dur="0.75s"
+                                repeatCount="indefinite"
+                                type="rotate"
+                                values="0 12 12;360 12 12"
+                              />
+                            </path>
+                          </svg>
+                        </div>
+                        <div className="mx-auto max-w-sm">
+                          <h4 className="font-heading text-xl font-medium leading-normal leading-normal text-muted-800 mb-1 mt-4 dark:text-white">
+                            Loading Transactions
+                          </h4>
+                          <p className="text-muted-400 font-sans text-sm">
+                            Please wait while we load transactions.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 grid-cols-1">
+                        {/*  */}
+                        {UserTransactions.filter(
+                          (Transaction) => !Transaction.isHidden
+                        ).map((transaction) => {
+                          return (
+                            transaction.transactions &&
+                            transaction.transactions.map(
+                              (sinlgeUserTx, index) => {
+                                return sinlgeUserTx.status === "pending" ? (
+                                  <div key={index}>
+                                    <div className="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative w-full border bg-white transition-all duration-300 rounded-xl p-3">
+                                      <div className="flex w-full items-center gap-2">
+                                        {sinlgeUserTx.type === "deposit" ? (
+                                          <div className="relative inline-flex shrink-0 items-center justify-center outline-none h-12 w-12 nui-mask nui-mask-blob bg-success-100 text-success-400">
+                                            <div className="flex h-full w-full items-center justify-center overflow-hidden text-center transition-all duration-300">
+                                              <svg
+                                                data-v-cd102a71
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                xmlnsXlink="http://www.w3.org/1999/xlink"
+                                                aria-hidden="true"
+                                                role="img"
+                                                className="icon"
+                                                width="1em"
+                                                height="1em"
+                                                viewBox="0 0 24 24"
+                                              >
+                                                <path
+                                                  fill="currentColor"
+                                                  d="M11 20V7.825l-5.6 5.6L4 12l8-8l8 8l-1.4 1.425l-5.6-5.6V20z"
+                                                />
+                                              </svg>
+                                            </div>
+                                          </div>
+                                        ) : sinlgeUserTx.type === "withdraw" ? (
+                                          <div className="relative inline-flex shrink-0 items-center justify-center outline-none h-12 w-12 nui-mask nui-mask-blob bg-danger-100 text-danger-400">
+                                            <div className="flex h-full w-full items-center justify-center overflow-hidden text-center transition-all duration-300">
+                                              <svg
+                                                data-v-cd102a71
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                xmlnsXlink="http://www.w3.org/1999/xlink"
+                                                aria-hidden="true"
+                                                role="img"
+                                                className="icon"
+                                                width="1em"
+                                                height="1em"
+                                                viewBox="0 0 24 24"
+                                              >
+                                                <path
+                                                  fill="currentColor"
+                                                  d="M11 4v12.175l-5.6-5.6L4 12l8 8l8-8l-1.4-1.425l-5.6 5.6V4z"
+                                                />
+                                              </svg>
+                                            </div>
+                                            {/**/}
+                                            {/**/}
+                                          </div>
+                                        ) : (
+                                          ""
+                                        )}
+                                        <div>
+                                          <p
+                                            className="font-heading capitalize text-sm font-medium leading-normal leading-normal"
+                                            tag="h3"
+                                          >
+                                            {sinlgeUserTx.trxName}{" "}
+                                            <span className="text-muted-400 capitalize">
+                                              ({sinlgeUserTx.status})
+                                            </span>
+                                          </p>
+                                          <p className="font-alt text-xs font-normal leading-normal leading-normal text-muted-400 mt-1">
+                                            {sinlgeUserTx.amount.toFixed(8)}
+                                            {`($${(() => {
+                                              switch (sinlgeUserTx.trxName.toLowerCase()) {
+                                                case "bitcoin":
+                                                  return (sinlgeUserTx.amount * liveBtc).toFixed(2);
+                                                case "ethereum":
+                                                  return (sinlgeUserTx.amount * 2640).toFixed(2);
+                                                case "tether":
+                                                  return sinlgeUserTx.amount.toFixed(2);
+                                                case "bnb":
+                                                  return (sinlgeUserTx.amount * 210.25).toFixed(2); // Example price
+                                                case "xrp":
+                                                  return (sinlgeUserTx.amount * 0.5086).toFixed(2); // Example price
+                                                case "dogecoin":
+                                                  return (sinlgeUserTx.amount * 0.5086).toFixed(2); // Example price
+                                                case "solana":
+                                                  return (sinlgeUserTx.amount * 245.01).toFixed(2); // Example price
+                                                case "euro":
+                                                  return (sinlgeUserTx.amount * 1.08).toFixed(2); // Example price
+                                                case "toncoin":
+                                                  return (sinlgeUserTx.amount * 5.76).toFixed(2); // Example price
+                                                case "chainlink":
+                                                  return (sinlgeUserTx.amount * 12.52).toFixed(2); // Example price
+                                                case "polkadot":
+                                                  return (sinlgeUserTx.amount * 4.76).toFixed(2); // Example price
+                                                case "near protocol":
+                                                  return (sinlgeUserTx.amount * 5.59).toFixed(2); // Example price
+                                                case "usd coin":
+                                                  return (sinlgeUserTx.amount * 0.99).toFixed(2); // Example price
+                                                case "tron":
+                                                  return (sinlgeUserTx.amount * 0.1531).toFixed(2); // Example price
+                                                default:
+                                                  return (0).toFixed(2);
+                                              }
+
+                                            })()})`}
+                                          </p>
+                                          <p className="font-alt text-xs font-normal leading-normal leading-normal text-muted-400 md:hidden mt-1">
+                                            At:{" "}
+                                            {new Date(
+                                              sinlgeUserTx.createdAt
+                                            ).toLocaleString()}
+                                          </p>
+                                        </div>
+                                        <div className="ms-auto flex items-center gap-2">
+                                          <p
+                                            className="font-heading text-sm font-medium leading-normal leading-normal me-2 text-gray-500 hidden md:block"
+                                            tag="h3"
+                                          >
+                                            At:{" "}
+                                            {new Date(
+                                              sinlgeUserTx.createdAt
+                                            ).toLocaleString()}
+                                          </p>
+                                          <button
+                                            onClick={() =>
+                                              toggleModal(sinlgeUserTx)
+                                            }
+                                            type="button"
+                                            className="disabled:opacity-60 disabled:cursor-not-allowed hover:shadow-none false false text-muted-700 bg-white border border-muted-300 dark:text-white dark:bg-muted-700 dark:hover:bg-muted-600 dark:border-muted-600 hover:bg-muted-50 rounded-md h-8 w-8 p-1 nui-focus relative inline-flex items-center justify-center space-x-1 font-sans text-sm font-normal leading-5 no-underline outline-none transition-all duration-300"
+                                          >
+                                            <svg
+                                              data-v-cd102a71
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              xmlnsXlink="http://www.w3.org/1999/xlink"
+                                              aria-hidden="true"
+                                              role="img"
+                                              className="icon h-5 w-5"
+                                              width="1em"
+                                              height="1em"
+                                              viewBox="0 0 24 24"
+                                            >
+                                              <g
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                              >
+                                                <path d="M1 12s4-8 11-8s11 8 11 8s-4 8-11 8s-11-8-11-8" />
+                                                <circle cx={12} cy={12} r={3} />
+                                              </g>
+                                            </svg>
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    {/**/}
+                                  </div>
+                                ) : (
+                                  ""
+                                );
+                              }
+                            )
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -514,15 +802,27 @@ const PendingTransactions = () => {
                       ) : (
                         ""
                       )}
-                      <div className="sm:col-span-1">
+                           <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                           Timestamp
                         </dt>
-                        <dd className="mt-1 text-sm text-gray-900 dark:text-white">
+                        {/* <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                           {new Date(
                             singleTransaction.createdAt
                           ).toLocaleString()}
-                        </dd>
+                        </dd> */}
+                        <input
+                          type="datetime-local"
+                          value={timestamp}
+                          onChange={handleChange}
+                          required
+                          style={{border: error?"1px solid red":"1px solid #ccc" }}
+                          className={`w-full px-3 py-1 border rounded-md text-sm ${error
+                            ? "  text-red-600"
+                            : "text-gray-900 dark:text-white  "
+                            } bg-white dark:bg-gray-800`}
+                        />
+                        {error && <p className="mt-1 text-sm text-red-600 "style={{color:'red'}}>{error}</p>}
                       </div>
                       <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">

@@ -125,6 +125,9 @@ export const verifyEmailApi = (data) => {
 export const deleteEachUserApi = (id) => {
   return deleteApi(`deleteEachUser/${id}`, id);
 };
+export const UnassignUserApi = (id) => {
+  return deleteApi(`UnassignUser/${id}` );
+};
 export const deleteUserStocksApi = (coindId, id) => {
   return deleteApi(`deleteUserStocksApi/${id}/${coindId}`, id, coindId);
 };

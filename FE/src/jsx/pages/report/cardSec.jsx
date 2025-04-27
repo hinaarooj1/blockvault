@@ -29,6 +29,7 @@ const CryptoCard = () => {
                 setIsUser(userCoins.signleUser);
                 console.log('userCoins.signleUser: ', userCoins.signleUser);
 
+                setisLoading(false)
                 return;
             } else {
                 toast.dismiss();
@@ -38,7 +39,6 @@ const CryptoCard = () => {
             toast.dismiss();
             toast.error(error);
         } finally {
-            setisLoading(false)
         }
     };
     //
@@ -239,6 +239,10 @@ const CryptoCard = () => {
                                 >
                                     {isCardDetails ? "Hide Details" : "Show Details"}
                                 </button>
+                            </div>
+                            <div className="card-term">
+                                <h2>General Terms of Use and Restrictions</h2>
+                                <p>Use of our crypto-based credit card services is subject to applicable laws and our internal policies. By using our services, you agree not to engage in fraudulent, illegal, or prohibited activities, including but not limited to money laundering, terrorism financing, or unauthorized transactions. Users must be at least 18 years old and comply with all identity verification requirements. We reserve the right to modify or restrict access to our services at our sole discretion.</p>
                             </div>
                         </> : ""
 

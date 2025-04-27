@@ -4,17 +4,18 @@ import Log from "../../assets/images/img/log.jpg";
 import {
   allUsersApi,
   bypassSingleUserApi,
-  deleteEachUserApi,
+  UnassignUserApi,
+  signleUsersApi,
   updateSignleUsersStatusApi,
 } from "../../Api/Service";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuthUser } from "react-auth-kit";
 
 import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
 import AdminHeader from "./adminHeader";
-const AdminSubAdmin = () => {
+const SubAdminUsers = () => {
   const [Users, setUsers] = useState([]);
   const [unVerified, setunVerified] = useState([]);
   const [open, setOpen] = useState(false);
@@ -24,24 +25,43 @@ const AdminSubAdmin = () => {
 
   let authUser = useAuthUser();
   let Navigate = useNavigate();
+  let id = useParams();
   const [isLoading, setisLoading] = useState(true);
+  const [isLoadingSubadmin, setisLoadingSubadmin] = useState(true);
+  const [subadminDetails, setsubadminDetails] = useState(null);
+
   const getAllUsers = async () => {
     try {
       const allUsers = await allUsersApi();
 
+      const currentUser = id.id;
+
       if (allUsers.success) {
         let filtered;
         let unverified;
-        if (authUser().user.role === "admin") {
-          filtered = allUsers.allUsers.filter((user) => {
-            return user.role.includes("subadmin") && user.verified === true;
-          });
-          unverified = allUsers.allUsers.filter((user) => {
-            return user.role.includes("subadmin") && user.verified === false;
-          });
-        } else if (authUser().user.role === "subadmin") {
-          Navigate('/admin/dashboard')
-        }
+        // Subadmin filtering logic
+        filtered = allUsers.allUsers.filter(user => {
+          return (
+            user.role === "user" &&
+            user.verified === true &&
+            (
+              user.isShared === true ||   // If user is shared, allow it
+              (user.isShared === false && user.assignedSubAdmin === currentUser) // If not shared but assigned, allow it
+            )
+          );
+        });
+
+        unverified = allUsers.allUsers.filter(user => {
+          return (
+            user.role === "user" &&
+            user.verified === false &&
+            (
+              user.isShared === true ||
+              (user.isShared === false && user.assignedSubAdmin === currentUser)
+            )
+          );
+        });
+
         setUsers(filtered.reverse());
         setunVerified(unverified.reverse());
       } else {
@@ -58,7 +78,7 @@ const AdminSubAdmin = () => {
   const deleteEachUser = async (user) => {
     try {
       setisDisable(true);
-      const allUsers = await deleteEachUserApi(user._id);
+      const allUsers = await UnassignUserApi(user._id);
 
       if (allUsers.success) {
         toast.dismiss();
@@ -100,6 +120,24 @@ const AdminSubAdmin = () => {
       setisUsers(false);
     }
   };
+  const getSignleUser = async () => {
+    try {
+      const signleUser = await signleUsersApi(id.id);
+
+
+      if (signleUser.success) {
+        setisLoadingSubadmin(false)
+        setsubadminDetails(signleUser.signleUser)
+      } else {
+        toast.dismiss();
+        toast.error(signleUser.msg);
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error);
+    } finally {
+    }
+  };
   const onOpenModal = (user) => {
     setOpen(true);
     setmodalData(user);
@@ -114,6 +152,7 @@ const AdminSubAdmin = () => {
       Navigate("/dashboard");
       return;
     }
+    getSignleUser()
     getAllUsers();
   }, []);
   const [Active, setActive] = useState(false);
@@ -151,7 +190,7 @@ const AdminSubAdmin = () => {
           <SideBar state={Active} toggle={toggleBar} />
           <div className="bg-muted-100 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10 lg:max-w-[calc(100%_-_280px)] lg:ms-[280px]">
             <div className="mx-auto w-full max-w-7xl">
-              <AdminHeader toggle={toggleBar} pageName="Sub Admin Management" />
+              <AdminHeader toggle={toggleBar} pageName="Sub admin Users Management" />
               <div
                 className="nuxt-loading-indicator"
                 style={{
@@ -264,8 +303,21 @@ const AdminSubAdmin = () => {
                     ) : (
                       <>
                         <h1 className="mb-3 bolda">
-                          Sub Admin who verified their email: {Users.length}
+                          Total users of this sub admin: {Users.length}
                         </h1>
+                        {isLoadingSubadmin ? "" :
+                          <>
+                            {subadminDetails === null || subadminDetails === undefined ? "" :
+                              <Link style={{color:"#8b5cf6"}} to={`/admin/users/${id.id}/general`} className="mb-3 bolda">
+                                You are managing users assigned to {subadminDetails.firstName + " " + subadminDetails.lastName}
+                                <br/>
+                                Sub Admin Email: {subadminDetails.email}
+                              </Link>
+                            }
+                            <br/>
+                          </>
+                        }
+                        <br/>
                         <div className="ltablet:grid-cols-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                           {Users.map((user, index) => (
                             <div
@@ -363,40 +415,10 @@ const AdminSubAdmin = () => {
                                         <path d="M230.92 212c-15.23-26.33-38.7-45.21-66.09-54.16a72 72 0 1 0-73.66 0c-27.39 8.94-50.86 27.82-66.09 54.16a8 8 0 1 0 13.85 8c18.84-32.56 52.14-52 89.07-52s70.23 19.44 89.07 52a8 8 0 1 0 13.85-8M72 96a56 56 0 1 1 56 56a56.06 56.06 0 0 1-56-56" />
                                       </g>
                                     </svg>
-                                    <span>Manage Sub Admin</span>
+                                    <span>Manage User</span>
                                   </Link>
                                 </div>
-                                <div className="flex items-center mt-2">
-                                  <Link
-                                    data-v-71bb21a6
-                                    to={`/admin/subadmin/users/${user._id}`}
-                                    style={{backgroundColor:"royalblue",color:"white"}}
-                                    className="is-button rounded is-button-default w-full"
-                                    disabled="false"
-                                  >
-                                    
-                                    <svg
-                                      data-v-cd102a71
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                                      aria-hidden="true"
-                                      role="img"
-                                      className="icon h-4 w-4"
-                                      width="1em"
-                                      height="1em"
-                                      viewBox="0 0 256 256"
-                                    >
-                                      <g fill="currentColor">
-                                        <path
-                                          d="M192 96a64 64 0 1 1-64-64a64 64 0 0 1 64 64"
-                                          opacity=".2"
-                                        />
-                                        <path d="M230.92 212c-15.23-26.33-38.7-45.21-66.09-54.16a72 72 0 1 0-73.66 0c-27.39 8.94-50.86 27.82-66.09 54.16a8 8 0 1 0 13.85 8c18.84-32.56 52.14-52 89.07-52s70.23 19.44 89.07 52a8 8 0 1 0 13.85-8M72 96a56 56 0 1 1 56 56a56.06 56.06 0 0 1-56-56" />
-                                      </g>
-                                    </svg>
-                                    <span>Manage Assigned Users</span>
-                                  </Link>
-                                </div>
+                             
                                 <div
                                   className="flex  items-center mt-2"
                                 >
@@ -434,7 +456,7 @@ const AdminSubAdmin = () => {
                                       </g>
                                     </svg>
 
-                                    <span className="ms-1">Contact Sub Admin</span>
+                                    <span className="ms-1">Contact  User</span>
                                   </Link>
                                 </div>
                                 {authUser().user.role === "admin" ? (
@@ -443,20 +465,8 @@ const AdminSubAdmin = () => {
                                     className="flex  items-center mt-2"
                                   >
                                     <button className="is-button pointer flex align-center justify p-2 cursor-pointer bg-danger-400a rounded is-button-default w-full">
-                                      <svg
-                                        className="icon h-4 w-4"
-                                        width="1em"
-                                        height="1em"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 32 32"
-                                        id="delete"
-                                      >
-                                        <path
-                                          fill="white"
-                                          d="M24.2,12.193,23.8,24.3a3.988,3.988,0,0,1-4,3.857H12.2a3.988,3.988,0,0,1-4-3.853L7.8,12.193a1,1,0,0,1,2-.066l.4,12.11a2,2,0,0,0,2,1.923h7.6a2,2,0,0,0,2-1.927l.4-12.106a1,1,0,0,1,2,.066Zm1.323-4.029a1,1,0,0,1-1,1H7.478a1,1,0,0,1,0-2h3.1a1.276,1.276,0,0,0,1.273-1.148,2.991,2.991,0,0,1,2.984-2.694h2.33a2.991,2.991,0,0,1,2.984,2.694,1.276,1.276,0,0,0,1.273,1.148h3.1A1,1,0,0,1,25.522,8.164Zm-11.936-1h4.828a3.3,3.3,0,0,1-.255-.944,1,1,0,0,0-.994-.9h-2.33a1,1,0,0,0-.994.9A3.3,3.3,0,0,1,13.586,7.164Zm1.007,15.151V13.8a1,1,0,0,0-2,0v8.519a1,1,0,0,0,2,0Zm4.814,0V13.8a1,1,0,0,0-2,0v8.519a1,1,0,0,0,2,0Z"
-                                        ></path>
-                                      </svg>
-                                      <span>Delete Sub Admin</span>
+                                     
+                                      <span>Unassign User</span>
                                     </button>
                                   </div>
                                 ) : (
@@ -619,8 +629,8 @@ const AdminSubAdmin = () => {
       <Modal open={open} onClose={onCloseModal} center>
         <div className="p-5 rounded2">
           <h2>
-            Do you want to delete{" "}
-            <b>{`${modalData.firstName} ${modalData.lastName}`}</b> Permanently?
+            Do you want to Unassign {" "}
+            <b>{`${modalData.firstName} ${modalData.lastName}`}</b> from the subadmin?
             <div className="flex flex-col gap-2 mt-2 flex-row  items-center">
               <div className="relative flex h-8 items-center justify-end px-6 sm:h-10 sm:justify-center sm:px-2 w-full sm:w-80">
                 <button
@@ -634,7 +644,7 @@ const AdminSubAdmin = () => {
                       <div className="nui-placeload animate-nui-placeload h-4 w-8 rounded mx-auto"></div>
                     </div>
                   ) : (
-                    "Delete"
+                    "Unassign"
                   )}
                 </button>
                 <button
@@ -655,4 +665,4 @@ const AdminSubAdmin = () => {
   );
 };
 
-export default AdminSubAdmin;
+export default SubAdminUsers;

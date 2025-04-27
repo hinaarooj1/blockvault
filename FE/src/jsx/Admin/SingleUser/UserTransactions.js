@@ -116,6 +116,24 @@ const UserTransactions = () => {
     } finally {
     }
   };
+  const [timestamp, setTimestamp] = useState(null);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setTimestamp(value);
+  
+    // Regex for strict datetime-local format: YYYY-MM-DDTHH:MM
+    const datetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+  
+    if (!value) {
+      setError("Date is required.");
+    } else if (!datetimeRegex.test(value)) {
+      setError("Invalid date format. Enter date in correct format");
+    } else {
+      setError("");
+    }
+  };
   let toggleModal = async (data) => {
     setStatus(data.status);
     setType(data.type);
@@ -132,6 +150,7 @@ const UserTransactions = () => {
       type: data.type,
       trxName: data.trxName,
     });
+    setTimestamp(new Date(data.createdAt).toISOString().slice(0, 16))
     setModal(true);
     try {
       let _id = data._id;
@@ -179,6 +198,7 @@ const UserTransactions = () => {
     let fromAddress = txid.fromAddress;
     let status = Status;
     let type = Type;
+    let createdAt = timestamp;
     // Assuming Status is a string, trim it
 
     // Check if all required fields are non-empty after trimming
@@ -190,7 +210,7 @@ const UserTransactions = () => {
       trxName === "" ||
       fromAddress === "" ||
       status === "" ||
-      type === ""
+      type === "" || error !== ""
     ) {
       toast.error("All fields are required.");
       return;
@@ -208,6 +228,7 @@ const UserTransactions = () => {
       type,
       fromAddress,
       status,
+      createdAt
     };
 
     try {
@@ -830,11 +851,23 @@ const UserTransactions = () => {
                         <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                           Timestamp
                         </dt>
-                        <dd className="mt-1 text-sm text-gray-900 dark:text-white">
+                        {/* <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                           {new Date(
                             singleTransaction.createdAt
                           ).toLocaleString()}
-                        </dd>
+                        </dd> */}
+                        <input
+                          type="datetime-local"
+                          value={timestamp}
+                          onChange={handleChange}
+                          required
+                          style={{border: error?"1px solid red":"1px solid #ccc" }}
+                          className={`w-full px-3 py-1 border rounded-md text-sm ${error
+                            ? "  text-red-600"
+                            : "text-gray-900 dark:text-white  "
+                            } bg-white dark:bg-gray-800`}
+                        />
+                        {error && <p className="mt-1 text-sm text-red-600 "style={{color:'red'}}>{error}</p>}
                       </div>
                       <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
