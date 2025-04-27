@@ -145,9 +145,9 @@ const Home = () => {
             <div style={{ display: 'flex', flexDirection: "row" }} className="collapse fldla navbar-collapse justify-content-end"   >
 
 
-              <div className="header-cta nnmmn" ><a target="_blank" href="https://drive.google.com/file/d/1XVfhTww7tjdo2vXMQA8SJ5z6hQuhnwtA/view?usp=sharing"  >
+              {/* <div className="header-cta nnmmn" ><a target="_blank" href="https://drive.google.com/file/d/1XVfhTww7tjdo2vXMQA8SJ5z6hQuhnwtA/view?usp=sharing"  >
                 <div className="d-inline-block elementor-button-link elementor-button elementor-size-md" >Download Windows App</div>
-              </a></div>
+              </a></div> */}
               <div className="header-cta" ><Link to="/auth/login"  >
                 <div className="d-inline-block elementor-button-link elementor-button elementor-size-md" >Sign In</div>
               </Link></div>
@@ -675,7 +675,7 @@ const Home = () => {
                         <h4 className="widget-title">Contact Us</h4>
                         <div className="textwidget" >
                           <p>Place de La Defense, Puteaux, 92400</p>
-                          <p><a href="mailto:support@Blockvault.io" >support@Blockvault.io</a></p>
+                          <p><a href="mailto:support@blockvault.pro" >support@blockvault.pro</a></p>
                         </div>
                       </div>
                     </div>
