@@ -16,6 +16,9 @@ import { Link, useLocation } from "react-router-dom";
 import "./Home.css";
 import "./style.css";
 import LogoNew from '../../../../assets/newlogo/logo.png'
+import firstLogo from '../../../../assets/home/1.png'
+import secondLogo from '../../../../assets/home/2.png'
+import thirdLogo from '../../../../assets/home/3.png'
 import Ethan from '../../../../assets/images/ethan.jpg'
 import Leo from '../../../../assets/images/leo.jpg'
 import Lily from '../../../../assets/images/lily.jpg'
@@ -653,46 +656,89 @@ const Home = () => {
             <div className="section-inner clearfix" />{/* .section-inner */}
           </article>{/* .post */}
         </main>{/* #site-content */}
+
+        <div className="footer-upper">
+    <img src={firstLogo} alt="Left Logo" className="footer-logo left"/>
+    <img src={secondLogo} alt="Center Logo" className="footer-logo center"/>
+    <img src={thirdLogo} alt="Right Logo" className="footer-logo right"/>
+  </div>
         <footer id="site-footer" className="nav-white-desktop" role="contentinfo">
-          <div id="footer-wave" />
-          <div className="footer-bg" >
-            <div className="footer-inner container-xl" >
-              <div className="footer-top" >
-                <div className="row" >
-                  <div className="ft-col-1 col-sm-12 col-lg-4" >
-                    <div className="widget widget_text" >
-                      <div className="widget-content" >
-                        <div className="textwidget" >
-                          <h4><img src={LogoNew} style={{ width: "80px" }} alt="" /></h4>
+  <div id="footer-wave" />
+  <div className="footer-bg">
+    <div className="footer-inner container-xl">
 
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="ft-col-2 col-sm-12 col-lg-4" >
-                    <div className="widget widget_text" >
-                      <div className="widget-content" >
-                        <h4 className="widget-title">Contact Us</h4>
-                        <div className="textwidget" >
-                          <p>Place de La Defense, Puteaux, 92400</p>
-                          <p><a href="mailto:support@blockvault.pro" >support@blockvault.pro</a></p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
+      <div className="footer-top">
+        <div className="row">
+          {/* Column 1: Logo */}
+          <div className="ft-col-1 col-sm-12 col-lg-4">
+            <div className="widget widget_text">
+              <div className="widget-content">
+                <div className="textwidget">
+                  <h4>
+                    <img src={LogoNew} style={{ width: "80px" }} alt="" />
+                  </h4>
                 </div>
               </div>
-              <div className="footer-bottom" >
-                <div className="footer-credits" >
-                  <p className="footer-copyright">Copyright ©2025 Blockvault. All rights reserved.
-                  </p>{/* .footer-copyright */}
-                </div>{/* .footer-credits */}
-
-              </div>{/* .footer-bottom  */}
-            </div>{/* .footer-inner */}
+            </div>
           </div>
-        </footer>{/* #site-footer */}
+
+          {/* Column 2: Contact Us */}
+          <div className="ft-col-2 col-sm-12 col-lg-4">
+            <div className="widget widget_text">
+              <div className="widget-content">
+                <h4 className="widget-title">Contact Us</h4>
+                <div className="textwidget">
+                  <p>Place de La Defense, Puteaux, 92400</p>
+                  <p><a href="mailto:support@blockvault.pro">support@blockvault.pro</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* New Column 3: Disclaimer */}
+          <div className="ft-col-3 col-sm-12 col-lg-12">
+            <div className="widget widget_text">
+              <div className="widget-content" style={{ textAlign: "center", paddingTop: "20px" }}>
+                <h4 className="widget-title">Disclaimer</h4>
+                <div className="textwidget" style={{ maxWidth: "900px", margin: "0 auto", fontSize: "14px", lineHeight: "1.6", color: "#777" }}>
+                  <p><strong>General Information</strong><br />
+                    BlockVault is a regulated digital wallet operating under the oversight of the UK Treasury Division, the Markets in Crypto-Assets (MiCA) regulatory framework, and the Clerk of Court, exclusively governed by UK law. The information provided on this website is for general informational purposes only and does not constitute legal, financial, or professional advice.
+                  </p>
+                  <p><strong>Client Ownership and Responsibility</strong><br />
+                    All funds held in a BlockVault wallet are the sole property of the individual client. The client is exclusively responsible for the management, security, and lawful use of their funds. BlockVault does not claim ownership, control, or liability over client funds beyond providing a secure, regulated wallet service.
+                  </p>
+                  <p><strong>No Guarantee of Outcomes</strong><br />
+                    While BlockVault collaborates with the UK Treasury Division, MiCA regulators, and court systems to ensure compliance and support clients in financial matters, we do not guarantee specific outcomes, including the recovery of funds in cases of fraud or loss. Outcomes depend on case-specific factors, jurisdictional requirements, and the nature of the issue, which are beyond BlockVault’s control.
+                  </p>
+                  <p><strong>Privacy and Non-Disclosure</strong><br />
+                    BlockVault is committed to protecting client privacy. We do not share client information, including personal details or wallet data, with any third parties, except as required by UK law or relevant authorities (e.g., UK Treasury Division, MiCA regulators, or courts) in compliance with regulatory or legal obligations.
+                  </p>
+                  <p><strong>Not a Legal or Financial Service</strong><br />
+                    BlockVault is a regulated wallet provider, not a law firm, financial advisor, or regulatory authority. We facilitate secure storage and compliance with applicable regulations but do not provide legal representation or financial advice. Clients seeking specific guidance should consult qualified legal or financial professionals.
+                  </p>
+                  <p><strong>Accuracy and Limitations</strong><br />
+                    BlockVault strives to ensure the accuracy and timeliness of information on this website. However, laws, regulations, and procedures under UK law, MiCA, or other frameworks may change, and we are not liable for errors, omissions, or reliance on this website’s content. For official guidance, clients should refer to the UK Treasury Division, MiCA regulators, or relevant court authorities.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div> {/* .row */}
+      </div> {/* .footer-top */}
+
+      <div className="footer-bottom">
+        <div className="footer-credits">
+          <p className="footer-copyright">
+            Copyright ©2025 Blockvault. All rights reserved.
+          </p>
+        </div>
+      </div>
+
+    </div> {/* .footer-inner */}
+  </div> {/* .footer-bg */}
+</footer>
+
       </div>
       <div id="google_translate_element"></div>
 

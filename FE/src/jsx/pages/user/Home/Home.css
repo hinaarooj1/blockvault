@@ -10,6 +10,18 @@
     font-size: 0.875rem;
     line-height: 1.25rem;
 }
+.footer-upper {
+    display: flex
+;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.footer-upper img{
+    width: 200px;
+    border-radius: 10px;
+}
 
 .mainea .footer {
     background-color: #0d0d2b !important;
