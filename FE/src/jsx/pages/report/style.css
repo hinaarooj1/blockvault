@@ -531,8 +531,31 @@ body {
   justify-content: space-between;
   margin-top: 8px;
 }
+.maon-00c label,
+.dark-nn th,
+.dark-nn td
 
+{
+  color: white !important;
 
+}
+.dark-nn p{
+  color: white;
+}
+.dark-nn .table{
+--bs-table-bg:transparent
+}
+.dark-nn .p-4{
+
+/* background-color: #131a22; */
+}
+.dark-nn .card-header .card-title{
+  color: #fff !important;
+}
+.dark-nn
+ .card{
+  background-color: #131a22 !important;
+}
 .css-qy35p {
   background-color: var(--primary);
   color: rgb(237, 242, 247);
@@ -541,7 +564,7 @@ body {
   background-image: none;
   overflow: hidden;
   padding: 12px;
-  border: 1px solid rgb(99, 102, 241);
+  /* border: 1px solid rgb(99, 102, 241); */
   border-radius: 8px;
   cursor: pointer;
   text-align: center;

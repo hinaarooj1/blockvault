@@ -116,16 +116,16 @@ const CreateTicket = () => {
         <>
             <div className="row">
                 <div className="col-xxl-12">
-                    <div className="card">
+                    <div className="card new-bg-dark" >
                         <Card.Header>
-                            <Card.Title style={{ cursor: "pointer" }} onClick={() => Navigate("/support")}><i style={{ fontSize: "23px" }} className="fa-solid fa-arrow-left"></i></Card.Title>
-                            <Card.Title>Create Ticket</Card.Title>
+                            <Card.Title style={{ cursor: "pointer" }} onClick={() => Navigate("/support")}><i style={{ fontSize: "23px" }} className="fa-solid fa-arrow-left text-white "></i></Card.Title>
+                            <Card.Title className='text-white'>Create Ticket</Card.Title>
 
                         </Card.Header>
 
                         {isTicket ? (
                             <Card.Body className="">
-                                <p>Your ticket was sent. You will be answered by one of our representatives.</p>
+                                <p className='text-white'>Your ticket was sent. You will be answered by one of our representatives.</p>
                             </Card.Body>
                         ) : (
                             <Card.Body>
@@ -137,24 +137,24 @@ const CreateTicket = () => {
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 className="h5 font-weight-semibold">Create New Ticket</h3>
-                                        <p className="text-muted">Fill in the form below to create a new ticket.</p>
+                                        <h3 className="h5 font-weight-semibold text-white">Create New Ticket</h3>
+                                        <p className="text-muted text-white">Fill in the form below to create a new ticket.</p>
                                     </div>
                                 </div>
                                 <Form>
                                     <Form.Group className="mb-4">
-                                        <Form.Label htmlFor="title">Title</Form.Label>
+                                        <Form.Label htmlFor="title" className='text-white'>Title</Form.Label>
                                         <Form.Control
                                             id="title"
                                             type="text"
                                             value={title}
                                             onChange={(e) => setTitle(e.target.value)}
                                             placeholder="Example: I can't buy BTC with my credit card"
-                                            className="dark:bg-muted-900/75 dark:text-muted-200"
+                                            className="dark:bg-muted-900/75 dark:text-muted-200 new-bg-light"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-4">
-                                        <Form.Label htmlFor="description">Description</Form.Label>
+                                        <Form.Label htmlFor="description" className='text-white'>Description</Form.Label>
                                         <Form.Control
                                             id="description"
                                             as="textarea"
@@ -162,7 +162,7 @@ const CreateTicket = () => {
                                             value={description}
                                             onChange={(e) => setDescription(e.target.value)}
                                             placeholder="Example: I'm trying to buy BTC with my credit card but I'm getting an error message."
-                                            className="dark:bg-muted-900/75 dark:text-muted-200"
+                                            className="dark:bg-muted-900/75 new-bg-light dark:text-muted-200"
                                         />
                                     </Form.Group>
                                     <Button

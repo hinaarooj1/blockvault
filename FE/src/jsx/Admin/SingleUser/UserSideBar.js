@@ -127,7 +127,7 @@ const UserSideBar = (props) => {
                 <span>Manage Verifications</span>
               </NavLink>
             </li>
-            {/* <li>
+            <li>
               <NavLink
                 to={`/admin/users/${props.userid}/stocks`}
                 className="text-muted-400 datas hover:text-muted-600 dark:hover:text-muted-200 hover:bg-muted-50 dark:hover:bg-muted-700/50 flex items-center gap-2 rounded-lg p-3 transition-colors duration-300"
@@ -153,7 +153,7 @@ const UserSideBar = (props) => {
                 </svg>
                 <span>User Stocks</span>
               </NavLink>
-            </li> */}
+            </li>
             {/* <li>
             <p className="text-muted-400 datas hover:text-muted-600 dark:hover:text-muted-200 hover:bg-muted-50 dark:hover:bg-muted-700/50 flex items-center gap-2 rounded-lg p-3 transition-colors duration-300">
               <svg

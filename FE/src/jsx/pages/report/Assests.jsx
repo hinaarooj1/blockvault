@@ -710,9 +710,9 @@ const Orders = () => {
         <>
             <div className="row">
                 <div className="col-xxl-12">
-                    <div className="card">
+                    <div className="card new-bg-dark">
                         <Card.Header>
-                            <Card.Title>Assets</Card.Title>
+                            <Card.Title className='text-white'>Assets</Card.Title>
                         </Card.Header>
                         <div className="card-body">
                             {isLoading ? (
@@ -727,7 +727,7 @@ const Orders = () => {
                                 </div>) : (
 
 
-                                <div className="table-responsive">
+                                <div className="table-responsive thatv">
                                     <table className="table tbleas tickettable display mb-4 no-footer" id="example6">
                                         <thead>
                                             <tr>

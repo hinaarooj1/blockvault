@@ -60,8 +60,8 @@ const SideBar = () => {
   return (
     <div onMouseEnter={() => ChangeIconSidebar(true)} onMouseLeave={() => ChangeIconSidebar(false)} className="dlabnav">
       <SidebarExtraContent />
-      <span className="main-menu">Main Menu</span>
-      <div className="menu-scroll">
+      {/* <span className="main-menu">Main Menu</span> */}
+      <div className="menu-scroll new-bg-dark">
         <div className="dlabnav-scroll">
           <ul className="metismenu" id="menu">
             {MenuList.map((item, index) => (
@@ -96,7 +96,7 @@ const SideBar = () => {
             <div className="info">
               <p>Contact our support</p>
               <Link to={"/support"} className="btn bg-white text-black w-75 btn-sm">
-                Supports
+                Support
               </Link>
             </div>
           </div>

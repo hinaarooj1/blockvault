@@ -28,18 +28,9 @@ const AdminHeader = (props) => {
             setisLoading(true)
             const getNotifications = await getNotificationsApi();
 
-            if (getNotifications.success) {
-                console.log('getNotifications: ', getNotifications.notifications);
+            if (getNotifications.success) { 
 
-                if (getNotifications.notifications && getNotifications.notifications.length > 0) {
-
-                    console.log('unreadExists: ');
-                    const unreadExists = getNotifications.notifications.some(n => n.isRead === false);
-                    setHasUnread(unreadExists);
-                    console.log('unreadExists: ', unreadExists);
-
-                }
-                setisLoading(false);
+             
                 const notificationWithUserDetail = await Promise.all(
                     getNotifications.notifications.map(async (notification) => {
 
@@ -51,21 +42,29 @@ const AdminHeader = (props) => {
                             return { ...notification, userDetails: null }; // Handle case if user details are not fetched
                         }
                     })
-                );
-                console.log('notificationWithUserDetail: ', notificationWithUserDetail);
+                ); 
                 let filteredNotifications = notificationWithUserDetail;
+                if (getNotifications.notifications && getNotifications.notifications.length > 0) {
 
+                   
+                    const unreadExists = getNotifications.notifications.some(n => n.isRead === false);
+                    setHasUnread(unreadExists); 
+
+                }
                 if (authUser().user.role === "subadmin") {
                     filteredNotifications = notificationWithUserDetail.filter(ticket =>
                         ticket.userDetails.signleUser &&
                         (ticket.userDetails.signleUser.isShared === true ||
                             ticket.userDetails.signleUser.assignedSubAdmin === authUser().user._id)
-                    );
-                    console.log('filteredNotifications: ', filteredNotifications);
+                    ); 
                     setnotificationsData(filteredNotifications.reverse());
+                    
+                setisLoading(false);
                     return
-                }
+                } 
                 setnotificationsData(getNotifications.notifications.reverse());
+                
+                setisLoading(false);
             } else {
                 toast.error(getNotifications.msg);
             }
@@ -327,6 +326,8 @@ const AdminHeader = (props) => {
     }, []);
     return (
         <>
+        
+        {console.log('sasa: ', notificationsData)}
             <div className="relative topakd z-50 mb-5 flex h-16 items-center gap-2 px-4">
                 {/* Existing Buttons */}
                 <button type="button" className="flex  groupas h-10 for-desk w-10 items-center justify-center -ms-3">

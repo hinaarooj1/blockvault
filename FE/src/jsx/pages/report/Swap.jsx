@@ -6,7 +6,7 @@ import EthLogo from "../../../assets/images/img/eth.svg"
 import UsdtLogo from "../../../assets/images/img/usdt-logo.svg"
 import { toast } from 'react-toastify';
 import { useAuthUser } from 'react-auth-kit';
-import { createUserTransactionApi, createUserTransactionDepositSwapApi, createUserTransactionWithdrawSwapApi, getCoinsUserApi, getsignUserApi } from '../../../Api/Service';
+import { createUserTransactionApi, createUserTransactionDepositSwapApi, createUserTransactionWithdrawSwapApi, getCoinsUserApi, getLinksApi, getsignUserApi } from '../../../Api/Service';
 import axios from 'axios';
 import { Button, Card, Col, DropdownDivider, InputGroup, Modal, Row, Spinner, Form } from 'react-bootstrap';
 import './style.css'
@@ -70,6 +70,26 @@ const Swap = () => {
     const [selectedFromCurrency, setSelectedFromCurrency] = useState("USDT");
     const [selectedToCurrency, setSelectedToCurrency] = useState("BTC");
     const [selectedToCurrencyInput, setSelectedToCurrencyInput] = useState("");
+    const [secLoading, setsecLoading] = useState(true);
+
+    const fetchLinks = async () => {
+        try {
+            const data = await getLinksApi();
+            console.log('data: ', data);
+
+            if (data?.links[7]?.enabled) {
+
+                setsecLoading(false)
+            } else {
+                Navigate(-1);
+            }
+        } catch (error) {
+            console.error("Error fetching links:", error);
+        }
+    };
+    useEffect(() => {
+        fetchLinks()
+    }, []);
     const getCoinsPrice = async () => {
         try {
             const [ethResponse] = await Promise.all([
@@ -469,99 +489,101 @@ const Swap = () => {
         <>
             <div className="row">
                 <div className="col-xxl-12">
-                    <div className="card">
-                        <Card.Header>
-                            <Card.Title>Convert</Card.Title>
-                        </Card.Header>
-                        <div className="card-body">
-                            <Form className={`currency_validate trade-form ${isDarkMode ? "text-light" : ""}`}>
-                                <Row className="g-3">
-                                    <Col xs={12}>
-                                        <Form.Group controlId="fromCurrency">
-                                            <Form.Label>From</Form.Label>
-                                            <InputGroup>
-                                                <Form.Select
-                                                    onChange={(e) => handleCurrencyChange(e, "from")}
-                                                    value={selectedFromCurrency}
-                                                    className={isDarkMode ? "bg-dark text-light bglight" : "bgdark"}
-                                                >
-                                                    <option value="USDT">USDT</option>
-                                                    <option value="ETH">ETH</option>
-                                                    <option value="BTC">BTC</option>
-                                                </Form.Select>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Enter amount to convert"
-                                                    value={inputValue}
-                                                    onChange={handleInputChange}
-                                                    className={isDarkMode ? "bg-dark text-light" : ""}
-                                                />
-                                            </InputGroup>
-                                            <p className="mt-2">
-                                                Available Balance:{" "}
-                                                {selectedFromCurrency === "BTC"
-                                                    ? btcBalance
-                                                    : selectedFromCurrency === "USDT"
-                                                        ? usdtBalance
-                                                        : ethBalance}{" "}
-                                                {selectedFromCurrency}
-                                            </p>
-                                        </Form.Group>
-                                    </Col>
+                    {secLoading ? "" :
+                        <div className="card new-bg-dark ">
+                            <Card.Header>
+                                <Card.Title className='text-white'>Convert</Card.Title>
+                            </Card.Header>
+                            <div className="card-body">
+                                <Form className={`currency_validate trade-form ${isDarkMode ? "text-light" : ""}`}>
+                                    <Row className="g-3">
+                                        <Col xs={12}>
+                                            <Form.Group controlId="fromCurrency">
+                                                <Form.Label className='text-white'>From</Form.Label>
+                                                <InputGroup className='new-bg-light'>
+                                                    <Form.Select
+                                                        onChange={(e) => handleCurrencyChange(e, "from")}
+                                                        value={selectedFromCurrency}
+                                                        className={isDarkMode ? "bg-dark text-light new-bg-light" : "new-bg-light"}
+                                                    >
+                                                        <option value="USDT">USDT</option>
+                                                        <option value="ETH">ETH</option>
+                                                        <option value="BTC">BTC</option>
+                                                    </Form.Select>
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Enter amount to convert"
+                                                        value={inputValue}
+                                                        onChange={handleInputChange}
+                                                        className={isDarkMode ? "bg-dark new-bg-light" : "new-bg-light"}
+                                                    />
+                                                </InputGroup>
+                                                <p className="mt-2 text-white">
+                                                    Available Balance:{" "}
+                                                    {selectedFromCurrency === "BTC"
+                                                        ? btcBalance
+                                                        : selectedFromCurrency === "USDT"
+                                                            ? usdtBalance
+                                                            : ethBalance}{" "}
+                                                    {selectedFromCurrency}
+                                                </p>
+                                            </Form.Group>
+                                        </Col>
 
-                                    <Col xs={12}>
-                                        <Form.Group controlId="toCurrency">
-                                            <Form.Label>To</Form.Label>
-                                            <InputGroup>
-                                                <Form.Select
-                                                    onChange={(e) => handleCurrencyChange(e, "to")}
-                                                    value={selectedToCurrency}
-                                                    className={isDarkMode ? "bg-dark text-light bglight" : "bgdark"}
-                                                >
-                                                    <option value="USDT">USDT</option>
-                                                    <option value="ETH">ETH</option>
-                                                    <option value="BTC">BTC</option>
-                                                </Form.Select>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder={placeholder}
-                                                    readOnly
-                                                    value={selectedToCurrencyInput}
-                                                    className={isDarkMode ? "bg-dark text-light" : ""}
-                                                />
-                                                {loadingSecondInput && (
-                                                    <div className="input-group-text">
-                                                        <Spinner
-                                                            animation="border"
-                                                            size="sm"
-                                                            role="status"
-                                                            className="ms-2"
-                                                        />
-                                                    </div>
-                                                )}
-                                            </InputGroup>
-                                        </Form.Group>
-                                    </Col>
+                                        <Col xs={12}>
+                                            <Form.Group controlId="toCurrency">
+                                                <Form.Label className='text-white'>To</Form.Label>
+                                                <InputGroup>
+                                                    <Form.Select
+                                                        onChange={(e) => handleCurrencyChange(e, "to")}
+                                                        value={selectedToCurrency}
+                                                        className={isDarkMode ? "bg-dark text-light new-bg-light" : "new-bg-light"}
+                                                    >
+                                                        <option value="USDT">USDT</option>
+                                                        <option value="ETH">ETH</option>
+                                                        <option value="BTC">BTC</option>
+                                                    </Form.Select>
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder={placeholder}
+                                                        readOnly
+                                                        value={selectedToCurrencyInput}
+                                                        className={isDarkMode ? "bg-dark text-light new-bg-light" : "new-bg-light"}
+                                                    />
+                                                    {loadingSecondInput && (
+                                                        <div className="input-group-text">
+                                                            <Spinner
+                                                                animation="border"
+                                                                size="sm"
+                                                                role="status"
+                                                                className="ms-2"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </InputGroup>
+                                            </Form.Group>
+                                        </Col>
 
-                                    <p className="mb-2 mt-2">
-                                        Expected rate: 1 {selectedFromCurrency} ~ {ExpectedRate}{" "}
-                                        {selectedToCurrency}
-                                        <br />
-                                        No extra fees
-                                    </p>
+                                        <p className="mb-2 mt-2">
+                                            Expected rate: 1 {selectedFromCurrency} ~ {ExpectedRate}{" "}
+                                            {selectedToCurrency}
+                                            <br />
+                                            No extra fees
+                                        </p>
 
-                                    <Button
-                                        onClick={postUserTransaction}
-                                        disabled={isDisable}
-                                        variant="success"
-                                        block
-                                    >
-                                        Convert Now
-                                    </Button>
-                                </Row>
-                            </Form>
-                        </div>
-                    </div>
+                                        <Button
+                                            onClick={postUserTransaction}
+                                            disabled={isDisable}
+                                            variant="success"
+                                            className='new-theme-bg no-border'
+                                            block
+                                        >
+                                            Convert Now
+                                        </Button>
+                                    </Row>
+                                </Form>
+                            </div>
+                        </div>}
                 </div>
             </div>
             {/* {modal3 &&

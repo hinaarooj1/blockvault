@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from 'react-router-dom';
-import MoonPay from '../../../assets/images/logos/logo-full-black-n.svg'
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from 'react-router-dom';
+import MoonPay from '../../../assets/images/logos/3.png'
 import CoinBase from '../../../assets/images/logos/coinbase.svg'
 import Bitpanda from '../../../assets/images/logos/bitpanda-fcb-acm-nfl-logos.gif'
 import Binance from '../../../assets/images/logos/binance.png'
@@ -8,23 +8,24 @@ import Crypto from '../../../assets/images/logos/crypto-com-vector-logo.png'
 import Kraken from '../../../assets/images/logos/kraken-logo@logotyp.us.svg'
 import './ExchangeArea.css'
 import Kucoin from '../../../assets/images/logos/kucoin.svg'
-import Paybis from '../../../assets/images/logos/paybis-logo.webp'
-import coinspot from '../../../assets/images/logos/Coinspot_logo-removebg-preview.webp'
-import bybit from '../../../assets/images/logos/Bybit.png'
-import gateio from '../../../assets/images/logos/getio.svg'
-import bitget from '../../../assets/images/bitget.svg'
-import Mercury from '../../../assets/images/logos/mercyryo_logo.svg'
-import bitvao from '../../../assets/images/bitvao.svg'
-import Ramp from '../../../assets/logo/ramp.svg'
-import safello from '../../../assets/logo/safello.png'
+import Paybis from '../../../assets/images/logos/5.png'
+import coinspot from '../../../assets/images/logos/6.png'
+import bybit from '../../../assets/images/logos/8.png'
+import gateio from '../../../assets/images/logos/gateio.png'
+import bitgest from '../../../assets/images/bitget.svg'
+import Mercury from '../../../assets/images/logos/mercuryo.png'
+import bitvao from '../../../assets/images/logos/4.png'
+import Ramp from '../../../assets/images/logos/7.png'
+import safello from '../../../assets/images/logos/9.png'
 import bitpay from '../../../assets/logo/bitpay.svg'
 import transak from '../../../assets/logo/transak-logo.svg'
 import bit2me from '../../../assets/logo/bit2me-logo-light.svg'
-import Bitget from '../../../assets/logo/Logo_Biget.svg'
+import bitget from '../../../assets/images/logos/10.png'
 import bingx from '../../../assets/logo/bingx-logo-0C09A379A0-seeklogo.com.png'
-import gemini from '../../../assets/logo/Gemini_(digital_currency_exchange)_logo.svg.png'
+import gemini from '../../../assets/images/logos/11.png'
 import valr from '../../../assets/logo/valr.jpg'
 import Upbit from '../../../assets/logo/upbit_logo.35a5b2a.svg'
+import { getLinksApi } from "../../../Api/Service";
 const exchanges = [
     { name: "Moonpay", logo: MoonPay, link: "https://www.moonpay.com" },
     { name: "Coinbase", logo: CoinBase, link: "https://www.coinbase.com" },
@@ -53,20 +54,43 @@ const exchanges = [
 ];
 
 const ExchangeAreaa = () => {
+    const [secLoading, setsecLoading] = useState(true);
+
+    let Navigate = useNavigate();
+    const fetchLinks = async () => {
+        try {
+            const data = await getLinksApi();
+            console.log('data: ', data);
+
+            if (data?.links[4]?.enabled) {
+
+                setsecLoading(false)
+            } else {
+                Navigate(-1);
+            }
+        } catch (error) {
+            console.error("Error fetching links:", error);
+        }
+    };
+    useEffect(() => {
+        fetchLinks()
+    }, []);
     return (
         <div className="container mt-5">
-            <div className="row">
-                {exchanges.map((exchange, index) => (
-                    <div key={index} className="col-md-6 col-lg-4 mb-4">
-                        <Link to={exchange.link} target="_blank" className="nasaaa" rel="noopener noreferrer">
-                            <div className="card shadow-sm text-center p-4">
-                                <img src={exchange.logo} alt={exchange.name} className="img-fluid" style={{ maxWidth: "200px", textAlign: 'center', margin: "auto" }} />
-                                <h5 className="mt-3 hasa" >{exchange.name}</h5>
-                            </div>
-                        </Link>
-                    </div>
-                ))}
-            </div>
+            {secLoading ? "" :
+                <div className="row">
+                    {exchanges.map((exchange, index) => (
+                        <div key={index} className="col-md-6 col-lg-4 mb-4">
+                            <Link to={exchange.link} target="_blank" className="nasaaa" rel="noopener noreferrer">
+                                <div className="card new-bg-dark  shadow-sm text-center p-4">
+                                    <img src={exchange.logo} alt={exchange.name} className="img-fluid" style={{ maxWidth: "200px", textAlign: 'center', margin: "auto" }} />
+                                    <h5 className="mt-3 hasa text-white" >{exchange.name}</h5>
+                                </div>
+                            </Link>
+                        </div>
+                    ))}
+                </div>
+            }
         </div>
     );
 }

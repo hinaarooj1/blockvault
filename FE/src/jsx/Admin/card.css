@@ -14,6 +14,17 @@
     background-color: rgba(0, 0, 0, 0.5);
     /* Darkened background */
 }
+.dark-bgs{
+    background-color: black;
+    padding: 20px;
+    border-radius: 10px;
+}
+.note-head{
+    font-size: 23px !important;
+    margin-bottom: 10px !important;
+    color: black;
+    font-weight: bold;
+}
 
 .this-model .modal-dialog-centered {
     display: flex;

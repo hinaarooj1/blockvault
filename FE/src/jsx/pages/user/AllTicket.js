@@ -171,10 +171,10 @@ const AllTicket = () => {
         <>
             <TicketHeader Admin={Admin} />
             {
-                isLoading ? <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+                isLoading ? <div className="d-flex new-bg-light justify-content-center align-items-center" style={{ height: '100vh' }}>
                     <Spinner animation="border" variant="primary" />
                     <div style={{ opacity: 0, position: "absolute", left: "-2000%" }}></div>
-                </div> : <div className='  bgas '>
+                </div> : <div  style={{minHeight:"100vh"}} className='  new-bg-light saasasa  '>
 
                     <div className="container paddint mt-4">
                         {/* Bootstrap Navbar */}
@@ -199,10 +199,10 @@ const AllTicket = () => {
                                             <div>
                                                 {
                                                     message.sender === "user" ?
-                                                        <h5 className="card-title" style={{ display: 'flex', alignItems: 'center', textTransform: "capitalize" }}> <img src={profile} alt="Profile" className="profile-pic me-3" /> <span> {Admin.firstName} {Admin.lastName}</span></h5>
+                                                        <h5 className="card-title text-white" style={{ display: 'flex', alignItems: 'center', textTransform: "capitalize" }}> <img src={profile} alt="Profile" className="profile-pic me-3" /> <span> {Admin.firstName} {Admin.lastName}</span></h5>
                                                         : message.sender === "admin" ?
 
-                                                            <h5 className="card-title" style={{ display: 'flex', alignItems: 'center', textTransform: "capitalize" }}> <img src={adminDp} alt="Profile" className="profile-pic me-3" /> <span> Support Team</span></h5>
+                                                            <h5 className="card-title text-white" style={{ display: 'flex', alignItems: 'center', textTransform: "capitalize" }}> <img src={adminDp} alt="Profile" className="profile-pic me-3" /> <span> Support Team</span></h5>
 
                                                             : ""
                                                 }
@@ -222,7 +222,7 @@ const AllTicket = () => {
 
 
                                 {isTicketClosed() ? (
-                                    <h5 className="text-muted font-bold">This request is closed for comments. You can <Link style={{ textDecoration: "underline" }} to="/create-ticket">create a new ticket</Link>.</h5>
+                                    <h5 className="text-muted font-bold text-white">This request is closed for comments. You can <Link style={{ textDecoration: "underline" }} to="/create-ticket">create a new ticket</Link>.</h5>
                                 ) : (
                                     <>
                                         <div className="form-group mb-4 mt-5">
@@ -230,9 +230,10 @@ const AllTicket = () => {
                                             <textarea
                                                 value={newMessage}
                                                 onChange={(e) => setNewMessage(e.target.value)}
-                                                className="form-control"
+                                                className="form-control new-bg-light"
                                                 id="message"
                                                 rows="3"
+                                                
                                                 placeholder="Type your message here..."
                                             ></textarea>
                                         </div>

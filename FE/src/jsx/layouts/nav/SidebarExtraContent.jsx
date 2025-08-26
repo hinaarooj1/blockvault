@@ -270,19 +270,19 @@ const SidebarExtraContent = () => {
 
 	return (
 		<>
-			<div className={`feature-box ${compare.includes(pathname) ? '' : 'style-3'}`}>
-				<div className="wallet-box">
+			<div className={`feature-box  new-bg-dark ${compare.includes(pathname) ? '' : 'style-3'}`}>
+				<div className="wallet-box new-bg-light">
 					{SVGICON.SideWalletSvgIcon}
 					<div className="ms-3">
 						<h4 className="text-white mb-0 d-block">{totalBalance === null ? "..." : totalBalance === 0 ? 0 : `${totalBalance}`} </h4>
-						<small>Available Funds</small>
+						<small className="new-theme-color">Available Funds</small>
 					</div>
 				</div>
-				<div className="wallet-box">
+				<div className="wallet-box new-bg-light">
 					{SVGICON.SideWalletSvgIcon}
 					<div className="ms-3">
 						<h4 className="text-white mb-0 d-block">{totalBalancePending === null ? "..." : totalBalance === 0 ? 0 : `${totalBalancePending}`} </h4>
-						<small> Total Pending</small>
+						<small className="new-theme-color"> Total Pending</small>
 					</div>
 				</div>
 

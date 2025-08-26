@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Spinner } from 'react-bootstrap';
+
+import { Spinner, Modal, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useAuthUser } from 'react-auth-kit';
-import { adminTicketsApi, signleUsersApi } from '../../Api/Service';
+import { adminTicketsApi, signleUsersApi,deleteTicketApi } from '../../Api/Service';
 import TicketHeader from '../pages/user/TicketHeader';
+import { toast } from 'react-toastify';
 
 const AllTicket = () => {
     const Navigate = useNavigate();
@@ -12,7 +14,11 @@ const AllTicket = () => {
     const [tickets, setTickets] = useState([]); // State to store tickets
     const [filter, setFilter] = useState('all'); // State to manage filter selection
     const [isLoading, setIsLoading] = useState(true); // Loading state
-
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [ticketToDelete, setTicketToDelete] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
     // Fetch tickets from the server
     const fetchTickets = async () => {
         try {
@@ -61,7 +67,54 @@ const AllTicket = () => {
             setIsLoading(false);
         }
     };
+    // Delete 
+    const handleDeleteClick = (ticket) => {
+        setTicketToDelete(ticket);
+        setShowDeleteModal(true);
+    };
 
+    // Handle actual deletion
+    const handleConfirmDelete = async () => {
+        if (!ticketToDelete) return;
+
+        setDeleteLoading(true);
+        setError(null);
+        setSuccess(null);
+
+        try { 
+            const response = await deleteTicketApi(ticketToDelete._id);
+
+            if (response.success) {
+                setSuccess('Ticket deleted successfully!');
+                toast.success('Ticket deleted successfully!')
+                // Remove the deleted ticket from state
+                setTickets(tickets.filter(ticket => ticket._id !== ticketToDelete._id));
+            } else {
+                setError(response.message || 'Failed to delete ticket.');
+            }
+        } catch (error) {
+            console.error('Error deleting ticket:', error);
+            setError('An error occurred while deleting the ticket.');
+        } finally {
+            setDeleteLoading(false);
+            setShowDeleteModal(false);
+            setTicketToDelete(null);
+
+            // Clear success/error messages after 3 seconds
+            setTimeout(() => {
+                setSuccess(null);
+                setError(null);
+            }, 3000);
+        }
+    };
+
+    // Close delete modal
+    const handleCloseModal = () => {
+        setShowDeleteModal(false);
+        setTicketToDelete(null);
+    };
+
+    // Delete 
     useEffect(() => {
         fetchTickets();
     }, []); // Fetch tickets on component mount
@@ -115,6 +168,16 @@ const AllTicket = () => {
                 <div className="bgas">
                     <div className="container paddint mt-4">
                         <TicketHeader Admin={Admin} />
+                        {success && (
+                            <Alert variant="success" className="mb-3">
+                                {success}
+                            </Alert>
+                        )}
+                        {error && (
+                            <Alert variant="danger" className="mb-3">
+                                {error}
+                            </Alert>
+                        )}
 
                         <div className="row">
                             <div className="col-md-12">
@@ -190,6 +253,13 @@ const AllTicket = () => {
                                                                 onClick={() => Navigate(`/admin/ticket/user/${ticket.user}/${ticket.ticketId}`)}
                                                             >
                                                                 View
+                                                            </button>{" "}
+                                                            <button
+                                                                className="btn  btn-danger "
+                                                                onClick={() => handleDeleteClick(ticket)}
+                                                                disabled={deleteLoading}
+                                                            >
+                                                                Delete
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -205,6 +275,30 @@ const AllTicket = () => {
                             </div>
                         </div>
                     </div>
+                    <Modal show={showDeleteModal} onHide={handleCloseModal}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Confirm Delete</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            Are you sure you want to delete ticket <strong>{ticketToDelete?.ticketId}</strong>?
+                            This action cannot be undone.
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={handleCloseModal} disabled={deleteLoading}>
+                                Cancel
+                            </Button>
+                            <Button variant="danger" onClick={handleConfirmDelete} disabled={deleteLoading}>
+                                {deleteLoading ? (
+                                    <>
+                                        <Spinner animation="border" size="sm" className="me-2" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    'Delete'
+                                )}
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
                 </div>
             )}
         </>

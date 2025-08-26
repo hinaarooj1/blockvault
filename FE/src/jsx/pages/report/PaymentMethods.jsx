@@ -6,7 +6,7 @@ import EthLogo from "../../../assets/images/img/eth.svg"
 import UsdtLogo from "../../../assets/images/img/usdt-logo.svg"
 import { toast } from 'react-toastify';
 import { useAuthUser } from 'react-auth-kit';
-import { addCardApi, createUserTransactionApi, deletePaymentApi, getCoinsUserApi, getsignUserApi, PaymentsApi } from '../../../Api/Service';
+import { addCardApi, createUserTransactionApi, deletePaymentApi, getCoinsUserApi, getLinksApi, getsignUserApi, PaymentsApi } from '../../../Api/Service';
 import axios from 'axios';
 import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
 import './style.css'
@@ -79,6 +79,26 @@ const PaymentMethods = () => {
     //
 
     //
+    const [secLoading, setsecLoading] = useState(true);
+
+    const fetchLinks = async () => {
+        try {
+            const data = await getLinksApi();
+            console.log('data: ', data);
+
+            if (data?.links[5]?.enabled) {
+
+                setsecLoading(false)
+            } else {
+                Navigate(-1);
+            }
+        } catch (error) {
+            console.error("Error fetching links:", error);
+        }
+    };
+    useEffect(() => {
+        fetchLinks()
+    }, []);
 
     useEffect(() => {
         getsignUser();
@@ -304,233 +324,239 @@ const PaymentMethods = () => {
         <>
             <div className="row">
                 <div className="col-xxl-12">
-                    <div className="card">
-                        <Card.Header>
-                            <Card.Title>Accounts</Card.Title>
-                        </Card.Header>
-                        <div className="card-body">
-                            {isLoading ? (
-                                <div className="text-center my-5">
-                                    <Spinner animation="border" variant="primary" />
-                                    <h4 className="mt-3">Loading Accounts...</h4>
-                                    <p>Please wait while we load the accounts.</p>
-                                </div>
-                            ) : UserData === null || !UserData ? (
-                                <div className="text-center my-5">
-                                    <h4> No Account found!</h4>
-                                </div>) : (
-
-
-                                <div className=" ptbg relative w-full    transition-all duration-300 ">
-                                    <div className="flex items-center justify-between p-4">
-                                        <div>
-                                            <h3
-                                                className=" font-heading   text-sm font-medium leading-normal leading-normal uppercase tracking-wider"
-                                                tag="h2"
-                                            >
-                                                Payment Methods
-                                            </h3>
-                                            <p className="">
-                                                You can add or remove your payment methods here.
-                                            </p>
-                                        </div>
-                                        <button onClick={() => setModal3(true)} className="add-btn btn btn-primary">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width={24}
-                                                height={24}
-                                                fill="none"
-                                            >
-                                                <path
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M12 5v14m-7-7h14"
-                                                />
-                                            </svg>
-                                            Add New
-                                        </button>
+                    {secLoading ? "" :
+                        <div className="card new-bg-dark ">
+                            <Card.Header>
+                                <Card.Title className='text-white'>Accounts</Card.Title>
+                            </Card.Header>
+                            <div className="card-body">
+                                {isLoading ? (
+                                    <div className="text-center my-5">
+                                        <Spinner animation="border" variant="primary" />
+                                        <h4 className="mt-3">Loading Accounts...</h4>
+                                        <p>Please wait while we load the accounts.</p>
                                     </div>
-                                    <div className="pt-6">
-                                        <div class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-v57kt1">
-                                            {isLoading ? (
-                                                <div>Loading...</div>
-                                            ) : isUser.payments.length !== 0 ? (
-                                                isUser.payments.map((item, key) => {
-                                                    return (
-                                                        <div
-                                                            key={key}
-                                                            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 MuiGrid2-grid-sm-6 MuiGrid2-grid-md-4 css-1m1aas1"
-                                                        >
-                                                            <div class="MuiStack-root svga css-1gq5e6f">
-                                                                <div class="MuiStack-root css-4u2is6">
-                                                                    <div class="MuiAvatar-root MuiAvatar-circular MuiAvatar-colorDefault css-drtivy">
-                                                                        {item.type === "bank" && (
+                                ) : UserData === null || !UserData ? (
+                                    <div className="text-center my-5">
+                                        <h4> No Account found!</h4>
+                                    </div>) : (
+
+
+                                    <div className=" ptbg relative w-full    transition-all duration-300 ">
+                                        <div className="flex items-center justify-between p-4">
+                                            <div>
+                                                <h3
+                                                    className=" font-heading text-white  text-sm font-medium leading-normal leading-normal uppercase tracking-wider"
+                                                    tag="h2"
+                                                >
+                                                    Payment Methods
+                                                </h3>
+                                                <p className="text-white">
+                                                    You can add or remove your payment methods here.
+                                                </p>
+                                            </div>
+                                            <button onClick={() => setModal3(true)} className="add-btn btn btn-primary">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M12 5v14m-7-7h14"
+                                                    />
+                                                </svg>
+                                                Add New
+                                            </button>
+                                        </div>
+                                        <div className="pt-6">
+                                            <div class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-v57kt1">
+                                                {isLoading ? (
+                                                    <div>Loading...</div>
+                                                ) : isUser.payments.length !== 0 ? (
+                                                    isUser.payments.map((item, key) => {
+                                                        return (
+                                                            <div
+                                                                key={key}
+                                                                class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 MuiGrid2-grid-sm-6 MuiGrid2-grid-md-4 css-1m1aas1"
+                                                            >
+                                                                <div class="MuiStack-root svga css-1gq5e6f">
+                                                                    <div class="MuiStack-root css-4u2is6">
+                                                                        <div class="MuiAvatar-root MuiAvatar-circular MuiAvatar-colorDefault css-drtivy">
+                                                                            {item.type === "bank" && (
+                                                                                <svg
+                                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                                    width="24"
+                                                                                    height="24"
+                                                                                    fill="white"
+                                                                                    stroke='white'
+                                                                                >
+                                                                                    <path
+                                                                                        fill="white"
+                                                                                        stroke='white'
+                                                                                        className='majd'
+                                                                                        d="M19.4 21c.5601 0 .8401 0 1.054-.109a.9993.9993 0 0 0 .437-.437C21 20.2401 21 19.9601 21 19.4v-.8c0-.56 0-.8401-.109-1.054a1.0003 1.0003 0 0 0-.437-.437C20.2401 17 19.9601 17 19.4 17H4.6c-.56 0-.84 0-1.054.109a1.0005 1.0005 0 0 0-.437.437C3 17.7599 3 18.04 3 18.6v.8c0 .5601 0 .8401.109 1.054a.9994.9994 0 0 0 .437.437C3.76 21 4.04 21 4.6 21h14.8Zm0-12c.5601 0 .8401 0 1.054-.109a1 1 0 0 0 .437-.437C21 8.2401 21 7.96 21 7.4V6.2835c0-.458 0-.687-.0812-.876a.9992.9992 0 0 0-.3343-.4167c-.1668-.1202-.3903-.1699-.8374-.2692l-7.4-1.6444c-.1295-.0288-.1943-.0432-.2597-.049a1.0004 1.0004 0 0 0-.1748 0c-.0654.0058-.1302.0202-.2597.049l-7.4 1.6444c-.447.0993-.6706.149-.8374.2692a1 1 0 0 0-.3344.4168C3 5.5966 3 5.8256 3 6.2835V7.4c0 .56 0 .8401.109 1.054.0959.1882.2489.3411.437.437C3.76 9 4.04 9 4.6 9h14.8Z"
+                                                                                    ></path>
+                                                                                    <path
+                                                                                        stroke="white"
+                                                                                        stroke-linecap="round"
+                                                                                        className='majd'
+                                                                                        stroke-linejoin="round"
+                                                                                        stroke-width="2"
+                                                                                        d="M5 9v8m4.5-8v8m5-8v8M19 9v8M3 18.6v.8c0 .5601 0 .8401.109 1.054a.9994.9994 0 0 0 .437.437C3.76 21 4.04 21 4.6 21h14.8c.5601 0 .8401 0 1.054-.109a.9993.9993 0 0 0 .437-.437C21 20.2401 21 19.9601 21 19.4v-.8c0-.56 0-.8401-.109-1.054a1.0003 1.0003 0 0 0-.437-.437C20.2401 17 19.9601 17 19.4 17H4.6c-.56 0-.84 0-1.054.109a1.0005 1.0005 0 0 0-.437.437C3 17.7599 3 18.04 3 18.6Zm8.6529-15.5229-7.4 1.6445c-.447.0993-.6706.149-.8374.2692a1 1 0 0 0-.3344.4168C3 5.5966 3 5.8256 3 6.2835V7.4c0 .56 0 .8401.109 1.054.0959.1882.2489.3411.437.437C3.76 9 4.04 9 4.6 9h14.8c.5601 0 .8401 0 1.054-.109a1 1 0 0 0 .437-.437C21 8.2401 21 7.96 21 7.4V6.2835c0-.458 0-.687-.0812-.876a.9992.9992 0 0 0-.3343-.4167c-.1668-.1202-.3903-.1699-.8374-.2692l-7.4-1.6444c-.1295-.0288-.1943-.0432-.2597-.049a1.0004 1.0004 0 0 0-.1748 0c-.0654.0058-.1302.0202-.2597.049Z"
+                                                                                    ></path>
+                                                                                </svg>
+                                                                            )}
+                                                                            {item.type === "card" && (
+                                                                                <svg
+                                                                                    className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-vubbuv"
+                                                                                    focusable="false"
+                                                                                    aria-hidden="true"
+                                                                                    width="24"
+                                                                                    height="24"
+                                                                                    viewBox="0 0 24 24"
+                                                                                    data-testid="CreditCardIcon"
+                                                                                >
+                                                                                    <path
+                                                                                        fill="white"
+                                                                                        className='majd'
+                                                                                        d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"
+                                                                                    />
+                                                                                </svg>
+                                                                            )}
+                                                                        </div>
+                                                                        <div class="MuiStack-root css-1msa3n8">
+                                                                            <h6 class="text-white MuiTypography-root MuiTypography-subtitle2 css-15udru3">
+                                                                                {item.type === "bank"
+                                                                                    ? "Bank Account"
+                                                                                    : "Credit Card"}
+                                                                            </h6>
+                                                                            <h6 className="MuiTypography-root  text-white  MuiTypography-subtitle1 css-1oklce5">
+                                                                                {item.type === "bank" ? (
+                                                                                    <>
+                                                                                        <p>
+                                                                                            <b> Bank Name:</b> <br />
+                                                                                            {item.bank.accountName}
+                                                                                        </p>{" "}
+
+                                                                                        <p>
+                                                                                            <b> Bank Account:</b>
+                                                                                            <br />
+                                                                                            {item.bank.accountNumber}
+                                                                                        </p>{" "}
+                                                                                        <p>
+                                                                                            <b>   Bank IBAN:</b>
+                                                                                            <br />
+                                                                                            {item.bank.iban}
+                                                                                        </p>{" "}
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        {item.card.cardNumber && (
+                                                                                            <>
+                                                                                                <span
+                                                                                                    className="uppercase text-white "
+                                                                                                    style={{
+                                                                                                        textTransform: "uppercase",
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {item.card.cardCategory}
+                                                                                                </span>{" "}
+                                                                                                *{item.card.cardNumber.slice(-4)}
+                                                                                            </>
+                                                                                        )}
+                                                                                    </>
+                                                                                )}
+                                                                            </h6>
+
+                                                                            <span class="MuiTypography-root text-white  MuiTypography-caption css-5d62nz">
+                                                                                {new Date(
+                                                                                    item.card.createdAt
+                                                                                ).toLocaleString()}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    {item.type === "bank" ? (
+                                                                        <button
+                                                                            class="MuiButtonBase-root  nas asSA MuiIconButton-root MuiIconButton-sizeSmall css-1s4gov3"
+                                                                            tabindex="0"
+                                                                            type="button"
+                                                                            disabled={isDisable1}
+                                                                            onClick={() => deletePayment(item._id)}
+                                                                        >
                                                                             <svg
                                                                                 xmlns="http://www.w3.org/2000/svg"
                                                                                 width="24"
                                                                                 height="24"
-                                                                                fill="none"
+                                                                                fill="white"
                                                                             >
                                                                                 <path
-                                                                                    fill=" "
                                                                                     className='majd'
-                                                                                    d="M19.4 21c.5601 0 .8401 0 1.054-.109a.9993.9993 0 0 0 .437-.437C21 20.2401 21 19.9601 21 19.4v-.8c0-.56 0-.8401-.109-1.054a1.0003 1.0003 0 0 0-.437-.437C20.2401 17 19.9601 17 19.4 17H4.6c-.56 0-.84 0-1.054.109a1.0005 1.0005 0 0 0-.437.437C3 17.7599 3 18.04 3 18.6v.8c0 .5601 0 .8401.109 1.054a.9994.9994 0 0 0 .437.437C3.76 21 4.04 21 4.6 21h14.8Zm0-12c.5601 0 .8401 0 1.054-.109a1 1 0 0 0 .437-.437C21 8.2401 21 7.96 21 7.4V6.2835c0-.458 0-.687-.0812-.876a.9992.9992 0 0 0-.3343-.4167c-.1668-.1202-.3903-.1699-.8374-.2692l-7.4-1.6444c-.1295-.0288-.1943-.0432-.2597-.049a1.0004 1.0004 0 0 0-.1748 0c-.0654.0058-.1302.0202-.2597.049l-7.4 1.6444c-.447.0993-.6706.149-.8374.2692a1 1 0 0 0-.3344.4168C3 5.5966 3 5.8256 3 6.2835V7.4c0 .56 0 .8401.109 1.054.0959.1882.2489.3411.437.437C3.76 9 4.04 9 4.6 9h14.8Z"
+                                                                                    d="M3 6.6h16.2H3Z"
+                                                                                    fill="white"
                                                                                 ></path>
                                                                                 <path
-                                                                                    stroke="black"
                                                                                     stroke-linecap="round"
-                                                                                    className='majd'
+                                                                                    className='majd2'
+                                                                                    store="white"
+                                                                                    fill="white"
                                                                                     stroke-linejoin="round"
                                                                                     stroke-width="2"
-                                                                                    d="M5 9v8m4.5-8v8m5-8v8M19 9v8M3 18.6v.8c0 .5601 0 .8401.109 1.054a.9994.9994 0 0 0 .437.437C3.76 21 4.04 21 4.6 21h14.8c.5601 0 .8401 0 1.054-.109a.9993.9993 0 0 0 .437-.437C21 20.2401 21 19.9601 21 19.4v-.8c0-.56 0-.8401-.109-1.054a1.0003 1.0003 0 0 0-.437-.437C20.2401 17 19.9601 17 19.4 17H4.6c-.56 0-.84 0-1.054.109a1.0005 1.0005 0 0 0-.437.437C3 17.7599 3 18.04 3 18.6Zm8.6529-15.5229-7.4 1.6445c-.447.0993-.6706.149-.8374.2692a1 1 0 0 0-.3344.4168C3 5.5966 3 5.8256 3 6.2835V7.4c0 .56 0 .8401.109 1.054.0959.1882.2489.3411.437.437C3.76 9 4.04 9 4.6 9h14.8c.5601 0 .8401 0 1.054-.109a1 1 0 0 0 .437-.437C21 8.2401 21 7.96 21 7.4V6.2835c0-.458 0-.687-.0812-.876a.9992.9992 0 0 0-.3343-.4167c-.1668-.1202-.3903-.1699-.8374-.2692l-7.4-1.6444c-.1295-.0288-.1943-.0432-.2597-.049a1.0004 1.0004 0 0 0-.1748 0c-.0654.0058-.1302.0202-.2597.049Z"
+                                                                                    d="M14.7 6.6v-.72c0-1.008 0-1.5121-.1962-1.8972a1.8 1.8 0 0 0-.7866-.7866C13.3321 3 12.8281 3 11.82 3h-1.44c-1.008 0-1.5121 0-1.8972.1962a1.8 1.8 0 0 0-.7866.7866C7.5 4.3678 7.5 4.872 7.5 5.88v.72m1.8 4.95v4.5m3.6-4.5v4.5M3 6.6h16.2m-1.8 0v10.08c0 1.5121 0 2.2682-.2943 2.8458a2.6996 2.6996 0 0 1-1.1799 1.1799C15.3482 21 14.5921 21 13.08 21H9.12c-1.5121 0-2.2682 0-2.8458-.2943a2.6998 2.6998 0 0 1-1.18-1.1799C4.8 18.9482 4.8 18.1921 4.8 16.68V6.6"
                                                                                 ></path>
                                                                             </svg>
-                                                                        )}
-                                                                        {item.type === "card" && (
+                                                                            <span class="MuiTouchRipple-root css-w0pj6f"></span>
+                                                                        </button>
+                                                                    ) : (
+                                                                        <button
+                                                                            class="MuiButtonBase-root nas asSA MuiIconButton-root MuiIconButton-sizeSmall css-1s4gov3"
+                                                                            tabindex="0"
+                                                                            type="button"
+                                                                            disabled={isDisable1}
+                                                                            onClick={() => deletePayment(item._id)}
+                                                                        >
                                                                             <svg
-                                                                                className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-vubbuv"
-                                                                                focusable="false"
-                                                                                aria-hidden="true"
+                                                                                xmlns="http://www.w3.org/2000/svg"
                                                                                 width="24"
                                                                                 height="24"
-                                                                                viewBox="0 0 24 24"
-                                                                                data-testid="CreditCardIcon"
+                                                                                fill="white"
                                                                             >
                                                                                 <path
-                                                                                    fill=""
                                                                                     className='majd'
-                                                                                    d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"
-                                                                                />
+                                                                                    d="M3 6.6h16.2H3Z"
+                                                                                ></path>
+                                                                                <path
+                                                                                    className='majd2'
+                                                                                    stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M14.7 6.6v-.72c0-1.008 0-1.5121-.1962-1.8972a1.8 1.8 0 0 0-.7866-.7866C13.3321 3 12.8281 3 11.82 3h-1.44c-1.008 0-1.5121 0-1.8972.1962a1.8 1.8 0 0 0-.7866.7866C7.5 4.3678 7.5 4.872 7.5 5.88v.72m1.8 4.95v4.5m3.6-4.5v4.5M3 6.6h16.2m-1.8 0v10.08c0 1.5121 0 2.2682-.2943 2.8458a2.6996 2.6996 0 0 1-1.1799 1.1799C15.3482 21 14.5921 21 13.08 21H9.12c-1.5121 0-2.2682 0-2.8458-.2943a2.6998 2.6998 0 0 1-1.18-1.1799C4.8 18.9482 4.8 18.1921 4.8 16.68V6.6"
+                                                                                ></path>
                                                                             </svg>
-                                                                        )}
-                                                                    </div>
-                                                                    <div class="MuiStack-root css-1msa3n8">
-                                                                        <h6 class="MuiTypography-root MuiTypography-subtitle2 css-15udru3">
-                                                                            {item.type === "bank"
-                                                                                ? "Bank Account"
-                                                                                : "Credit Card"}
-                                                                        </h6>
-                                                                        <h6 className="MuiTypography-root  MuiTypography-subtitle1 css-1oklce5">
-                                                                            {item.type === "bank" ? (
-                                                                                <>
-                                                                                    <p>
-                                                                                        <b> Bank Name:</b> <br />
-                                                                                        {item.bank.accountName}
-                                                                                    </p>{" "}
-
-                                                                                    <p>
-                                                                                        <b> Bank Account:</b>
-                                                                                        <br />
-                                                                                        {item.bank.accountNumber}
-                                                                                    </p>{" "}
-                                                                                    <p>
-                                                                                        <b>   Bank IBAN:</b>
-                                                                                        <br />
-                                                                                        {item.bank.iban}
-                                                                                    </p>{" "}
-                                                                                </>
-                                                                            ) : (
-                                                                                <>
-                                                                                    {item.card.cardNumber && (
-                                                                                        <>
-                                                                                            <span
-                                                                                                className="uppercase"
-                                                                                                style={{
-                                                                                                    textTransform: "uppercase",
-                                                                                                }}
-                                                                                            >
-                                                                                                {item.card.cardCategory}
-                                                                                            </span>{" "}
-                                                                                            *{item.card.cardNumber.slice(-4)}
-                                                                                        </>
-                                                                                    )}
-                                                                                </>
-                                                                            )}
-                                                                        </h6>
-
-                                                                        <span class="MuiTypography-root MuiTypography-caption css-5d62nz">
-                                                                            {new Date(
-                                                                                item.card.createdAt
-                                                                            ).toLocaleString()}
-                                                                        </span>
-                                                                    </div>
+                                                                            <span class="MuiTouchRipple-root css-w0pj6f"></span>
+                                                                        </button>
+                                                                    )}
                                                                 </div>
-                                                                {item.type === "bank" ? (
-                                                                    <button
-                                                                        class="MuiButtonBase-root  nas asSA MuiIconButton-root MuiIconButton-sizeSmall css-1s4gov3"
-                                                                        tabindex="0"
-                                                                        type="button"
-                                                                        disabled={isDisable1}
-                                                                        onClick={() => deletePayment(item._id)}
-                                                                    >
-                                                                        <svg
-                                                                            xmlns="http://www.w3.org/2000/svg"
-                                                                            width="24"
-                                                                            height="24"
-                                                                            fill="none"
-                                                                        >
-                                                                            <path
-                                                                                className='majd'
-                                                                                d="M3 6.6h16.2H3Z"
-                                                                            ></path>
-                                                                            <path
-                                                                                stroke-linecap="round"
-                                                                                className='majd2'
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M14.7 6.6v-.72c0-1.008 0-1.5121-.1962-1.8972a1.8 1.8 0 0 0-.7866-.7866C13.3321 3 12.8281 3 11.82 3h-1.44c-1.008 0-1.5121 0-1.8972.1962a1.8 1.8 0 0 0-.7866.7866C7.5 4.3678 7.5 4.872 7.5 5.88v.72m1.8 4.95v4.5m3.6-4.5v4.5M3 6.6h16.2m-1.8 0v10.08c0 1.5121 0 2.2682-.2943 2.8458a2.6996 2.6996 0 0 1-1.1799 1.1799C15.3482 21 14.5921 21 13.08 21H9.12c-1.5121 0-2.2682 0-2.8458-.2943a2.6998 2.6998 0 0 1-1.18-1.1799C4.8 18.9482 4.8 18.1921 4.8 16.68V6.6"
-                                                                            ></path>
-                                                                        </svg>
-                                                                        <span class="MuiTouchRipple-root css-w0pj6f"></span>
-                                                                    </button>
-                                                                ) : (
-                                                                    <button
-                                                                        class="MuiButtonBase-root nas asSA MuiIconButton-root MuiIconButton-sizeSmall css-1s4gov3"
-                                                                        tabindex="0"
-                                                                        type="button"
-                                                                        disabled={isDisable1}
-                                                                        onClick={() => deletePayment(item._id)}
-                                                                    >
-                                                                        <svg
-                                                                            xmlns="http://www.w3.org/2000/svg"
-                                                                            width="24"
-                                                                            height="24"
-                                                                            fill="none"
-                                                                        >
-                                                                            <path
-                                                                                className='majd'
-                                                                                d="M3 6.6h16.2H3Z"
-                                                                            ></path>
-                                                                            <path
-                                                                                className='majd2'
-                                                                                stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M14.7 6.6v-.72c0-1.008 0-1.5121-.1962-1.8972a1.8 1.8 0 0 0-.7866-.7866C13.3321 3 12.8281 3 11.82 3h-1.44c-1.008 0-1.5121 0-1.8972.1962a1.8 1.8 0 0 0-.7866.7866C7.5 4.3678 7.5 4.872 7.5 5.88v.72m1.8 4.95v4.5m3.6-4.5v4.5M3 6.6h16.2m-1.8 0v10.08c0 1.5121 0 2.2682-.2943 2.8458a2.6996 2.6996 0 0 1-1.1799 1.1799C15.3482 21 14.5921 21 13.08 21H9.12c-1.5121 0-2.2682 0-2.8458-.2943a2.6998 2.6998 0 0 1-1.18-1.1799C4.8 18.9482 4.8 18.1921 4.8 16.68V6.6"
-                                                                            ></path>
-                                                                        </svg>
-                                                                        <span class="MuiTouchRipple-root css-w0pj6f"></span>
-                                                                    </button>
-                                                                )}
                                                             </div>
-                                                        </div>
-                                                    );
-                                                })
-                                            ) : (
-                                                <div className="px-5 py-4">
-                                                    <h1 className="">
-                                                        No payment methods found
-                                                    </h1>
-                                                </div>
-                                            )}
+                                                        );
+                                                    })
+                                                ) : (
+                                                    <div className="px-5 py-4">
+                                                        <h1 className="text-white">
+                                                            No payment methods found
+                                                        </h1>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                                )}
+                            </div>
+                        </div>}
                 </div>
             </div>
 

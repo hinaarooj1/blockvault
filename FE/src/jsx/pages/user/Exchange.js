@@ -32,7 +32,7 @@ const Exchange = () => {
         >
             <Nav />
             <RightWalletBar />
-            <div className="content-body">
+            <div className="content-body new-bg-light">
                 <div
                     className="container-fluid"
                     style={{ minHeight: window.screen.height - 45 }}

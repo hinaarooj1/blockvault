@@ -185,9 +185,9 @@ const EditProfile = () => {
         <>
             <div className="row">
                 <div className="col-xl-12 col-lg-12">
-                    <div className="card profile-card card-bx">
+                    <div className="card new-bg-dark  profile-card card-bx">
                         <div className="card-header">
-                            <h6 className="card-title">Account setup</h6>
+                            <h6 className="card-title text-white">Account setup</h6>
                         </div>
                         <form className="profile-form" onSubmit={updateSignleUser}>
                             <div className="card-body">

@@ -103,18 +103,34 @@
 // ]
 import React, { useEffect, useState } from "react";
 import { useAuthUser, useSignOut } from "react-auth-kit";
+import { getLinksApi } from "../../../Api/Service";
 
 const useMenuList = () => {
     const [Admin, setAdmin] = useState(null); // Initialize as null
+    const [Links, setLinks] = useState(null); // Initialize as null
     const authUser = useAuthUser();
 
     useEffect(() => {
         const user = authUser()?.user;
         if (user) {
             setAdmin(user);
+
         }
     }, [authUser]);
+    const fetchLinks = async () => {
+        try {
+            const data = await getLinksApi();
+            console.log('data: ', data.links[0]);
+            setLinks(data?.links);
 
+        } catch (error) {
+            console.error("Error fetching links:", error);
+        }
+    };
+    useEffect(() => {
+
+        fetchLinks()
+    }, []);
     return [
 
         //Dashboard
@@ -139,36 +155,54 @@ const useMenuList = () => {
             iconStyle: <i className="material-symbols-outlined">apps_outage</i>,
 
         },
-        // {
-        //     title: 'My Stocks',
-        //     classsChange: 'mm-active',
+        ...(Array.isArray(Links) && Links[2]?.enabled
+            ? [
+                {
+                    title: 'My Stocks',
+                    classsChange: 'mm-active',
 
 
-        //     to: Admin ? `/stocks/${Admin._id}` : '#',
-        //     iconStyle: <i className="material-symbols-outlined">table</i>,
+                    to: Admin ? `/stocks/${Admin._id}` : '#',
+                    iconStyle: <i className="material-symbols-outlined">table</i>,
+                },
+            ]
+            : [])
+        ,
 
-        // },
+        ...(Array.isArray(Links) && Links[3]?.enabled
+            ? [
+                {
+                    title: 'Documents',
+                    classsChange: 'mm-active',
+                    to: '/all-files',
+                    iconStyle: <i className="material-symbols-outlined">request_quote</i>,
+                },
+            ]
+            : [])
+        ,
+
+
         {
-            title: 'Documents',
+            title: 'Legal',
             classsChange: 'mm-active',
-            to: '/all-files',
-            iconStyle: <i className="material-symbols-outlined">request_quote</i>,
-
-        },
-        {
-            title: 'Legal Notice',
-            classsChange: 'mm-active',
-            to: '/legal-notice',
+            to: '/legal',
             iconStyle: <i className="material-symbols-outlined">lab_profile</i>,
 
         },
-        {
-            title: 'Crypto Card',
-            classsChange: 'mm-active',
-            to: '/crypto-card',
-            iconStyle: <i className="material-symbols-outlined">monetization_on</i>,
 
-        },
+        ...(Array.isArray(Links) && Links[0]?.enabled
+            ? [
+                {
+                    title: "Crypto Card",
+                    classsChange: "mm-active",
+                    to: "/crypto-card",
+                    iconStyle: (
+                        <i className="material-symbols-outlined">monetization_on</i>
+                    ),
+                },
+            ]
+            : [])
+        ,
         {
             title: 'Assets',
             classsChange: 'mm-active',
@@ -176,35 +210,75 @@ const useMenuList = () => {
             iconStyle: <i className="material-symbols-outlined">table_chart</i>,
 
         },
-        {
-            title: 'Exchanges',
-            classsChange: 'mm-active',
-            to: '/exchanges',
-            iconStyle: <span class="fa-solid fa-arrow-right-arrow-left faris"></span>,
+        ...(Array.isArray(Links) && Links[4]?.enabled
+            ? [
+                {
+                    title: 'Exchanges',
+                    classsChange: 'mm-active',
+                    to: '/exchanges',
+                    iconStyle: <span class="fa-solid fa-arrow-right-arrow-left faris"></span>,
 
-        },
-        {
-            title: 'Payment Methods',
-            classsChange: 'mm-active',
-            to: '/account',
-            iconStyle: <i className="material-symbols-outlined">monetization_on</i>,
+                },
+            ]
+            : [])
+        ,
+        ...(Array.isArray(Links) && Links[5]?.enabled
+            ? [
+                {
+                    title: 'Payment Methods',
+                    classsChange: 'mm-active',
+                    to: '/account',
+                    iconStyle: <i className="material-symbols-outlined">monetization_on</i>,
+                },
+            ]
+            : [])
+        ,
+        ...(Array.isArray(Links) && Links[6]?.enabled
+            ? [
+                {
 
-        },
-        {
-            title: 'Staking',
-            classsChange: 'mm-active',
-            to: '/staking',
-            iconStyle: <i className="material-symbols-outlined">widgets</i>,
+                    title: 'Staking',
+                    classsChange: 'mm-active',
+                    to: '/staking',
+                    iconStyle: <i className="material-symbols-outlined">widgets</i>,
 
-        },
+                },
+            ]
+            : [])
+        ,
 
-        {
-            title: 'Swap',
-            classsChange: 'mm-active',
-            to: '/swap',
-            iconStyle: <i className="material-symbols-outlined">monitoring</i>,
 
-        },
+
+
+        ...(Array.isArray(Links) && Links[1]?.enabled
+            ? [
+                {
+                    title: 'AI Trading Bot ',
+                    classsChange: 'mm-active',
+                    to: '/trading',
+                    iconStyle: <i className="material-symbols-outlined">request_quote</i>
+                },
+            ]
+            : [])
+        ,
+
+        ...(Array.isArray(Links) && Links[7]?.enabled
+            ? [
+                {
+
+                    title: 'Swap',
+                    classsChange: 'mm-active',
+                    to: '/swap',
+                    iconStyle: <i className="material-symbols-outlined">monitoring</i>,
+
+
+                },
+            ]
+            : [])
+        ,
+
+
+
         {
             title: 'Transactions',
             classsChange: 'mm-active',

@@ -64,6 +64,7 @@ const TransactionSec = () => {
             //     "https://api.coindesk.com/v1/bpi/currentprice.json"
             // );
             const allTransactions = await getUserCoinApi(id);
+            console.log('allTransactions: ', allTransactions.getCoin.transactions);
             if (allTransactions.success) {
                 setUserTransactions(allTransactions.getCoin.transactions.reverse());
                 let val = 0;
@@ -181,9 +182,9 @@ const TransactionSec = () => {
         <>
             <div className="row">
                 <div className="col-xxl-12">
-                    <div className="card">
+                    <div className="card new-bg-dark">
                         <Card.Header>
-                            <Card.Title>Transactions</Card.Title>
+                            <Card.Title className='text-white'>Transactions</Card.Title>
                         </Card.Header>
                         <div className="card-body">
                             {isLoading ? (
@@ -200,13 +201,13 @@ const TransactionSec = () => {
                                             UserTransactions.filter(Transaction => !Transaction.isHidden).map((Transaction, index) => (
                                                 <Card
                                                     key={index}
-                                                    className="transaction-card border-0 shadow-sm rounded-3 transition-all duration-300"
+                                                    className="transaction-card no-bg border-0 shadow-sm rounded-3 transition-all duration-300"
                                                 >
                                                     <Card.Body className="p-3">
                                                         <Row className="align-items-center">
                                                             <Col xs={2} className="text-center">
                                                                 {Transaction.type === 'deposit' ? (
-                                                                    <div className="icon-container bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center">
+                                                                    <div className="icon-container   bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                                                             <path d="M11 20V7.825l-5.6 5.6L4 12l8-8 8 8-1.4 1.425-5.6-5.6V20z" />
                                                                         </svg>
@@ -220,9 +221,9 @@ const TransactionSec = () => {
                                                                 ) : null}
                                                             </Col>
                                                             <Col>
-                                                                <Card.Title as="h6" className="mb-1">
+                                                                <Card.Title as="h6" className="mb-1 text-white">
                                                                     {Transaction.trxName}{' '}
-                                                                    <small className="transaction-status">({Transaction.status})</small>
+                                                                    <small className="transaction-status text-white">({Transaction.status})</small>
                                                                 </Card.Title>
                                                                 <Card.Text className="mb-1 transaction-amount">
                                                                     {Transaction.amount.toFixed(8)}{' '}

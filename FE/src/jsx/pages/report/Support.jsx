@@ -135,9 +135,9 @@ const Support = () => {
         <>
             <div className="row">
                 <div className="col-xxl-12">
-                    <div className="card mt-2">
+                    <div className="card new-bg-dark mt-2">
                         <Card.Header>
-                            <Card.Title>My tickets</Card.Title>
+                            <Card.Title className='text-white'>My tickets</Card.Title>
                             <Card.Title> <Button onClick={() => Navigate("/create-ticket")}
                                 className="me-2" variant="primary btn-rounded">
                                 Create New <i class="fa-solid fa-plus"></i>
@@ -171,7 +171,7 @@ const Support = () => {
                                             </thead>
                                             <tbody>
                                                 {allTickets.map((ticket, index) => (
-                                                    <tr key={index} className='ttrr' onClick={() => Navigate(`/tickets/${ticket.ticketId}`)}>
+                                                    <tr key={index}  onClick={() => Navigate(`/tickets/${ticket.ticketId}`)}>
                                                         <td className='tleft'>
                                                             <span className="font-w600 fs-14">{ticket.title}</span>
                                                         </td>

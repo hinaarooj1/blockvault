@@ -5,17 +5,33 @@ import React, { useState, useEffect, useReducer } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuthUser } from 'react-auth-kit';
-import { applyCreditCardApi, getCoinsUserApi, getsignUserApi, getUserCoinApi } from '../../../Api/Service';
+import { applyCreditCardApi, getCoinsUserApi, getLinksApi, getsignUserApi, getUserCoinApi } from '../../../Api/Service';
 const CryptoCard = () => {
 
     const [isLoading, setisLoading] = useState(true);
     const [usdtBalance, setusdtBalance] = useState(null);
     const [isDisable, setisDisable] = useState(false);
     const [isCardDetails, setisCardDetails] = useState(false);
+    const [secLoading, setsecLoading] = useState(true);
 
     const authUser = useAuthUser();
     const Navigate = useNavigate();
     const [isUser, setIsUser] = useState({});
+    const fetchLinks = async () => {
+        try {
+            const data = await getLinksApi();
+            console.log('data: ', data);
+
+            if (data?.links[0]?.enabled) {
+
+                setsecLoading(false)
+            } else {
+                Navigate(-1);
+            }
+        } catch (error) {
+            console.error("Error fetching links:", error);
+        }
+    };
     const getsignUser = async () => {
         setisLoading(true)
         try {
@@ -48,6 +64,7 @@ const CryptoCard = () => {
         if (authUser().user.role === "user") {
 
             getCoins(authUser().user);
+            fetchLinks()
             return;
         } else if (authUser().user.role === "admin") {
             Navigate("/admin/dashboard");
@@ -154,7 +171,7 @@ const CryptoCard = () => {
     };
     return (
         <>
-            {isLoading ?
+            {isLoading || secLoading ?
 
                 <div className="crypto-card skeleton">
                     <div className="crypto-card-header">

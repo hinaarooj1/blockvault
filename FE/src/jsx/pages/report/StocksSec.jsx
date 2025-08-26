@@ -6,7 +6,7 @@ import EthLogo from "../../../assets/images/img/eth.svg"
 import UsdtLogo from "../../../assets/images/img/usdt-logo.svg"
 import { toast } from 'react-toastify';
 import { useAuthUser } from 'react-auth-kit';
-import { createUserTransactionApi, getCoinsUserApi, getsignUserApi, getUserCoinApi } from '../../../Api/Service';
+import { createUserTransactionApi, getCoinsUserApi, getLinksApi, getsignUserApi, getUserCoinApi } from '../../../Api/Service';
 import axios from 'axios';
 import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import './style.css'
@@ -18,7 +18,12 @@ const StocksSec = () => {
     const [selectedStock, setSelectedStock] = useState('');
     const [stockValue, setStockValue] = useState('');
     const [apiLoading, setapiLoading] = useState(false);
-    const apiKey = 'JTJDB1ZIXDMIT0WN';
+    const [stocks, setStocks] = useState({
+        stockName: '',
+        stockSymbol: '',
+        stockAmount: 1,
+        stockValue: ''
+    });
     const [modal, setModal] = useState(false);
     const [isLoading, setisLoading] = useState(true);
     const [UserTransactions, setUserTransactions] = useState([]);
@@ -34,6 +39,25 @@ const StocksSec = () => {
     const [spValue, setspValue] = useState(true);
 
     const [isUser, setIsUser] = useState({});
+    const [secLoading, setsecLoading] = useState(true);
+    const fetchLinks = async () => {
+        try {
+            const data = await getLinksApi();
+            console.log('data: ', data);
+
+            if (data?.links[2]?.enabled) {
+
+                setsecLoading(false)
+            } else {
+                Navigate(-1);
+            }
+        } catch (error) {
+            console.error("Error fetching links:", error);
+        }
+    };
+    useEffect(() => {
+        fetchLinks()
+    }, []);
     const getsignUser = async () => {
         try {
             const formData = new FormData();
@@ -186,88 +210,223 @@ const StocksSec = () => {
                 }, 2000);
             });
     };
+    const apiKey = 'JTJDB1ZIXDMIT0WN';
+
+
+    // Predefined stock symbols and their corresponding company names
+    const stockData = [
+        { symbol: 'ibm', name: 'IBM' },
+        { symbol: 'AAPL', name: 'Apple Inc.' },
+        { symbol: 'GOOGL', name: 'Alphabet Inc.' },
+        { symbol: 'AMZN', name: 'Amazon.com Inc.' },
+        { symbol: 'MSFT', name: 'Microsoft Corporation' },
+        { symbol: 'TSLA', name: 'Tesla Inc.' },
+        { symbol: 'FB', name: 'Meta Platforms Inc.' },
+        { symbol: 'NFLX', name: 'Netflix Inc.' },
+        { symbol: 'NVDA', name: 'NVIDIA Corporation' },
+        { symbol: 'BABA', name: 'Alibaba Group Holding Ltd.' },
+        { symbol: 'DIS', name: 'Walt Disney Company' },
+        { symbol: 'INTC', name: 'Intel Corporation' },
+        { symbol: 'CSCO', name: 'Cisco Systems Inc.' },
+        { symbol: 'ORCL', name: 'Oracle Corporation' },
+        { symbol: 'IBM', name: 'International Business Machines Corporation' },
+        { symbol: 'BA', name: 'Boeing Co.' },
+        { symbol: 'UBER', name: 'Uber Technologies Inc.' },
+        { symbol: 'LYFT', name: 'Lyft Inc.' },
+        { symbol: 'ZM', name: 'Zoom Video Communications Inc.' },
+        { symbol: 'TWTR', name: 'Twitter Inc.' },
+        { symbol: 'SNAP', name: 'Snap Inc.' },
+        { symbol: 'V', name: 'Visa Inc.' },
+        { symbol: 'MA', name: 'Mastercard Inc.' },
+        { symbol: 'PYPL', name: 'PayPal Holdings Inc.' },
+        { symbol: 'SHOP', name: 'Shopify Inc.' },
+        { symbol: 'SQ', name: 'Square Inc.' },
+        { symbol: 'T', name: 'AT&T Inc.' },
+        { symbol: 'VZ', name: 'Verizon Communications Inc.' },
+        { symbol: 'TMUS', name: 'T-Mobile US Inc.' },
+        { symbol: 'KO', name: 'The Coca-Cola Company' },
+        { symbol: 'PEP', name: 'PepsiCo Inc.' },
+        { symbol: 'JPM', name: 'JPMorgan Chase & Co.' },
+        { symbol: 'BAC', name: 'Bank of America Corporation' },
+        { symbol: 'C', name: 'Citigroup Inc.' },
+        { symbol: 'GS', name: 'Goldman Sachs Group Inc.' },
+        { symbol: 'MS', name: 'Morgan Stanley' },
+        { symbol: 'XOM', name: 'Exxon Mobil Corporation' },
+        { symbol: 'CVX', name: 'Chevron Corporation' },
+        { symbol: 'BP', name: 'BP p.l.c.' },
+        { symbol: 'WMT', name: 'Walmart Inc.' },
+        { symbol: 'COST', name: 'Costco Wholesale Corporation' },
+        { symbol: 'HD', name: 'The Home Depot Inc.' },
+        { symbol: 'LOW', name: 'Lowe\'s Companies Inc.' },
+        { symbol: 'NKE', name: 'Nike Inc.' },
+        { symbol: 'ADBE', name: 'Adobe Inc.' },
+        { symbol: 'CRM', name: 'Salesforce Inc.' },
+        { symbol: 'SBUX', name: 'Starbucks Corporation' },
+        { symbol: 'MCD', name: 'McDonald\'s Corporation' },
+        { symbol: 'PG', name: 'Procter & Gamble Co.' },
+        { symbol: 'JNJ', name: 'Johnson & Johnson' },
+        { symbol: 'MRNA', name: 'Moderna Inc.' },
+        { symbol: 'PFE', name: 'Pfizer Inc.' },
+        { symbol: 'AZN', name: 'AstraZeneca PLC' },
+        { symbol: 'LLY', name: 'Eli Lilly and Company' },
+        { symbol: 'TMO', name: 'Thermo Fisher Scientific Inc.' },
+        { symbol: 'UNH', name: 'UnitedHealth Group Incorporated' },
+        { symbol: 'RDS-A', name: 'Royal Dutch Shell plc' },
+        { symbol: 'GE', name: 'General Electric Company' },
+        { symbol: 'GM', name: 'General Motors Company' },
+        { symbol: 'F', name: 'Ford Motor Company' },
+        { symbol: 'TSM', name: 'Taiwan Semiconductor Manufacturing Company Limited' },
+        { symbol: 'SPCE', name: 'Virgin Galactic Holdings Inc.' },
+        { symbol: 'PLTR', name: 'Palantir Technologies Inc.' },
+        { symbol: 'DKNG', name: 'DraftKings Inc.' },
+        { symbol: 'BB', name: 'BlackBerry Limited' },
+        { symbol: 'NKLA', name: 'Nikola Corporation' },
+    ];
+    useEffect(() => {
+        // Sort stock data alphabetically by company name
+        const sortedStocks = stockData.sort((a, b) => a.name.localeCompare(b.name));
+        setStocksNew(sortedStocks);
+    }, []);
+
+    const getStockValue = (symbol) => {
+        setapiLoading(true)
+        axios
+            .get(
+                `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${apiKey}`
+            )
+            .then((response) => {
+                console.log('response: ', response);
+                const timeSeries = response.data['Time Series (5min)'];
+                if (timeSeries) {
+                    setapiLoading(false)
+                    // Get the latest stock price
+                    const latestTime = Object.keys(timeSeries)[0];
+                    const latestData = timeSeries[latestTime]['1. open'];
+                    setStockValue(latestData);
+                    console.log('latestData: ', latestData);
+                } else {
+                    alert('Stock data not available');
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching stock data:', error);
+            });
+    };
+
+    // Handle dropdown selection
+    const handleStockChange = (event) => {
+        const selectedSymbol = event.target.value;
+        setSelectedStock(selectedSymbol);
+        getStockValue(selectedSymbol);
+
+        // Find the stock name based on the selected symbol
+        const stock = stockData.find(stock => stock.symbol === selectedSymbol);
+        if (stock) {
+            setStocks(prevStocks => ({
+                ...prevStocks,
+                stockName: stock.name
+            }));
+        }
+    };
 
     return (
         <>
-            <div className="row">
+            <div className="row dark-nn" >
                 <div className="col-xxl-12">
                     <div className="card">
-                        <Card.Header>
+                        
+                        {secLoading ? "" :
+                       <> <Card.Header>
                             <Card.Title>Stocks</Card.Title>
                         </Card.Header>
-                        <div className="card-body">
-                            {isLoading ? (
-                                <div className="text-center my-5">
-                                    <Spinner animation="border" variant="primary" />
-                                    <h4 className="mt-3"> Loading Stocks...</h4>
-                                    <p>Please wait while we load the  Stocks.</p>
-                                </div>
-                            ) : (
-
-                                <div className="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative w-full border bg-white duration-300 rounded-md">
-                                    <div className="flex items-center justify-between p-4">
-                                        <div>
-                                            <p
-                                                className="font-heading text-sm font-medium leading-normal leading-normal uppercase tracking-wider"
-                                                tag="h2"
-                                            >
-                                                {" "}
-                                                All Stocks
-                                            </p>
-                                        </div>
+                            <div className="card-body">
+                                {isLoading ? (
+                                    <div className="text-center my-5">
+                                        <Spinner animation="border" variant="primary" />
+                                        <h4 className="mt-3"> Loading Stocks...</h4>
+                                        <p>Please wait while we load the  Stocks.</p>
                                     </div>
-                                    {isLoading && (
-                                        <div className="  p-5">Loading Stocks...</div>
-                                    )}
-                                    {!isLoading && (
-                                        <div className="pt-6 asm">
-                                            <Table striped bordered hover>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Stock Name</th>
-                                                        <th>Stock Symbol</th>
-                                                        <th>Quantity</th>
-                                                        <th>Total Value</th>
-                                                    </tr>
-                                                </thead>
-                                                {UserTransactions && Array.isArray(UserTransactions) && UserTransactions.length > 0 ? (
-                                                    UserTransactions.map((transaction, index) => (
-                                                        <tbody>
-                                                            <tr key={index}>
-                                                                <td>{transaction.stockName || 'N/A'}</td>
-                                                                <td className="text-center">{transaction.stockSymbol || 'N/A'}</td>
-                                                                <td>{transaction.stockAmount || 'N/A'}</td>
-                                                                <td>
-                                                                    {spValue ? (
-                                                                        <div className="loader-container">
-                                                                            <Spinner animation="border" role="status">
-                                                                                <span className="visually-hidden">Loading...</span>
-                                                                            </Spinner>
-                                                                        </div>
-                                                                    ) : (() => {
-                                                                        const liveValue = liveStockValues[transaction.stockSymbol];
-                                                                        const calculatedValue = parseFloat(liveValue) * parseFloat(transaction.stockAmount);
-                                                                        const formattedValue = isNaN(calculatedValue)
-                                                                            ? parseFloat(transaction.stockValue) * parseFloat(transaction.stockAmount)
-                                                                            : calculatedValue;
-                                                                        return `$${formattedValue.toFixed(3) || 'N/A'}`;
-                                                                    })()}
+                                ) : (
 
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan="4" className="text-center">No stocks available</td>
-                                                    </tr>
-                                                )}
-                                            </Table>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                                    <Row>
+                                        <Col md={6}>
+                                            <Card className='maon-00c'>
+                                                <Card.Header><Card.Title>Buy Assets</Card.Title></Card.Header>
+                                                <Card.Body>
+                                                    <Form>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Asset ID</Form.Label>
+                                                            {/* <Form.Control type="text" placeholder="Enter Asset ID" /> */}
+                                                            <select className="form-control" value={selectedStock} onChange={handleStockChange}>
+                                                                <option value="">Select a stock</option>
+                                                                {stocksNew.map((stock, index) => (
+                                                                    <option key={index} value={stock.symbol}>
+                                                                        {stock.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </Form.Group>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Asset Quote</Form.Label>
+                                                            <Form.Control type="text" placeholder="USD" disabled />
+                                                        </Form.Group>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Quantity</Form.Label>
+                                                            <Form.Control type="number" defaultValue={1} />
+                                                        </Form.Group>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Current Price</Form.Label>
+                                                            <Form.Control type="number" />
+                                                        </Form.Group>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Buy Amount</Form.Label>
+                                                            <Form.Control type="number" />
+                                                        </Form.Group>
+                                                        <Button variant="success" type="submit">
+                                                            Buy Asset
+                                                        </Button>
+                                                    </Form>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+
+                                        <Col md={6}>
+                                            <Card className='maon-00c'>
+                                                <Card.Header><Card.Title>Sell Assets</Card.Title></Card.Header>
+                                                <Card.Body>
+                                                    <Form>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Asset ID</Form.Label>
+                                                            <Form.Control type="text" defaultValue="ETOR (Etoro Group Ltd - Class A)" />
+                                                        </Form.Group>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Asset Quote</Form.Label>
+                                                            <Form.Control type="text" defaultValue="USD" disabled />
+                                                        </Form.Group>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Quantity</Form.Label>
+                                                            <Form.Control type="number" defaultValue={1} />
+                                                        </Form.Group>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Current Price</Form.Label>
+                                                            <Form.Control type="number" defaultValue={64.98} />
+                                                        </Form.Group>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label>Sell Price</Form.Label>
+                                                            <Form.Control type="number" defaultValue={64.98} />
+                                                        </Form.Group>
+                                                        <Button variant="danger" type="submit">
+                                                            Sell Asset
+                                                        </Button>
+                                                    </Form>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    </Row>
+
+                                )}
+                            </div></>
+                        }
                     </div>
                 </div>
             </div>

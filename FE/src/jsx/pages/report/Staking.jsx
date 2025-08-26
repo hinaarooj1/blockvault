@@ -6,7 +6,7 @@ import EthLogo from "../../../assets/images/img/eth.svg"
 import UsdtLogo from "../../../assets/images/img/usdt-logo.svg"
 import { toast } from 'react-toastify';
 import { useAuthUser } from 'react-auth-kit';
-import { createUserTransactionApi, getCoinsUserApi, getsignUserApi, getUserCoinApi } from '../../../Api/Service';
+import { createUserTransactionApi, getCoinsUserApi, getLinksApi, getsignUserApi, getUserCoinApi } from '../../../Api/Service';
 import axios from 'axios';
 import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
 import './style.css'
@@ -170,6 +170,27 @@ const Staking = () => {
     const authUser = useAuthUser();
     const Navigate = useNavigate();
     const [isUser, setIsUser] = useState({});
+
+    const [secLoading, setsecLoading] = useState(true);
+
+    const fetchLinks = async () => {
+        try {
+            const data = await getLinksApi();
+            console.log('data: ', data);
+
+            if (data?.links[6]?.enabled) {
+
+                setsecLoading(false)
+            } else {
+                Navigate(-1);
+            }
+        } catch (error) {
+            console.error("Error fetching links:", error);
+        }
+    };
+    useEffect(() => {
+        fetchLinks()
+    }, []);
     const getsignUser = async () => {
         try {
             const formData = new FormData();
@@ -445,15 +466,15 @@ const Staking = () => {
         <>
             <div className="row">
                 <div className="col-xxl-12">
-                    <div className="card">
-                        <Card.Header>
-                            <Card.Title>Assets</Card.Title>
+                    <div className="card no-bg" >
+                        <Card.Header className='no-border'>
+                            <Card.Title className='text-white'>Assets</Card.Title>
                         </Card.Header>
                         <div className="card-body">
                             <div className="MuiStack-root css-jddaxh">
                                 <div className="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-1tz8m30">
                                     <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6 MuiGrid-grid-md-4 css-i9p3im">
-                                        <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-l43idd">
+                                        <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-l43idd no-border new-bg-dark">
                                             <div className="MuiCardContent-root css-1dzn5ey">
                                                 <div className="MuiStack-root css-jelo4q">
                                                     <div className="MuiAvatar-root MuiAvatar-circular css-1m3w9oh">
@@ -462,11 +483,11 @@ const Staking = () => {
                                                             className="MuiAvatar-img css-1hy9t21"
                                                         />
                                                     </div>
-                                                    <h6 className="MuiTypography-root MuiTypography-h6 css-ow70wi">
+                                                    <h6 className="MuiTypography-root  MuiTypography-h6 css-ow70wi text-white">
                                                         Staking Bitcoin
                                                     </h6>
                                                 </div>
-                                                <p className="MuiTypography-root MuiTypography-body2 css-1jorj1k">
+                                                <p className="MuiTypography-root text-white MuiTypography-body2 css-1jorj1k">
                                                     DURATION
                                                 </p>
                                                 <div className="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-krtfz2">
@@ -478,7 +499,7 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 30 Days
                                                             </span>
                                                         </div>
@@ -491,7 +512,7 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 60 Days
                                                             </span>
                                                         </div>
@@ -504,19 +525,19 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 90 Days
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="MuiStack-root css-9npne8">
-                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                         Tap Stake to see your reward
                                                     </span>
                                                 </div>
                                                 <div className="MuiStack-root css-j0iiqq">
-                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                         Min Value
                                                     </span>
                                                     <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -537,7 +558,7 @@ const Staking = () => {
                                         </div>
                                     </div>
                                     <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6 MuiGrid-grid-md-4 css-i9p3im">
-                                        <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-l43idd">
+                                        <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-l43idd no-border new-bg-dark">
                                             <div className="MuiCardContent-root css-1dzn5ey">
                                                 <div className="MuiStack-root css-jelo4q">
                                                     <div className="MuiAvatar-root MuiAvatar-circular css-1m3w9oh">
@@ -546,7 +567,7 @@ const Staking = () => {
                                                             className="MuiAvatar-img css-1hy9t21"
                                                         />
                                                     </div>
-                                                    <h6 className="MuiTypography-root MuiTypography-h6 css-ow70wi">
+                                                    <h6 className="MuiTypography-root MuiTypography-h6 css-ow70wi text-white">
                                                         Staking Ethereum
                                                     </h6>
                                                 </div>
@@ -562,7 +583,7 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 30 Days
                                                             </span>
                                                         </div>
@@ -575,7 +596,7 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 60 Days
                                                             </span>
                                                         </div>
@@ -588,19 +609,19 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 90 Days
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="MuiStack-root css-9npne8">
-                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                         Tap Stake to see your reward
                                                     </span>
                                                 </div>
                                                 <div className="MuiStack-root css-j0iiqq">
-                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                         Min Value
                                                     </span>
                                                     <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -621,7 +642,7 @@ const Staking = () => {
                                         </div>
                                     </div>
                                     <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6 MuiGrid-grid-md-4 css-i9p3im">
-                                        <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-l43idd">
+                                        <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-l43idd no-border new-bg-dark">
                                             <div className="MuiCardContent-root css-1dzn5ey">
                                                 <div className="MuiStack-root css-jelo4q">
                                                     <div className="MuiAvatar-root MuiAvatar-circular css-1m3w9oh">
@@ -630,7 +651,7 @@ const Staking = () => {
                                                             className="MuiAvatar-img css-1hy9t21"
                                                         />
                                                     </div>
-                                                    <h6 className="MuiTypography-root MuiTypography-h6 css-ow70wi">
+                                                    <h6 className="MuiTypography-root MuiTypography-h6 css-ow70wi text-white">
                                                         Staking Tether USDT
                                                     </h6>
                                                 </div>
@@ -646,7 +667,7 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 30 Days
                                                             </span>
                                                         </div>
@@ -659,7 +680,7 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 60 Days
                                                             </span>
                                                         </div>
@@ -672,19 +693,19 @@ const Staking = () => {
                                                                 : "css-18xyzlx"
                                                                 }`}
                                                         >
-                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb">
+                                                            <span className="MuiTypography-root MuiTypography-caption css-50upxb  text-white">
                                                                 90 Days
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="MuiStack-root css-9npne8">
-                                                    <span className="MuiTypography-root text-center MuiTypography-caption css-1canfvu">
+                                                    <span className="MuiTypography-root text-center MuiTypography-caption css-1canfvu text-white">
                                                         Tap Stake to see your reward
                                                     </span>
                                                 </div>
                                                 <div className="MuiStack-root css-j0iiqq">
-                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                    <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                         Min Value
                                                     </span>
                                                     <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -710,82 +731,83 @@ const Staking = () => {
                     </div>
                 </div>
                 <div className="col-x-12">
-                    <div className="card">
-                        <Card.Header>
-                            <Card.Title>Staking Rewards</Card.Title>
-                        </Card.Header>
-                        <div className="card-body">
-                            {isLoading ? (
-                                <div className="text-center my-5">
-                                    <Spinner animation="border" variant="primary" />
-                                    <h4 className="mt-3"> Loading...</h4>
-                                </div>
-                            ) : (
-
-                                <>
-                                    <div className="d-grid gap-4">
-                                        {UserTransactions &&
-                                            UserTransactions.filter(Transaction => !Transaction.isHidden && Transaction.txId === "staking amount")
-                                                .map((Transaction, index) => (
-                                                    <Card
-                                                        key={index}
-                                                        className="transaction-card border-0 shadow-sm rounded-3 transition-all duration-300"
-                                                    >
-                                                        <Card.Body className="p-3">
-                                                            <Row className="align-items-center">
-
-                                                                <Col>
-                                                                    <Card.Title as="h6" className="mb-1">
-                                                                        {Transaction.trxName}{' '}
-                                                                        <small className="transaction-status">({Transaction.status})</small>
-                                                                    </Card.Title>
-                                                                    <Card.Text className="mb-1 transaction-amount">
-                                                                        {Math.abs(Transaction.amount).toFixed(8)}{' '}
-                                                                        <small>
-                                                                            {Transaction.type === 'deposit' ? (
-                                                                                <td className="text-success font-w600">{`($${Transaction.trxName === 'bitcoin'
-                                                                                    ? (Transaction.amount * liveBtc).toFixed(2)
-                                                                                    : Transaction.trxName === 'ethereum'
-                                                                                        ? (Transaction.amount * 2640).toFixed(2)
-                                                                                        : Transaction.trxName === 'tether'
-                                                                                            ? Transaction.amount.toFixed(2)
-                                                                                            : (0).toFixed(2)
-                                                                                    })`}</td>
-                                                                            ) : Transaction.type === 'withdraw' ? (
-                                                                                <td className="text-danger font-w600"> {`($${Transaction.trxName === 'bitcoin'
-                                                                                    ? Math.abs((Transaction.amount * liveBtc)).toFixed(2)
-                                                                                    : Transaction.trxName === 'ethereum'
-                                                                                        ? Math.abs((Transaction.amount * 2640)).toFixed(2)
-                                                                                        : Transaction.trxName === 'tether'
-                                                                                            ? Math.abs(Transaction.amount).toFixed(2)
-                                                                                            : (0).toFixed(2)
-                                                                                    })`}</td>
-                                                                            ) : null}
-                                                                        </small>
-                                                                    </Card.Text>
-                                                                    <Card.Text className="transaction-date d-md-none">
-                                                                        At: {new Date(Transaction.createdAt).toLocaleString()}
-                                                                    </Card.Text>
-                                                                </Col>
-                                                                <Col xs="auto" className="d-flex align-items-center">
-                                                                    <Card.Text className="me-3 mb-0 transaction-date d-none d-md-block">
-                                                                        At: {new Date(Transaction.createdAt).toLocaleString()}
-                                                                    </Card.Text>
-
-                                                                </Col>
-                                                            </Row>
-                                                        </Card.Body>
-                                                    </Card>
-                                                ))}
-
+                    {secLoading ? "" :
+                        <div className="card new-bg-dark">
+                            <Card.Header>
+                                <Card.Title className='text-white'>Staking Rewards</Card.Title>
+                            </Card.Header>
+                            <div className="card-body">
+                                {isLoading ? (
+                                    <div className="text-center my-5">
+                                        <Spinner animation="border" variant="primary" />
+                                        <h4 className="mt-3"> Loading...</h4>
                                     </div>
-                                    {UserTransactions.length === 0 ? (
-                                        <div>
+                                ) : (
+
+                                    <>
+                                        <div className="d-grid gap-4">
+                                            {UserTransactions &&
+                                                UserTransactions.filter(Transaction => !Transaction.isHidden && Transaction.txId === "staking amount")
+                                                    .map((Transaction, index) => (
+                                                        <Card
+                                                            key={index}
+                                                            className="transaction-card no-bg border-0 shadow-sm rounded-3 transition-all duration-300"
+                                                        >
+                                                            <Card.Body className="p-3">
+                                                                <Row className="align-items-center">
+
+                                                                    <Col>
+                                                                        <Card.Title as="h6" className="mb-1 text-white">
+                                                                            {Transaction.trxName}{' '}
+                                                                            <small className="transaction-status">({Transaction.status})</small>
+                                                                        </Card.Title>
+                                                                        <Card.Text className="mb-1 transaction-amount">
+                                                                            {Math.abs(Transaction.amount).toFixed(8)}{' '}
+                                                                            <small>
+                                                                                {Transaction.type === 'deposit' ? (
+                                                                                    <td className="text-success font-w600">{`($${Transaction.trxName === 'bitcoin'
+                                                                                        ? (Transaction.amount * liveBtc).toFixed(2)
+                                                                                        : Transaction.trxName === 'ethereum'
+                                                                                            ? (Transaction.amount * 2640).toFixed(2)
+                                                                                            : Transaction.trxName === 'tether'
+                                                                                                ? Transaction.amount.toFixed(2)
+                                                                                                : (0).toFixed(2)
+                                                                                        })`}</td>
+                                                                                ) : Transaction.type === 'withdraw' ? (
+                                                                                    <td className="text-danger font-w600"> {`($${Transaction.trxName === 'bitcoin'
+                                                                                        ? Math.abs((Transaction.amount * liveBtc)).toFixed(2)
+                                                                                        : Transaction.trxName === 'ethereum'
+                                                                                            ? Math.abs((Transaction.amount * 2640)).toFixed(2)
+                                                                                            : Transaction.trxName === 'tether'
+                                                                                                ? Math.abs(Transaction.amount).toFixed(2)
+                                                                                                : (0).toFixed(2)
+                                                                                        })`}</td>
+                                                                                ) : null}
+                                                                            </small>
+                                                                        </Card.Text>
+                                                                        <Card.Text className="transaction-date d-md-none">
+                                                                            At: {new Date(Transaction.createdAt).toLocaleString()}
+                                                                        </Card.Text>
+                                                                    </Col>
+                                                                    <Col xs="auto" className="d-flex align-items-center">
+                                                                        <Card.Text className="me-3 mb-0 transaction-date d-none d-md-block">
+                                                                            At: {new Date(Transaction.createdAt).toLocaleString()}
+                                                                        </Card.Text>
+
+                                                                    </Col>
+                                                                </Row>
+                                                            </Card.Body>
+                                                        </Card>
+                                                    ))}
+
+                                        </div>
+                                        {UserTransactions.length === 0 ? (
                                             <div>
-                                                <div className="flex min-h-[400px] items-center justify-center">
-                                                    <div className="mx-auto w-full text-center max-w-xs">
-                                                        <div className="mx-auto max-w-xs new">
-                                                            {/* <img
+                                                <div>
+                                                    <div className="flex min-h-[400px] items-center justify-center">
+                                                        <div className="mx-auto w-full text-center max-w-xs">
+                                                            <div className="mx-auto max-w-xs new">
+                                                                {/* <img
                                       className="block dark:hidden"
                                       src={searcH}
                                       alt="Placeholder image"
@@ -795,25 +817,25 @@ const Staking = () => {
                                       src={searcH}
                                       alt="Placeholder image"
                                     /> */}
-                                                        </div>
-                                                        <div className="mx-auto max-w-sm">
-                                                            <h4 className="font-heading text-xl font-medium leading-normal leading-normal text-muted-800 mb-1 mt-4 dark:text-white">
-                                                                No staking found
-                                                            </h4>
+                                                            </div>
+                                                            <div className="mx-auto max-w-sm">
+                                                                <h4 className="font-heading text-xl font-medium leading-normal leading-normal text-muted-800 mb-1 mt-4 dark:text-white">
+                                                                    No staking found
+                                                                </h4>
 
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
+                                                {/**/}
                                             </div>
-                                            {/**/}
-                                        </div>
-                                    ) : (
-                                        ""
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    </div>
+                                        ) : (
+                                            ""
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </div>}
                 </div>
             </div>
             {stakingModal && (
@@ -911,7 +933,7 @@ const Staking = () => {
                                                 </p>
                                             </div>
                                             <div className="MuiStack-root css-9npne8">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Rate
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -925,7 +947,7 @@ const Staking = () => {
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Min Value
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -933,7 +955,7 @@ const Staking = () => {
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Est. Interest
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -941,7 +963,7 @@ const Staking = () => {
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Total Amount
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -1015,7 +1037,7 @@ const Staking = () => {
                                                 </p>
                                             </div>
                                             <div className="MuiStack-root css-9npne8">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Rate
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -1029,7 +1051,7 @@ const Staking = () => {
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Min Value
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -1038,7 +1060,7 @@ const Staking = () => {
                                             </div>
 
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Est. Interest
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -1046,7 +1068,7 @@ const Staking = () => {
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Total Amount
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -1121,7 +1143,7 @@ const Staking = () => {
                                                 </p>
                                             </div>
                                             <div className="MuiStack-root css-9npne8">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Rate
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -1135,7 +1157,7 @@ const Staking = () => {
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Min Value
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -1144,7 +1166,7 @@ const Staking = () => {
                                             </div>
 
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Est. Interest
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
@@ -1152,7 +1174,7 @@ const Staking = () => {
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
-                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu">
+                                                <span className="MuiTypography-root MuiTypography-caption css-1canfvu text-white">
                                                     Total Amount
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">

@@ -18,7 +18,7 @@ const NavHader = () => {
     dispatch(navtoggle());
   };
   return (
-    <div className="nav-header">
+    <div className="nav-header new-bg-dark">
       <Link to="/dashboard" className="brand-logo">
         {/* <svg className="logo-abbr"
               xmlns="http://www.w3.org/2000/svg"					

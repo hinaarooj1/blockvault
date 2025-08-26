@@ -6,6 +6,34 @@
     box-sizing: border-box;
 }
 
+.new-bg-light {
+    background-color: #1c252e !important
+}
+
+.new-bg-dark {
+    background-color: #131a22 !important;
+}
+
+.new-theme-bg {
+    background-color: #7634dc !important;
+}
+.new-theme-color {
+color: #7634dc !important;
+}
+.no-bg{
+    background-color: transparent !important;
+}
+.naman  th,
+.naman  td{border: none !important; color: white !important;
+    background-color: transparent  !important;
+}
+.no-border{
+    border-left:none !important;
+    border-right:none !important;
+    border-bottom:none !important;
+    border-top:none !important;
+}
+
 .admin :after,
 .admin :before {
     --tw-content: "";

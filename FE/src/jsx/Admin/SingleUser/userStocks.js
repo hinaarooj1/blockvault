@@ -11,10 +11,286 @@ import {
     getCoinsApi,
     signleUsersApi,
     deleteUserStocksApi,
+    getStocksApi,
+    addNewStockApi,
+    deleteStockApi,
+    updateStockApi,
 } from "../../../Api/Service";
 import axios from "axios";
 import './userStocks.css'
 import AdminHeader from "../adminHeader";
+const CustomStocksModal = ({ show, onClose, stocks, onEdit }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  if (!show) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content" style={{position:'relative', zIndex:'1000', maxWidth: '800px', width: '90%'}}>
+        <div onClick={onClose} style={{position:'absolute',top:'10px',right:'10px', cursor:'pointer',color:'black'}}>X</div>
+        <h3>Manage Custom Stocks</h3>
+        
+        {stocks.length === 0 ? (
+          <p>No custom stocks available</p>
+        ) : (
+          <div className="table-responsive">
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stocks.map((stock) => (
+                  <tr key={stock._id}>
+                    <td>{stock.symbol}</td>
+                    <td>{stock.name}</td>
+                    <td>${stock.price}</td>
+                    <td>
+                      <button
+                        onClick={() => onEdit(stock)}
+                        className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        )}
+        
+        <div className="modal-actions" style={{justifyContent: 'flex-end', marginTop: '20px'}}>
+          <button 
+            type="button" 
+            onClick={onClose}
+            style={{backgroundColor:"gray"}}
+            className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+const EditStockModal = ({ show, onClose, stock, onUpdate, onDelete }) => {
+    const [stockData, setStockData] = useState({
+        symbol: stock?.symbol || '',
+        name: stock?.name || '',
+        price: stock?.price || ''
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    useEffect(() => {
+        if (stock) {
+            setStockData({
+                symbol: stock.symbol,
+                name: stock.name,
+                price: stock.price
+            });
+        }
+    }, [stock]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setStockData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleUpdate = async (e) => { 
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            await onUpdate(stock._id, stockData);
+            onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+            await onDelete(stock._id);
+            onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    if (!show || !stock) return null;
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content" style={{ position: 'relative', zIndex: '1000' }}>
+                <div onClick={onClose} style={{ position: 'absolute', top: '10px', right: '10px', cursor: 'pointer', color: 'black' }}>X</div>
+                <h3>Edit Custom Stock</h3>
+                <form onSubmit={handleUpdate}>
+                    <div className="form-group">
+                        <label>Stock Symbol</label>
+                        <input
+                            type="text"
+                            name="symbol"
+                            value={stockData.symbol}
+                            onChange={handleChange}
+                            required
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Stock Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={stockData.name}
+                            onChange={handleChange}
+                            required
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Price per Share ($)</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="price"
+                            value={stockData.price}
+                            onChange={handleChange}
+                            required
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="modal-actions">
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            style={{ backgroundColor: "red" }}
+                            className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+                        >
+                            {isDeleting ? 'Deleting...' : 'Delete Stock'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            style={{ backgroundColor: "gray" }}
+                            className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+                        >
+                            {isLoading ? 'Updating...' : 'Update Stock'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+const AddStockModal = ({ show, onClose, onAdd }) => {
+    const [stockData, setStockData] = useState({
+        symbol: '',
+        name: '',
+        price: ''
+    });
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setStockData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            await onAdd(stockData);
+            // setStockData({ symbol: '', name: '', price: '' });
+            // onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (!show) return null;
+
+    return (
+        <div className="modal-overlay"
+        >
+            <div className="modal-content" style={{ position: 'relative', zIndex: '1000' }}>
+                <div onClick={onClose} style={{ position: 'absolute', top: '10px', right: '10px', cursor: 'pointer', color: 'black' }}>X</div>
+                <h3>Add Custom Stock</h3>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label>Stock Symbol</label>
+                        <input
+                            type="text"
+                            name="symbol"
+                            value={stockData.symbol}
+                            onChange={handleChange}
+                            required
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Stocks Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={stockData.name}
+                            onChange={handleChange}
+                            required
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Price per Share ($)</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="price"
+                            value={stockData.price}
+                            onChange={handleChange}
+                            required
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="modal-actions">
+                        <button type="button" onClick={onClose} style={{ backgroundColor: "red" }} className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" disabled={isLoading} className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+                        >
+                            {isLoading ? 'Adding...' : 'Add Stock'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 const UserTransactions = () => {
     const [isLoading, setisLoading] = useState(true);
     const [UserTransactions, setUserTransactions] = useState([]);
@@ -23,8 +299,103 @@ const UserTransactions = () => {
     const [Active, setActive] = useState(false);
     const [liveStockValues, setLiveStockValues] = useState({});
     const [spValue, setspValue] = useState(true);
+    const [showAddStockModal, setShowAddStockModal] = useState(false);
+    const [customStocks, setCustomStocks] = useState([]);
+    const [combinedStocks, setCombinedStocks] = useState([]);
+    const [showCustomStocksModal, setShowCustomStocksModal] = useState(false);
+const [showEditStockModal, setShowEditStockModal] = useState(false);
+const [selectedCustomStock, setSelectedCustomStock] = useState(null);
+    useEffect(() => {
+        const fetchCustomStocks = async () => {
+            try {
+                const response = await getStocksApi();
+                if (response.success) {
+                    setCustomStocks(response.stocks);
+                }
+            } catch (error) {
+                console.error('Error fetching custom stocks:', error);
+            }
+        };
 
+        fetchCustomStocks();
+    }, []);
+    useEffect(() => {
+        // Format custom stocks to match predefined structure
+        const formattedCustomStocks = customStocks.map(stock => ({
+            symbol: stock.symbol,
+            name: stock.name,
+            custom: true
+        }));
 
+        // Combine with predefined stocks
+        const allStocks = [...stockData, ...formattedCustomStocks].sort((a, b) =>
+            a.name.localeCompare(b.name)
+        );
+
+        setCombinedStocks(allStocks);
+    }, [customStocks]);
+    const handleAddCustomStock = async (stockData) => {
+
+        try {
+            const response = await addNewStockApi(stockData);
+            if (response.success) {
+                toast.success('Stock added successfully');
+                // Update custom stocks list
+                setShowAddStockModal(false);
+                setCustomStocks(prev => [...prev, response.stock]);
+            } else {
+                toast.error(response.msg || 'Failed to add stock');
+            }
+        } catch (error) {
+            toast.error('Error adding stock');
+            console.error(error);
+        }
+    };
+    // 
+    // Add these state variables near the top of your UserTransactions component
+   
+
+    // Add these handler functions
+    const handleUpdateStock = async (stockId, updatedData) => {
+        try {
+            const response = await updateStockApi(stockId, updatedData);
+            if (response.success) {
+                toast.success('Stock updated successfully');
+                setCustomStocks(prev =>
+                    prev.map(stock =>
+                        stock._id === stockId ? { ...stock, ...updatedData } : stock
+                    )
+                );
+            } else {
+                toast.error(response.msg || 'Failed to update stock');
+            }
+        } catch (error) {
+            toast.error('Error updating stock');
+            console.error(error);
+        }
+    };
+
+    const handleDeleteStock = async (stockId) => {
+        try {
+            const response = await deleteStockApi(stockId);
+            if (response.success) {
+                toast.success('Stock deleted successfully');
+                setCustomStocks(prev => prev.filter(stock => stock._id !== stockId));
+            } else {
+                toast.error(response.msg || 'Failed to delete stock');
+            }
+        } catch (error) {
+            toast.error('Error deleting stock');
+            console.error(error);
+        }
+    };
+
+ const handleEditStock = (stock) => {
+  setSelectedCustomStock(stock);
+  setShowCustomStocksModal(false);
+  setShowEditStockModal(true);
+};
+    // 
     let toggleBar = () => {
         if (Active === true) {
             setActive(false);
@@ -299,42 +670,62 @@ const UserTransactions = () => {
 
     // Function to get stock price
     const getStockValue = (symbol) => {
-        setapiLoading(true)
+        setapiLoading(true);
+
+        // Check if it's a custom stock
+        const customStock = customStocks.find(stock => stock.symbol === symbol);
+        if (customStock) {
+            setStockValue(customStock.price);
+            setapiLoading(false);
+            return;
+        }
+
+        // Otherwise, fetch from API
         axios
             .get(
                 `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${apiKey}`
             )
             .then((response) => {
-                console.log('response: ', response);
                 const timeSeries = response.data['Time Series (5min)'];
                 if (timeSeries) {
-                    setapiLoading(false)
-                    // Get the latest stock price
+                    setapiLoading(false);
                     const latestTime = Object.keys(timeSeries)[0];
                     const latestData = timeSeries[latestTime]['1. open'];
                     setStockValue(latestData);
-                    console.log('latestData: ', latestData);
                 } else {
                     alert('Stock data not available');
                 }
             })
             .catch((error) => {
                 console.error('Error fetching stock data:', error);
+                setapiLoading(false);
             });
     };
 
     // Handle dropdown selection
     const handleStockChange = (event) => {
         const selectedSymbol = event.target.value;
+        console.log('selectedSymbol: ', selectedSymbol);
         setSelectedStock(selectedSymbol);
         getStockValue(selectedSymbol);
 
-        // Find the stock name based on the selected symbol
-        const stock = stockData.find(stock => stock.symbol === selectedSymbol);
-        if (stock) {
+        // First check in custom stocks
+        const customStock = customStocks.find(stock => stock.symbol === selectedSymbol);
+        if (customStock) {
             setStocks(prevStocks => ({
                 ...prevStocks,
-                stockName: stock.name
+                stockName: customStock.name
+            }));
+            return;
+        }
+
+        // If not found in custom stocks, check in predefined stocks
+        const predefinedStock = stockData.find(stock => stock.symbol === selectedSymbol);
+        console.log('predefinedStock: ', predefinedStock);
+        if (predefinedStock) {
+            setStocks(prevStocks => ({
+                ...prevStocks,
+                stockName: predefinedStock.name
             }));
         }
     };
@@ -353,6 +744,10 @@ const UserTransactions = () => {
             }));
         }
     }, [stocks.stockAmount, stockValue]);
+    const handleCloseEditModal = () => {
+  setShowEditStockModal(false);
+  setShowCustomStocksModal(true); // Return to the list modal
+};
     return (
         <>
 
@@ -402,6 +797,25 @@ const UserTransactions = () => {
                                                     </div>
                                                 </div>
 
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowAddStockModal(true)}
+                                                    className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+
+                                                    style={{ marginLeft: '10px' }}
+                                                >
+                                                    Add Custom Stock
+                                                </button>
+                                              <button
+  type="button"
+  onClick={() => setShowCustomStocksModal(true)}
+  className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-info-500 text-info-50 bg-info-500 dark:bg-info-500 dark:border-info-500 text-white hover:enabled:bg-info-400 dark:hover:enabled:bg-info-400 hover:enabled:shadow-lg hover:enabled:shadow-info-500/50 dark:hover:enabled:shadow-info-800/20 focus-visible:outline-info-400/70 focus-within:outline-info-400/70 focus-visible:bg-info-500 active:enabled:bg-info-500 dark:focus-visible:outline-info-400/70 dark:focus-within:outline-info-400/70 dark:focus-visible:bg-info-500 dark:active:enabled:bg-info-500 rounded-md mr-2"
+  style={{ marginLeft: '10px' }}
+>
+  Edit Custom Stocks
+</button>
+
+                                               
                                                 <div className="pt-6 asm">
                                                     <Table striped bordered hover>
                                                         <thead>
@@ -415,15 +829,15 @@ const UserTransactions = () => {
                                                         <tbody>
                                                             <tr>
                                                                 <td>
-
                                                                     <select className="this-sel" value={selectedStock} onChange={handleStockChange}>
                                                                         <option value="">Select a stock</option>
-                                                                        {stocksNew.map((stock, index) => (
+                                                                        {combinedStocks.map((stock, index) => (
                                                                             <option key={index} value={stock.symbol}>
-                                                                                {stock.name}
+                                                                                {stock.name} {stock.custom ? '(Custom)' : ''}
                                                                             </option>
                                                                         ))}
                                                                     </select>
+
                                                                 </td>
                                                                 <td className="text-center">
                                                                     <Form.Control
@@ -571,8 +985,26 @@ const UserTransactions = () => {
                     </div>
                 </div>
                 {/* Modal 1 */}
+                <AddStockModal
+                    show={showAddStockModal}
+                    onClose={() => setShowAddStockModal(false)}
+                    onAdd={handleAddCustomStock}
+                />
 
+<CustomStocksModal
+  show={showCustomStocksModal}
+  onClose={() => setShowCustomStocksModal(false)}
+  stocks={customStocks}
+  onEdit={handleEditStock}
+/>
 
+<EditStockModal
+  show={showEditStockModal}
+  onClose={handleCloseEditModal}
+  stock={selectedCustomStock}
+  onUpdate={handleUpdateStock}
+  onDelete={handleDeleteStock}
+/>
                 {/* Modal 1 */}
             </div>
         </>

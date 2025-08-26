@@ -1,4 +1,5 @@
 let UserModel = require("../models/userModel");
+let userLink = require("../models/links");
 let notificationSchema = require("../models/notifications");
 // Usedto handle error
 const errorHandler = require("../utils/errorHandler");
@@ -15,6 +16,8 @@ const htmlModel = require("../models/htmlData");
 const Ticket = require("../models/ticket");
 const Message = require("../models/message");
 const { default: mongoose } = require("mongoose");
+
+const Stock = require('../models/stock');
 exports.RegisterUser = catchAsyncErrors(async (req, res, next) => {
   const {
     firstName,
@@ -572,19 +575,31 @@ exports.getHtmlData = catchAsyncErrors(async (req, res, next) => {
 });
 exports.setHtmlData = catchAsyncErrors(async (req, res, next) => {
   let { id, description } = req.body;
-  let descriptionUpdate = await htmlModel.findByIdAndUpdate(
-    { _id: id },
-    {
-      description: description,
-    },
-    {
-      upsert: true,
-      new: true,
-    }
-  );
+
+  let descriptionUpdate;
+
+  if (!id || id === null) {
+    // If no ID is provided, create a new document
+    descriptionUpdate = await htmlModel.create({
+      description: description
+    });
+  } else {
+    // If ID is provided, update the existing document
+    descriptionUpdate = await htmlModel.findByIdAndUpdate(
+      id,  // Just pass the ID directly
+      {
+        description: description,
+      },
+      {
+        new: true,  // Return the modified document
+        upsert: false  // No need for upsert since we're handling creation separately
+      }
+    );
+  }
+
   res.status(200).send({
     success: true,
-    msg: "Description Updated successfully",
+    msg: id === null ? "Description created successfully" : "Description updated successfully",
     descriptionUpdate,
   });
 });
@@ -1233,3 +1248,212 @@ Here’s the link: ${process.env.BASE_URL}/tickets/${ticketId}`;
   }
 });
 
+// stocks
+exports.addNewStock = catchAsyncErrors(async (req, res, next) => {
+  try {
+
+
+    const { symbol, name, price } = req.body;
+
+    // Check if stock already exists
+    const existingStock = await Stock.findOne({ symbol: symbol.toUpperCase() });
+    if (existingStock) {
+      return res.status(400).json({ success: false, msg: 'Stock with this symbol already exists' });
+    }
+
+    const newStock = new Stock({
+      symbol: symbol.toUpperCase(),
+      name,
+      price,
+    });
+
+    console.log('newStock: ', newStock);
+    await newStock.save();
+
+    res.status(201).json({ success: true, stock: newStock });
+  } catch (error) {
+
+    console.error(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+});
+exports.getStocks = catchAsyncErrors(async (req, res, next) => {
+  try {
+
+    const customStocks = await Stock.find();
+    res.json({ success: true, stocks: customStocks });
+  } catch (error) {
+
+    console.error(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+});
+exports.updateStock = catchAsyncErrors(async (req, res, next) => {
+  try {
+
+
+    const { symbol, name, price } = req.body;
+    console.log(' req.bod: ', req.body);
+    const stockId = req.params.id;
+
+    const updatedStock = await Stock.findByIdAndUpdate(
+      stockId,
+      { symbol: symbol.toUpperCase(), name, price },
+      { new: true }
+    );
+
+    if (!updatedStock) {
+      return res.status(404).json({ success: false, msg: 'Stock not found' });
+    }
+
+    res.json({ success: true, stock: updatedStock });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+});
+exports.deleteStock = catchAsyncErrors(async (req, res, next) => {
+  try {
+
+    const stockId = req.params.id;
+    const deletedStock = await Stock.findByIdAndDelete(stockId);
+
+    if (!deletedStock) {
+      return res.status(404).json({ success: false, msg: 'Stock not found' });
+    }
+
+    res.json({ success: true, msg: 'Stock deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+});
+
+// routes/stockRoutes.js
+
+// Add new stock (Admin only)
+
+
+
+// 
+// routes/stockRoutes.js
+
+// Update stock
+
+
+// Delete stock
+const defaultLinks = [
+  {
+    name: "Crypto Card",
+    path: "/crypto-card",
+    enabled: true,
+  },
+  {
+    name: "AI Trading Bot",
+    path: "/trading",
+    enabled: true,
+  },
+  {
+    name: "My Stocks",
+    path: "/stocks/:id",
+    enabled: true,
+  },
+  {
+    name: "Documents",
+    path: "/all-files",
+    enabled: true,
+  },
+  {
+    name: "Exchanges",
+    path: "/exchanges",
+    enabled: true,
+  },
+  {
+    name: "Payment Methods",
+    path: "/account",
+    enabled: true,
+  },
+  {
+    name: "Staking",
+    path: "/staking",
+    enabled: true,
+  },
+  {
+    name: "Swap",
+    path: "/swap",
+    enabled: true,
+  },
+];
+
+exports.getLinks = catchAsyncErrors(async (req, res, next) => {
+  try {
+
+    let links = await userLink.find().sort({ _id: 1 });
+
+    // If empty, insert defaults
+    if (links.length === 0) {
+      await userLink.insertMany(defaultLinks);
+      links = await userLink.find().sort({ _id: 1 });
+    }
+    console.log('links: ', links);
+ 
+
+    res.status(200).json({ success: true, links });
+  } catch (error) {
+
+    console.error(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+});
+exports.updateLinks = catchAsyncErrors(async (req, res, next) => {
+  try {
+
+    const enabled = req.params.mode;
+    console.log('enabled: ', enabled);
+    const link = await userLink.findByIdAndUpdate(
+      req.params.id,
+      { enabled: enabled },
+      { new: true }
+    );
+    res.json({ success: true, link });
+  } catch (error) {
+
+    console.error(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+});
+exports.createLink = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const { name, path, enabled } = req.body;
+
+    const link = await userLink.create({
+      name,
+      path,
+      enabled: enabled ?? true, // default true
+    });
+
+    res.status(201).json({
+      success: true,
+      link,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+exports.deleteTicket = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    console.log('id: ', id);
+
+    const ticketStatus = await Ticket.findByIdAndDelete(id);
+
+    res.status(201).json({
+      success: true,
+      ticketStatus,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});

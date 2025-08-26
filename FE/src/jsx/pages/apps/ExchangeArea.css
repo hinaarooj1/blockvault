@@ -20,3 +20,13 @@
     margin-right: 13px;
     margin-left: 2px;
 }
+.profile-form 
+label{
+    color: rgb(182, 182, 182) !important; 
+}
+.profile-form input{
+    color: white !important;
+    background-color: #1c252e !important;
+    border: none !important;
+    
+}

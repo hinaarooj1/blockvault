@@ -29,7 +29,9 @@ const Dashboard = () => {
   const [completed, setCompleted] = useState();
   const [isDisable, setisDisable] = useState(false);
   const [Description, setDescription] = useState({});
+  const [Description2, setDescription2] = useState({});
   const [newDescription, setnewDescription] = useState("");
+  const [newDescription2, setnewDescription2] = useState("");
   const [allFiles, setallFiles] = useState([]);
   const [imgSrc, setImgSrc] = React.useState(undefined);
 
@@ -81,13 +83,18 @@ const Dashboard = () => {
   const handleQuillChange = (content, _, source, editor) => {
     setnewDescription(content);
   };
+  const handleQuillChange2 = (content, _, source, editor) => {
+    setnewDescription2(content);
+  };
   const getHtmlData = async () => {
     try {
-      const description = await getHtmlDataApi();
+      const description = await getHtmlDataApi(); 
 
       if (description.success) {
         setDescription(description.description[0]);
+        setDescription2(description.description[1]);
         setnewDescription(description.description[0].description);
+        setnewDescription2(description.description[1].description);
 
         return;
       } else {
@@ -114,14 +121,67 @@ const Dashboard = () => {
         editDesc = "";
       } else {
         editDesc = newDescription;
+      } 
+      let data
+      let id = Description?._id 
+      if (!id) {
+
+        data = { id: null, description: editDesc };
+      } else {
+        data = { id: Description._id, description: editDesc };
+
       }
-      let data = { id: Description._id, description: editDesc };
       const descriptionUpdate = await setHtmlDataApi(data);
       getHtmlData();
-
+ 
       if (descriptionUpdate.success) {
         toast.success(descriptionUpdate.msg);
+        
         setDescription(descriptionUpdate.description);
+
+        return;
+      } else {
+        toast.error("Something went wrong, please try again");
+      }
+    } catch (error) {
+      toast.error(error);
+    } finally {
+      setisDisable(false);
+    }
+  };
+  const setHtmlData2 = async () => {
+    try {
+      setisDisable(true);
+      let editDesc = newDescription2;
+      if (
+        editDesc === "<p><br></p>" ||
+        editDesc === "<h1><br></h1>" ||
+        editDesc === "<h2><br></h2>" ||
+        editDesc === "<h3><br></h3>" ||
+        editDesc === "<h4><br></h4>" ||
+        editDesc === "<h5><br></h5>" ||
+        editDesc === "<h6><br></h6>"
+      ) {
+        editDesc = "";
+      } else {
+        editDesc = newDescription2;
+      } 
+      let data
+      let id = Description2?._id 
+      if (!id) {
+
+        data = { id: null, description: editDesc };
+      } else {
+        data = { id: Description2._id, description: editDesc };
+
+      }
+      const descriptionUpdate = await setHtmlDataApi(data);
+      getHtmlData();
+ 
+      if (descriptionUpdate.success) {
+        toast.success(descriptionUpdate.msg);
+        
+        setDescription2(descriptionUpdate.description);
 
         return;
       } else {
@@ -424,7 +484,8 @@ const Dashboard = () => {
                 Add User
               </button> */}
               {/**/}
-              {/* <ReactQuill
+              <h2 className="note-head">Header Note:</h2>
+              <ReactQuill
                 className="htmlcode"
                 value={newDescription}
                 onChange={handleQuillChange}
@@ -461,7 +522,7 @@ const Dashboard = () => {
                     "Save"
                   )}
                 </button>
-              </div> */}
+              </div>
               {/*  */}
               <br />
               {newDescription === "" ||
@@ -474,14 +535,76 @@ const Dashboard = () => {
                 newDescription === "<h6><br></h6>" ? (
                 ""
               ) : (
-                <div className="dark">
+                <div className="dark-bgs dark">
                   <h3 className="mb-2 font-bold inveret">
                     This will the output for all users on their dashboard
-                    footer:
+                    header: <br/>
                   </h3>
                   <div
                     className="htmData"
                     dangerouslySetInnerHTML={{ __html: newDescription }}
+                  />
+                </div>
+              )}
+              <h2 className="note-head mt-4">Footer Note:</h2>
+              <ReactQuill
+                className="htmlcode"
+                value={newDescription2}
+                onChange={handleQuillChange2}
+                formats={format}
+                modules={{
+                  toolbar: [
+                    [{ link: "link" }],
+                    ["bold", "italic", "underline", "strike"],
+
+                    [{ header: 1 }, { header: 2 }],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ script: "sub" }, { script: "super" }],
+
+                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+                    [{ color: [] }, { background: [] }],
+
+                    ["clean"],
+                  ],
+                }}
+              />
+              <div className="text-center mt-2">
+                <button
+                  disabled={isDisable}
+                  onClick={setHtmlData2}
+                  data-v-71bb21a6
+                  className="is-button rounded bg-primary-500 dark:bg-primary-500 hover:enabled:bg-primary-400 dark:hover:enabled:bg-primary-400 text-white hover:enabled:shadow-lg hover:enabled:shadow-primary-500/50 dark:hover:enabled:shadow-primary-800/20 focus-visible:outline-primary-400/70 focus-within:outline-primary-400/70 focus-visible:bg-primary-500 active:enabled:bg-primary-500 dark:focus-visible:outline-primary-400 dark:focus-within:outline-primary-400 dark:focus-visible:bg-primary-500 dark:active:enabled:bg-primary-500 w-24"
+                >
+                  {isDisable ? (
+                    <div>
+                      <div className="nui-placeload animate-nui-placeload h-4 w-8 rounded mx-auto"></div>
+                    </div>
+                  ) : (
+                    "Save"
+                  )}
+                </button>
+              </div>
+              {/*  */}
+              <br />
+              {newDescription2 === "" ||
+                newDescription2 === "<p><br></p>" ||
+                newDescription2 === "<h1><br></h1>" ||
+                newDescription2 === "<h2><br></h2>" ||
+                newDescription2 === "<h3><br></h3>" ||
+                newDescription2 === "<h4><br></h4>" ||
+                newDescription2 === "<h5><br></h5>" ||
+                newDescription2 === "<h6><br></h6>" ? (
+                ""
+              ) : (
+                <div className="dark-bgs dark">
+                  <h3 className="mb-2 font-bold inveret">
+                    This will the output for all users on their dashboard
+                    footer:<br/>
+                  </h3>
+                  <div
+                    className="htmData"
+                    dangerouslySetInnerHTML={{ __html: newDescription2 }}
                   />
                 </div>
               )}

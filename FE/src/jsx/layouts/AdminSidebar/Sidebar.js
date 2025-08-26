@@ -242,7 +242,36 @@ const SideBar = (props) => {
                 </span>
               </NavLink>
             </li>
-            {/* {authUser().user.role === "admin" ? (
+            <li>
+              <NavLink
+                to="/admin/user/links"
+                className="router-link-active nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
+              >
+                <svg width="1rem" height="1rem" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+                  <title>Link</title>
+                  <g id="Page-1" stroke="none" strokeWidth={1} fill="none" fillRule="evenodd">
+                    <g id="Link">
+                      <rect id="Rectangle" fillRule="nonzero" x={0} y={0} width={24} height={24}>
+                      </rect>
+                      <path d="M14,16 L17,16 C19.2091,16 21,14.2091 21,12 L21,12 C21,9.79086 19.2091,8 17,8 L14,8" id="Path" stroke="#0C0310" strokeWidth={2} strokeLinecap="round">
+                      </path>
+                      <path d="M10,16 L7,16 C4.79086,16 3,14.2091 3,12 L3,12 C3,9.79086 4.79086,8 7,8 L10,8" id="Path" stroke="#0C0310" strokeWidth={2} strokeLinecap="round">
+                      </path>
+                      <line x1="7.5" y1={12} x2="16.5" y2={12} id="Path" stroke="#0C0310" strokeWidth={2} strokeLinecap="round">
+                      </line>
+                    </g>
+                  </g>
+                </svg>
+
+
+
+
+                <span className="whitespace-nowrap font-sans text-sm block">
+                  User Links Management
+                </span>
+              </NavLink>
+            </li>
+            {authUser().user.role === "admin" ? (
               <li>
                 <NavLink
                   to="/admin/subadmin"
@@ -272,7 +301,7 @@ const SideBar = (props) => {
               </li>
             ) : (
               ""
-            )} */}
+            )}
             {authUser().user.role === "admin" ? (
               <li>
                 <NavLink
@@ -307,7 +336,7 @@ const SideBar = (props) => {
             ) : (
               ""
             )}
-            {/* {authUser().user.role === "admin" ? (
+            {authUser().user.role === "admin" ? (
               <li>
                 <NavLink
                   to="/admin/add-subadmin"
@@ -340,7 +369,7 @@ const SideBar = (props) => {
               </li>
             ) : (
               ""
-            )} */}
+            )}
             {authUser().user.role === "subadmin" ? (
               <li>
                 <button onClick={onOpenModal}
@@ -593,7 +622,7 @@ const SideBar = (props) => {
             My Account
           </span>
         </div>
-      </div>
+      </div >
       <Modal classNames="this-modal" open={open} onClose={onCloseModal} center>
         <h2>Add user</h2>
         <div className="emaol-">

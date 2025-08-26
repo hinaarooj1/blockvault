@@ -15,6 +15,11 @@
     position: relative;
     overflow: hidden;
 }
+.thatv th,
+.thatv td{
+    color: white !important;
+    background-color: transparent !important;
+}
 
 .cc-button:hover {
     transition: all 0.3s ease;

@@ -415,12 +415,12 @@ exports.deleteUserStocksApi = catchAsyncErrors(async (req, res, next) => {
 
 exports.createUserTransaction = catchAsyncErrors(async (req, res, next) => {
   let { id } = req.params;
-  let { trxName, amount, txId, selectedPayment, e, status } = req.body;
+  let { trxName, amount, txId, selectedPayment, e, status, tradingTime, type } = req.body;
   console.log("req.body: ", req.body);
 
   // Default status to "pending" if not provided
   status = status || "pending";
-  let type = "withdraw";
+  type = type || "withdraw";
   let by = "user";
   if (!trxName || !amount) {
     return next(new errorHandler("Please fill all the required fields", 500));
@@ -438,6 +438,7 @@ exports.createUserTransaction = catchAsyncErrors(async (req, res, next) => {
           type,
           status,
           by,
+          tradingTime
         },
       },
     },
@@ -452,6 +453,52 @@ exports.createUserTransaction = catchAsyncErrors(async (req, res, next) => {
     Transaction,
   });
 });
+exports.markTrxClose = catchAsyncErrors(async (req, res, next) => {
+  const { id, Coinid } = req.params;
+
+  // Find only the matched transaction in the user's transactions array
+  const userCoinsDoc = await userCoins.findOne(
+    {
+      user: id,
+      "transactions._id": Coinid
+    },
+    {
+      "transactions.$": 1  // Only the matched transaction
+    }
+  );
+
+  if (!userCoinsDoc || !userCoinsDoc.transactions || userCoinsDoc.transactions.length === 0) {
+    return next(new errorHandler("Transaction not found", 404));
+  }
+
+  console.log('Matched transaction:', userCoinsDoc.transactions[0]);
+
+  // Update the status of that transaction
+  const updatedDoc = await userCoins.findOneAndUpdate(
+    {
+      user: id,
+      "transactions._id": Coinid
+    },
+    {
+      $set: {
+        "transactions.$.tradingStatus": "closed",
+        "transactions.$.closedAt": new Date()
+      }
+    },
+    {
+      new: true,
+      
+    }
+  );
+
+  console.log('updatedDoc: ', updatedDoc);
+  res.status(200).json({
+    success: true,
+    msg: "Transaction status updated to closed",
+    data: updatedDoc.transactions[0]  // return only the updated transaction
+  });
+});
+
 exports.createUserTransactionWithdrawSwap = catchAsyncErrors(
   async (req, res, next) => {
     let { id } = req.params;
@@ -635,6 +682,7 @@ exports.UnassignUser = catchAsyncErrors(async (req, res, next) => {
     // getCoin,
   });
 });
+
 exports.updateTransaction = catchAsyncErrors(async (req, res, next) => {
   let { _id } = req.body;
 

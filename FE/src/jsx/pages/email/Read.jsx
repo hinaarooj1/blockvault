@@ -275,7 +275,7 @@ const Read = () => {
                                           </p>
                                        </div>
                                     </div>
-                                    <div className="read-content-body">
+                                    <div className="read-content-body new-bg-light">
                                        <h5 className="mb-4">Hi,Ingredia,</h5>
                                        <p className="mb-2">
                                           <strong>Ingredia Nutrisha,</strong> A

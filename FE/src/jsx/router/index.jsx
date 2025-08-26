@@ -282,7 +282,7 @@ function MainLayout(){
       >  
           <Nav />
           <RightWalletBar />
-          <div className="content-body" >          
+          <div className="content-body new-bg-light" >          
             <div className="container-fluid" style={{ minHeight: window.screen.height - 45 }}>
               <Outlet />   
             </div>
@@ -299,7 +299,7 @@ function MainLayout2(){
     <>
       <div id="main-wrapper" className={`show ${sidebariconHover ? "iconhover-toggle": ""} ${ sideMenu ? "menu-toggle" : ""}`}>  
           <Nav />          
-          <div className="content-body" >          
+          <div className="content-body new-bg-light" >          
             <div className="container-fluid" style={{ minHeight: window.screen.height - 45 }}>
               <Outlet />   
             </div>

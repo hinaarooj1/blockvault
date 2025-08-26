@@ -105,7 +105,7 @@ let userSchema = new mongoose.Schema({
     },
     cnic: {
       type: String,
-    },
+    },      
   },
   verified: {
     type: Boolean,

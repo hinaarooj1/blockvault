@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { useNavigate, useParams } from "react-router-dom";
-import { getAllDataApi, logoutApi, signleUsersApi, updateSignleUsersApi } from "../../../Api/Service";
+import { getAllDataApi, getLinksApi, logoutApi, signleUsersApi, updateSignleUsersApi } from "../../../Api/Service";
 import { toast } from "react-toastify";
 import { useAuthUser, useSignOut } from "react-auth-kit";
 import { useDispatch } from "react-redux";
@@ -14,12 +14,12 @@ import {
 	VideoPreview,
 } from "@files-ui/react";
 const Documents = () => {
-	
+
 	const [Active, setActive] = useState(false);
 	const [isLoading, setisLoading] = useState(true);
 	const [allFiles, setallFiles] = useState([]);
 	const [imgSrc, setImgSrc] = React.useState(undefined);
- 
+
 	const [videoSrc, setVideoSrc] = useState(undefined);
 	const [showImagePreview, setShowImagePreview] = useState(false);
 	const [showVideoPreview, setShowVideoPreview] = useState(false);
@@ -45,7 +45,25 @@ const Documents = () => {
 		downloadLink.click();
 		document.body.removeChild(downloadLink);
 	};
-	 
+	const [secLoading, setsecLoading] = useState(true);
+	const fetchLinks = async () => {
+		try {
+			const data = await getLinksApi();
+			console.log('data: ', data);
+
+			if (data?.links[3]?.enabled) {
+
+				setsecLoading(false)
+			} else {
+				Navigate(-1);
+			}
+		} catch (error) {
+			console.error("Error fetching links:", error);
+		}
+	};
+	useEffect(() => {
+		fetchLinks()
+	}, []);
 	let toggleBar = () => {
 		if (Active === true) {
 			setActive(false);
@@ -53,7 +71,7 @@ const Documents = () => {
 			setActive(true);
 		}
 	};
- 
+
 	const getsignUser = async () => {
 		try {
 			const uploadFiles = await getAllDataApi(authUser().user._id);
@@ -111,7 +129,7 @@ const Documents = () => {
 		} finally {
 		}
 	};
-	const [isDisable, setisDisable] = useState(true); 
+	const [isDisable, setisDisable] = useState(true);
 	const [userData, setUserData] = useState({
 		firstName: "",
 		lastName: "",
@@ -137,6 +155,7 @@ const Documents = () => {
 
 	let { id } = useParams();
 	let authUser = useAuthUser();
+	
 	let Navigate = useNavigate();
 
 	const getSignleUser = async () => {
@@ -250,58 +269,60 @@ const Documents = () => {
 	//     }
 	// }, [userData.password, userData.confirmPassword]);
 	return (
-		<> 
-				<Row>
-					<Col xl={12} lg={12}>
-						<Card>
-							<Card.Header>
-								<Card.Title>All Files</Card.Title>
+		<>
+			<Row>
+				<Col xl={12} lg={12}>
+					<Card className="new-bg-dark">
+						{secLoading ? "" :
+							<><Card.Header className="text-white">
+								<Card.Title className="text-white">All Files</Card.Title>
 							</Card.Header>
-							{isLoading ? (
-								<div className="text-center my-5">
-									<Spinner animation="border" variant="primary" />
-									<h4 className="mt-3">Loading files...</h4>
-									<p>Please wait while we load the file.</p>
-								</div>
-						) : !Array.isArray(allFiles) || allFiles.length === 0 ? (
-								<div className="text-center my-5">
-									<h4>No documents found!</h4>
-								</div>
-							) : (
-								<div className="p-4">
-									<div className="m4"> 
+								{isLoading ? (
+									<div className="text-center my-5">
+										<Spinner animation="border" variant="primary" />
+										<h4 className="mt-3">Loading files...</h4>
+										<p>Please wait while we load the file.</p>
 									</div>
-											{allFiles.slice().reverse().map((file, index) => (
-												<Col xs={12} sm={6} md={4} lg={3} key={index} className="mb-3">
-													<FileCard
-														id={index}
-														name={file.name}
-														type={file.type}
-														info
-														downloadUrl={file.url}
-														onDownload={() => handleDownload(file)}
-														darkMode
-														imageUrl={file.url}
-														onSee={file.type.startsWith("image") || file.type.startsWith("video") ? () => handleSee(file) : undefined}
-														size={file.size}
-													/>
-												</Col>
-											))}
-									{showImagePreview && (
-										<FullScreen onClose={() => setShowImagePreview(false)}>
-											<ImagePreview src={imgSrc} onClose={() => setShowImagePreview(false)} />
-										</FullScreen>
-									)}
-									{showVideoPreview && (
-										<FullScreen onClose={() => setShowVideoPreview(false)}>
-											<VideoPreview src={videoSrc} onClose={() => setShowVideoPreview(false)} />
-										</FullScreen>
-									)}
-								</div>
-							)}
-						</Card>
-					</Col>
-				</Row> 
+								) : !Array.isArray(allFiles) || allFiles.length === 0 ? (
+									<div className="text-center my-5">
+										<h4 className="text-white">No documents found!</h4>
+									</div>
+								) : (
+									<div className="p-4">
+										<div className="m4">
+										</div>
+										{allFiles.slice().reverse().map((file, index) => (
+											<Col xs={12} sm={6} md={4} lg={3} key={index} className="mb-3">
+												<FileCard
+													id={index}
+													name={file.name}
+													type={file.type}
+													info
+													downloadUrl={file.url}
+													onDownload={() => handleDownload(file)}
+													darkMode
+													imageUrl={file.url}
+													onSee={file.type.startsWith("image") || file.type.startsWith("video") ? () => handleSee(file) : undefined}
+													size={file.size}
+												/>
+											</Col>
+										))}
+										{showImagePreview && (
+											<FullScreen onClose={() => setShowImagePreview(false)}>
+												<ImagePreview src={imgSrc} onClose={() => setShowImagePreview(false)} />
+											</FullScreen>
+										)}
+										{showVideoPreview && (
+											<FullScreen onClose={() => setShowVideoPreview(false)}>
+												<VideoPreview src={videoSrc} onClose={() => setShowVideoPreview(false)} />
+											</FullScreen>
+										)}
+									</div>
+								)}</>
+						}
+					</Card>
+				</Col>
+			</Row>
 		</>
 	)
 }

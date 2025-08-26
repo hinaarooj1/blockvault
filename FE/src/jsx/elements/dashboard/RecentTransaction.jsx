@@ -221,10 +221,10 @@ const RecentTransaction = () => {
     };
 
     return (
-        <div className="card transaction-table">
+        <div className="card new-bg-dark  transaction-table">
             <div className="card-header border-0 flex-wrap pb-0">
                 <div className="mb-2">
-                    <h4 className="card-title">Recent Transactions</h4>
+                    <h4 className="card-title text-white">Recent Transactions</h4>
                 </div>
 
             </div>
@@ -232,7 +232,7 @@ const RecentTransaction = () => {
                 <div className="tab-content" id="myTabContent1">
                     <div className="tab-pane fade show active" id="Week" role="tabpanel" aria-labelledby="Week-tab">
                         <div className="table-responsive">
-                            <table className="table table-responsive-md">
+                            <table className="table table-responsive-md naman">
                                 <thead>
                                     <tr>
                                         <th>#</th>

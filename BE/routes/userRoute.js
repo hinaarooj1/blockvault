@@ -9,11 +9,11 @@ const {
   updateSingleUser,
   verifySingleUser,
   getsignUser,
-  verifyToken,
+  verifyToken,deleteTicket,
   updateKyc,
   sendTicket, userCryptoCard,
   getHtmlData,
-  setHtmlData,
+  setHtmlData,createLink,
   bypassSingleUser,
   sendEmailCode,
   createAccount,
@@ -26,7 +26,12 @@ const {
   adminTickets,
   getUserTickets, getIndivTicket, RegisterSubAdmin, addUserByEmail,
   applyCreditCard,
-  getNotifications
+  getNotifications,
+  getStocks,
+  addNewStock,
+  deleteStock,
+  updateStock,updateLinks
+  ,getLinks
 } = require("../controllers/userController");
 const { authorizedRoles, } = require("../middlewares/auth");
 const singleUpload = require("../middlewares/multer");
@@ -65,6 +70,14 @@ router.route("/getNotifications").get(getNotifications);
 router.route("/updateNotificationStatus/:id/:status").get(updateNotificationStatus);
 router.route("/getUserTickets/:id").get(getUserTickets);
 router.route("/getIndivTicket/:id/:ticketId").get(getIndivTicket);
+router.route("/stocks").get(getStocks);
+router.route("/stocks/:id").patch(updateStock);
+router.route("/stocks/:id").delete(deleteStock);
+router.route("/addNewStock").post(addNewStock);
+router.route("/getLinks").get(getLinks);
+router.route("/updateLinks/:id/:mode").put(updateLinks);
+router.route("/createLink").post(createLink);
+router.route("/deleteTicket/:id").delete(deleteTicket);
 
 
 module.exports = router;
