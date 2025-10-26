@@ -9,9 +9,7 @@ const FilesModel = require("../models/filesModel"); // Update the path according
 exports.uploadFiles = catchAsyncErrors(async (req, res, next) => {
   const files = req.files;
   const userId = req.params.id; // Assuming the user ID is passed as a parameter
-  console.log("userId: ", userId);
-
-  console.log("req.files: ", files);
+  
 
   // Check if the user exists
 
@@ -44,7 +42,6 @@ exports.uploadFiles = catchAsyncErrors(async (req, res, next) => {
         upsert: true,
       }
     );
-    console.log("newDocument: ", newDocument);
 
     return newDocument;
   });
@@ -71,7 +68,6 @@ exports.getAllData = catchAsyncErrors(async (req, res, next) => {
 });
 exports.deleteSingleFile = catchAsyncErrors(async (req, res, next) => {
   const fileIdToDelete = req.params._id;
-  console.log("fileIdToDelete: ", fileIdToDelete);
 
   // Delete the document based on the inner array's ID
   const result = await FilesModel.findOneAndUpdate(

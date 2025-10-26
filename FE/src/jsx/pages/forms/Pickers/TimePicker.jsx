@@ -14,7 +14,6 @@ function TimePicker() {
     );
 }
 
-
 function CurrentTimePicker(){
     const [value2, onChange2] = useState('10:00');
     return(

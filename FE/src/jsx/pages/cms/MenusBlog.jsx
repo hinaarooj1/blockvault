@@ -16,7 +16,6 @@ const MenusBlog = () => {
   const [checkedInput, setCheckedInput] = useState(false);
   const [openFirst, setOpenFirst] = useState(true);
 
-
   function checkBox(ind) {
     
     setCheckedInput(false);

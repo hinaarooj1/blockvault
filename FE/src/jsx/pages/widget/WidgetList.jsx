@@ -4,7 +4,6 @@ import {Link} from 'react-router-dom';
 import {Row, Card, Col , Dropdown} from 'react-bootstrap';
 import { IMAGES } from '../../constant/theme';
 
-
 const todoList = [
     {title:"Get up", color:"success"},
     {title:"Stand up", color:"warning"},
@@ -49,7 +48,6 @@ const MediaProfile = ({name}) =>{
     </div>
   )
 }
-
 
 const paymentTable = [
     { ward:'12', name:"Mr. Bobby", drname:'Dr. Jackson', date:'01 Nov 2023', status:'Pending', color:'primary', bills:'$120'},

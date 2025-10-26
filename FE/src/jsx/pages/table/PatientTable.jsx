@@ -3,7 +3,6 @@ import {  Dropdown } from "react-bootstrap";
 
 import { Link } from "react-router-dom";
 
-
 const PatientTable = () => {
   const [data, setData] = useState(
     document.querySelectorAll("#patientTable_basic_table tbody tr")

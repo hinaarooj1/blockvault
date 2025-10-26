@@ -44,13 +44,9 @@ const testimonials = [
   }
 ];
 
-
 const Home = () => {
   const sliderRef = useRef(null);
   const [openAccordion, setOpenAccordion] = useState(null);
-
-
-
 
   const toggleAccordion = (index) => {
     setOpenAccordion(openAccordion === index ? null : index);
@@ -135,7 +131,6 @@ const Home = () => {
                                 <li id="menu-item-1274" className="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-home menu-item-1274"><Link to="/" aria-current="page">Why Blockchain</Link></li>
                                 <li id="menu-item-1275" className="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-home menu-item-1275"><Link to="/" aria-current="page">Features</Link></li>
 
-
                               </ul>                                      </div>
                             <div className="header-action">
                               <ul className="list-wrap">
@@ -199,7 +194,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-
 
       <main className="main-area">
         <div data-elementor-type="wp-page" data-elementor-id={144} className="elementor elementor-144">
@@ -538,7 +532,6 @@ const Home = () => {
                 </div>
               </div>
 
-
             </div>
           </div>
           <div className="elementor-element elementor-element-b8413d2 e-flex e-con-boxed e-con e-parent" data-id="b8413d2" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;gradient&quot;}" data-core-v316-plus="true">
@@ -711,7 +704,6 @@ const Home = () => {
                             </div>
                           </div>
                         </div>
-
 
                       </div>
                     </div>

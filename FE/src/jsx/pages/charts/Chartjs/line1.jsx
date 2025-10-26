@@ -3,7 +3,6 @@ import { Line } from 'react-chartjs-2';
 
 import 'chart.js/auto'
 
-
 class LineChart1 extends Component {
   render() {
     const data = {

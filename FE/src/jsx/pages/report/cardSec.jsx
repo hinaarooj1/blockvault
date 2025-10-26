@@ -19,10 +19,7 @@ const CryptoCard = () => {
     const [isUser, setIsUser] = useState({});
     const fetchLinks = async () => {
         try {
-            const data = await getLinksApi();
-            console.log('data: ', data);
-
-            if (data?.links[0]?.enabled) {
+            const data = await getLinksApi();if (data?.links[0]?.enabled) {
 
                 setsecLoading(false)
             } else {
@@ -37,15 +34,9 @@ const CryptoCard = () => {
         try {
             const formData = new FormData();
             formData.append("id", authUser().user._id);
-            console.log("authUser().user: ", authUser().user);
-            const userCoins = await getsignUserApi(formData);
-            console.log('userCoins: ', userCoins);
 
-            if (userCoins.success) {
-                setIsUser(userCoins.signleUser);
-                console.log('userCoins.signleUser: ', userCoins.signleUser);
-
-                setisLoading(false)
+            const userCoins = await getsignUserApi(formData);if (userCoins.success) {
+                setIsUser(userCoins.signleUser);setisLoading(false)
                 return;
             } else {
                 toast.dismiss();
@@ -73,9 +64,7 @@ const CryptoCard = () => {
     }, []);
     // withdraw
 
-
     const applyCard = async () => {
-
 
         try {
             setisDisable(true);
@@ -86,9 +75,6 @@ const CryptoCard = () => {
                 status: "applied",
 
             };
-
-
-
 
             const cardRequest = await applyCreditCardApi(body);
 
@@ -131,10 +117,7 @@ const CryptoCard = () => {
             // const response = await axios.get(
             //     "https://api.coindesk.com/v1/bpi/currentprice.json"
             // );
-            const userCoins = await getCoinsUserApi(id);
-            console.log('usdtntt: ', userCoins);
-
-            if (userCoins.success) {
+            const userCoins = await getCoinsUserApi(id);if (userCoins.success) {
                 // setUserTransactions;
 
                 setisLoading(false);
@@ -153,10 +136,6 @@ const CryptoCard = () => {
                     usdtValueAdded += usdtCount;
                 }
                 setusdtBalance(usdtValueAdded);
-
-
-
-
 
                 return;
             } else {

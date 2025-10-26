@@ -33,7 +33,6 @@ const soldTable = [
     {currency:'EURO', email:'demo@mail.com', name:'Nadia Edja',price:'73.25',status:'Unpaid', color:'danger'},
 ];
 
-
 const Exchange = () => {
     const chackboxFun = (type) => {
         setTimeout(()=>{               

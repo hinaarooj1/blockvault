@@ -124,7 +124,6 @@ const SubAdminUsers = () => {
     try {
       const signleUser = await signleUsersApi(id.id);
 
-
       if (signleUser.success) {
         setisLoadingSubadmin(false)
         setsubadminDetails(signleUser.signleUser)
@@ -149,7 +148,7 @@ const SubAdminUsers = () => {
       return;
     }
     if (authUser().user.role === "subadmin") {
-      Navigate("/dashboard");
+      Navigate("/admin/dashboard");
       return;
     }
     getSignleUser()
@@ -183,6 +182,33 @@ const SubAdminUsers = () => {
       setdisabledIn(false);
     }
   };
+
+  const [isAssignUser, setisAssignUser] = useState(false);
+  const getActiveSignleUser = async () => {
+    try {
+      const signleUser = await signleUsersApi(authUser().user._id);
+
+      if (signleUser.success) {
+        if (signleUser.signleUser.adminPermissions?.isSubManagement === false && signleUser.signleUser.role === "admin") {
+          Navigate("/admin/dashboard")
+
+        }
+        setisAssignUser(signleUser.signleUser?.adminPermissions?.isAddUsersToSubAdmin)
+
+      } else {
+        toast.dismiss();
+        toast.error(signleUser.msg);
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error);
+    } finally {
+    }
+  };
+  useEffect(() => {
+
+    getActiveSignleUser()
+  }, []);
   return (
     <div className="admin">
       <div>
@@ -308,16 +334,16 @@ const SubAdminUsers = () => {
                         {isLoadingSubadmin ? "" :
                           <>
                             {subadminDetails === null || subadminDetails === undefined ? "" :
-                              <Link style={{color:"#8b5cf6"}} to={`/admin/users/${id.id}/general`} className="mb-3 bolda">
+                              <Link style={{ color: "#8b5cf6" }} to={`/admin/user/${id.id}/general`} className="mb-3 bolda">
                                 You are managing users assigned to {subadminDetails.firstName + " " + subadminDetails.lastName}
-                                <br/>
+                                <br />
                                 Sub Admin Email: {subadminDetails.email}
                               </Link>
                             }
-                            <br/>
+                            <br />
                           </>
                         }
-                        <br/>
+                        <br />
                         <div className="ltablet:grid-cols-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                           {Users.map((user, index) => (
                             <div
@@ -392,7 +418,7 @@ const SubAdminUsers = () => {
                                 <div className="flex items-center mt-5">
                                   <Link
                                     data-v-71bb21a6
-                                    to={`/admin/users/${user._id}/general`}
+                                    to={`/admin/user/${user._id}/general`}
                                     className="is-button rounded is-button-default w-full"
                                     disabled="false"
                                   >
@@ -418,7 +444,7 @@ const SubAdminUsers = () => {
                                     <span>Manage User</span>
                                   </Link>
                                 </div>
-                             
+
                                 <div
                                   className="flex  items-center mt-2"
                                 >
@@ -459,13 +485,13 @@ const SubAdminUsers = () => {
                                     <span className="ms-1">Contact  User</span>
                                   </Link>
                                 </div>
-                                {authUser().user.role === "admin" ? (
+                                {authUser().user.role === "admin" &&isAssignUser|| authUser().user.role === "superadmin" ? (
                                   <div
                                     onClick={() => onOpenModal(user)}
                                     className="flex  items-center mt-2"
                                   >
                                     <button className="is-button pointer flex align-center justify p-2 cursor-pointer bg-danger-400a rounded is-button-default w-full">
-                                     
+
                                       <span>Unassign User</span>
                                     </button>
                                   </div>
@@ -532,7 +558,7 @@ const SubAdminUsers = () => {
                                 <div className="flex items-center mt-5">
                                   <Link
                                     data-v-71bb21a6
-                                    to={`/admin/users/${user._id}/general`}
+                                    to={`/admin/user/${user._id}/general`}
                                     className="is-button rounded is-button-default w-full"
                                     disabled="false"
                                   >

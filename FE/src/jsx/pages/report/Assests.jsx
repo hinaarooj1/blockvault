@@ -6,7 +6,7 @@ import EthLogo from "../../../assets/images/img/eth.svg"
 import UsdtLogo from "../../../assets/images/img/usdt-logo.svg"
 import { toast } from 'react-toastify';
 import { useAuthUser } from 'react-auth-kit';
-import { createUserTransactionApi, getCoinsUserApi, getsignUserApi, updateNewCoinAddressApi } from '../../../Api/Service';
+import { createUserTransactionApi, getCoinsUserApi, getRestrictionsApi, getsignUserApi, patchCoinsApi, sendEmailCodeApi, updateNewCoinAddressApi } from '../../../Api/Service';
 import axios from 'axios';
 import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
 import './style.css'
@@ -77,21 +77,51 @@ const Orders = () => {
             setActive(true);
         }
     };
-    const [coinAddress, setcoinAddress] = useState({
-        btcAddress: "",
-        ehtAddress: "",
-        usdtAddress: "",
-    });
 
-    const [newCoinAddress, setnewCoinAddress] = useState({
-        coinSymbol: "",  // Currently selected coin symbol
-        address: {},     // Object to store addresses for each coin
-    });
+    const patchCoins = async () => {
+        try {
+            const userCoins = await patchCoinsApi(authUser().user._id);
+
+            if (userCoins.success) {
+
+            } else {
+                toast.dismiss();
+                toast.error(userCoins.msg);
+            }
+        } catch (error) {
+            toast.dismiss();
+            toast.error(error);
+        } finally {
+        }
+    };
+
     const [liveBtc, setliveBtc] = useState(null);
 
     const authUser = useAuthUser();
     const Navigate = useNavigate();
     const [isUser, setIsUser] = useState({});
+    const [isUserRestriction, setIsUserRestriction] = useState(false);
+    const getUserRestrcition = async () => {
+        try {
+            const data = await getRestrictionsApi();
+
+            if (data.success) {
+                setIsUserRestriction(data.data.withdrawal2Fa);
+                return;
+            } else {
+                toast.dismiss();
+                toast.error(data.msg);
+            }
+        } catch (error) {
+            toast.dismiss();
+            toast.error(error);
+        } finally {
+        }
+    };
+    useEffect(() => {
+
+        getUserRestrcition()
+    }, []);
     const getsignUser = async () => {
         try {
             const formData = new FormData();
@@ -235,12 +265,10 @@ const Orders = () => {
         }
     };
     const getTransactionsForCoin = (coinSymbol, transactions) => {
-        console.log('coinSymbol: ', coinSymbol);
         // Filter transactions for the specific coin symbol
         const coinTransactions = transactions.filter((transaction) =>
             transaction.trxName.includes(coinSymbol)
         );
-        console.log("coinTransactionsas", coinTransactions);
         // Filter completed transactions
         const completedTransactions = coinTransactions.filter((transaction) =>
             transaction.status.includes("completed")
@@ -248,8 +276,7 @@ const Orders = () => {
 
         // Calculate total balance (assuming each transaction has a 'value' property)
         const totalBalance = completedTransactions.reduce((acc, transaction) => {
-            console.log('transactionsa: ', transaction);
-            console.log('acc: ', acc);
+
             return acc + transaction.amount; // Adjust according to your transaction structure
         }, 0);
 
@@ -260,7 +287,6 @@ const Orders = () => {
     // Function to handle selection change in the dropdown menu
     const handlePaymentSelection = (event) => {
         const selectedValue = event.target.value;
-        console.log("selectedValue: ", selectedValue);
         if (selectedValue === "Select a Payment Method") {
             setSelectedPayment(null); // Set selected payment to null if the first option is selected
         } else {
@@ -321,6 +347,7 @@ const Orders = () => {
         getsignUser();
         if (authUser().user.role === "user") {
             getCoins(authUser().user);
+            patchCoins()
             return;
         } else if (authUser().user.role === "admin") {
             Navigate("/admin/dashboard");
@@ -329,6 +356,8 @@ const Orders = () => {
     }, []);
     // withdraw
     const [modal3, setModal3] = useState(false);
+    const [otpModal, setotpModal] = useState(false);
+
     const [depositName, setdepositName] = useState("");
 
     const [transactionDetail, settransactionDetail] = useState({
@@ -383,7 +412,6 @@ const Orders = () => {
         } else {
             depositBalance = 0
         }
-        console.log('depositBalance: ', depositBalance);
 
         // Allow only up to 9 digits
         const sanitizedValue = value.replace(/[^0-9.]/g, "").slice(0, 9);
@@ -408,13 +436,11 @@ const Orders = () => {
     let NewCoinDepositMinus = (coin) => {
 
         const totalBalance = getTransactionsForCoin(coin.coinName, userCoins.getCoin.transactions);
-        console.log('totalBalance: ', totalBalance);
         setNewValue(totalBalance.toFixed(8)); // Store the total balance directly
         setnewCoin(coin)
         setdepositName(coin.coinName.toLowerCase());
         setModal3(true);
     };
-
 
     let tetherDepositMinus = () => {
         setdepositName("tether");
@@ -441,80 +467,9 @@ const Orders = () => {
             txId: "",
         });
         setModal3(false);
+        setotpModal(false);
         setConfirmationPopup(false);
     };
-
-    // const postUserTransaction = async (e) => {
-    //   console.log("Value of e:", e);
-
-    //   try {
-    //     let id = authUser().user._id;
-    //     setisDisable(true);
-
-    //     if (
-    //       parseFloat(transactionDetail.amountMinus) <= 0 ||
-    //       transactionDetail.amountMinus.trim() === "00" ||
-    //       transactionDetail.amountMinus.trim() === "0.000"
-    //     ) {
-    //       toast.dismiss();
-    //       toast.error(
-    //         "Transaction amount must be a positive value and cannot be equal to zero"
-    //       );
-    //       return;
-    //     }
-    //     let body;
-    //     if (e == "crypto") {
-    //       body = {
-    //         trxName: depositName,
-    //         amount: -transactionDetail.amountMinus,
-    //         txId: transactionDetailId.txId,
-    //         e: e,
-    //       };
-    //       if (!body.trxName || !body.amount || !body.txId) {
-    //         console.log("body.amount: ", body.amount);
-    //         console.log("body.trxName: ", body.trxName);
-    //         toast.dismiss();
-    //         toast.error("Fill all the required fields");
-    //         return;
-    //       }
-    //     } else if (e == "bank") {
-    //       body = {
-    //         trxName: depositName,
-    //         amount: -transactionDetail.amountMinus,
-    //         selectedPayment: selectedPayment,
-    //         e: e,
-    //       };
-    //       if (!body.trxName || !body.amount) {
-    //         toast.dismiss();
-    //         toast.error("Fill all the required fields");
-    //         return;
-    //       }
-    //       if (selectedPayment === null) {
-    //         toast.dismiss();
-    //         toast.error("Please select a Payment Method");
-    //         return;
-    //       }
-    //     }
-
-    //     const newTransaction = await createUserTransactionApi(id, body);
-
-    //     if (newTransaction.success) {
-    //       setSelectedPayment(null);
-    //       toast.dismiss();
-    //       toast.success(newTransaction.msg);
-
-    //       closeDeposit();
-    //     } else {
-    //       toast.dismiss();
-    //       toast.error(newTransaction.msg);
-    //     }
-    //   } catch (error) {
-    //     toast.dismiss();
-    //     toast.error(error);
-    //   } finally {
-    //     setisDisable(false);
-    //   }
-    // };
 
     const [activeBank, setactiveBank] = useState(false);
     let activeCrypto = () => {
@@ -524,8 +479,7 @@ const Orders = () => {
         setactiveBank(true);
     };
     //
-    const postUserTransaction = async (e) => {
-        console.log("Value of e:", e);
+    const postUserTransaction = async (e, isSendOtp) => {
 
         let id = authUser().user._id;
 
@@ -547,10 +501,11 @@ const Orders = () => {
                 amount: -transactionDetail.amountMinus,
                 txId: transactionDetailId.txId,
                 e: e,
+                // This will send for notification
+                notification: true
             };
             if (!body.trxName || !body.amount || !body.txId) {
-                console.log("body.amount: ", body.amount);
-                console.log("body.trxName: ", body.trxName);
+
                 toast.dismiss();
                 toast.error("Fill all the required fields");
                 return;
@@ -558,30 +513,45 @@ const Orders = () => {
             try {
                 let id = authUser().user._id;
                 setisDisable(true);
-                const newTransaction = await createUserTransactionApi(id, body);
+                if (isUserRestriction === true && isSendOtp) {
+                    sendEmail()
+                    return;
 
-                if (newTransaction.success) {
-                    setSelectedPayment(null);
-                    toast.dismiss();
-                    toast.success(newTransaction.msg);
-                    closeDeposit();
                 } else {
-                    toast.dismiss();
-                    toast.error(newTransaction.msg);
+                    const newTransaction = await createUserTransactionApi(id, body);
+
+                    if (newTransaction.success) {
+
+                        getUserRestrcition()
+                        setSelectedPayment(null);
+                        toast.dismiss();
+                        setisDisable(false)
+                        toast.success(newTransaction.msg);
+                        closeDeposit();
+                    } else {
+                        closeDeposit();
+                        getUserRestrcition()
+                        setisDisable(false)
+                        toast.dismiss();
+                        toast.error(newTransaction.msg);
+                    }
                 }
+
             } catch (error) {
-                toast.dismiss();
+                closeDeposit();
+                getUserRestrcition()
+                toast.dismiss(); setisDisable(false)
                 toast.error(error);
             } finally {
-                setisDisable(false);
+                // setisDisable(false);
             }
         } else if (e == "bank") {
-            console.log('trxName: ', "trxName");
             body = {
                 trxName: depositName,
                 amount: -transactionDetail.amountMinus,
                 selectedPayment: selectedPayment,
                 e: e,
+                notification: true
             };
             if (!body.trxName || !body.amount) {
                 toast.dismiss();
@@ -597,114 +567,162 @@ const Orders = () => {
 
                 setisDisable(true);
                 let id = authUser().user._id;
+                if (isUserRestriction === true && isSendOtp) {
 
-                const newTransaction = await createUserTransactionApi(id, body);
-
-                if (newTransaction.success) {
-                    setSelectedPayment(null);
-                    toast.dismiss();
-                    toast.success(newTransaction.msg);
-                    closeDeposit();
-                    setConfirmationPopup(false);
-
-                    setModal3(false);
+                    sendEmail()
+                    return;
                 } else {
-                    toast.dismiss();
-                    toast.error(newTransaction.msg);
+
+                    const newTransaction = await createUserTransactionApi(id, body);
+
+                    if (newTransaction.success) {
+
+                        getUserRestrcition()
+                        setSelectedPayment(null);
+                        toast.dismiss();
+                        setisDisable(false)
+                        toast.success(newTransaction.msg);
+                        closeDeposit();
+                        setConfirmationPopup(false);
+
+                        setModal3(false);
+                    } else {
+                        closeDeposit();
+                        getUserRestrcition()
+                        setisDisable(false)
+                        toast.dismiss();
+                        toast.error(newTransaction.msg);
+                    }
                 }
             } catch (error) {
+                closeDeposit();
                 toast.dismiss();
+                setisDisable(false)
+
+                getUserRestrcition()
                 toast.error(error);
             } finally {
-                setisDisable(false);
+                // setisDisable(false);
             }
         }
 
         // Trigger the confirmation popup instead of API call
     };
+    const verifyOtp = (e) => {
+        setisDisable(true);
 
-    const confirmTransaction = async (e, body) => {
-        console.log("body: ", body);
+        if (Number(randomCode) === Number(otp)) {
+            // ✅ OTP matched logic here
+
+            postUserTransaction(e, false)
+            return;
+        } else {
+            setTimeout(() => {
+                setIsError({
+                    show: true,
+                    type: "The OTP you entered is incorrect. Please try again."
+                });
+                setisDisable(false);
+            }, 2000);
+        }
+    };
+
+    // Otp//////////////////////////
+
+    const [isError, setIsError] = useState({
+        show: false,
+        type: ""
+    });
+    const [randomCode, setRandomCode] = useState(null);
+    const [isDisable2, setisDisable2] = useState(false);
+    const [otp, setOtp] = useState('');
+    const [isEmail, setisEmail] = useState(false);
+    const [isCode, setisCode] = useState(false);
+    function generateRandomCode() {
+        const min = 100000;
+        const max = 999999;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    let sendEmail = async () => {
+        setisDisable(true)
+
+        const newCode = generateRandomCode();
+
         try {
-            setisDisable(true);
-            let body;
-            if (e == "crypto") {
-                body = {
-                    trxName: depositName,
-                    amount: -transactionDetail.amountMinus,
-                    txId: transactionDetailId.txId,
-                    e: e,
-                };
-                if (!body.trxName || !body.amount || !body.txId) {
-                    console.log("body.amount: ", body.amount);
-                    console.log("body.trxName: ", body.trxName);
-                    toast.dismiss();
-                    toast.error("Fill all the required fields");
-                    return;
-                }
-            } else if (e == "bank") {
-                body = {
-                    trxName: depositName,
-                    amount: -transactionDetail.amountMinus,
-                    selectedPayment: selectedPayment,
-                    e: e,
-                };
-                if (!body.trxName || !body.amount) {
-                    toast.dismiss();
-                    toast.error("Fill all the required fields");
-                    return;
-                }
-                if (selectedPayment === null) {
-                    toast.dismiss();
-                    toast.error("Please select a Payment Method");
-                    return;
-                }
-            }
             let id = authUser().user._id;
+            let email = authUser().user.email;
+            let username = authUser().user.firstName;
+            let body = { email, id, code: newCode, username };
 
-            const newTransaction = await createUserTransactionApi(id, body);
-
-            if (newTransaction.success) {
-                setSelectedPayment(null);
+            // setisDisable(true);
+            const sendEmail = await sendEmailCodeApi(body);
+            if (sendEmail.success) {
                 toast.dismiss();
-                toast.success(newTransaction.msg);
-                closeDeposit();
-                setConfirmationPopup(false);
+                setModal3(false)
+                setotpModal(true)
+                setRandomCode(newCode);
+                toast.success(sendEmail.msg);
+                setisCode(true);
+                setisEmail(false);
+
             } else {
                 toast.dismiss();
-                toast.error(newTransaction.msg);
+                toast.error(sendEmail.msg);
             }
         } catch (error) {
             toast.dismiss();
-            toast.error(error);
+            toast.error(error?.data?.msg || error?.message || "Something went wrong");
         } finally {
             setisDisable(false);
         }
     };
+    const [counter, setCounter] = useState(0);
+    const [counterDisable, setCounterDisable] = useState(false);
+    let reSend = async () => {
+        const newCode = generateRandomCode();
 
-    const chackboxFun = (type) => {
-        setTimeout(() => {
-            const chackbox = document.querySelectorAll(".order-table input");
-            const motherChackBox = document.querySelector(".order-table-head input");
-            for (let i = 0; i < chackbox.length; i++) {
-                const element = chackbox[i];
-                if (type === "all") {
-                    if (motherChackBox.checked) {
-                        element.checked = true;
-                    } else {
-                        element.checked = false;
-                    }
-                } else {
-                    if (!element.checked) {
-                        motherChackBox.checked = false;
-                        break;
-                    } else {
-                        motherChackBox.checked = true;
-                    }
-                }
+        try {
+            let id = authUser().user._id;
+            let email = authUser().user.email;
+            let username = authUser().user.firstName;
+            let body = { email, id, code: newCode, username };
+
+            setisDisable2(true);
+
+            const sendEmail = await sendEmailCodeApi(body);
+            if (sendEmail.success) {
+                setCounter(60);
+                setRandomCode(newCode);
+                setCounterDisable(true)
+                toast.dismiss();
+            } else {
+                setisDisable2(false);
+                toast.dismiss();
+                toast.error(sendEmail.msg);
             }
-        }, 100)
+        } catch (error) {
+            toast.dismiss();
+            toast.error(error?.data?.msg || error?.message || "Something went wrong");
+        } finally {
+            setisDisable2(false);
+        }
     };
+
+    useEffect(() => {
+        if (counter === 0) return; // stop if counter is 0
+        const interval = setInterval(() => {
+            setCounter((prev) => {
+                if (prev <= 1) {
+                    setCounterDisable(false); // enable button when finished
+                    clearInterval(interval);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [counter]);
 
     return (
         <>
@@ -725,7 +743,6 @@ const Orders = () => {
                                 <div className="text-center my-5">
                                     <h4> No Assets found!</h4>
                                 </div>) : (
-
 
                                 <div className="table-responsive thatv">
                                     <table className="table tbleas tickettable display mb-4 no-footer" id="example6">
@@ -1137,8 +1154,6 @@ const Orders = () => {
                                                 })
                                             }
 
-
-
                                         </tbody>
                                     </table>
                                 </div>
@@ -1527,20 +1542,106 @@ const Orders = () => {
                         </Button>
                         {activeBank ? (
 
-
                             <Button
-                                onClick={() => postUserTransaction("bank")}
+                                onClick={() => postUserTransaction("bank", true)}
                                 disabled={isDisable} variant="primary">Create</Button>
                         ) : (
 
                             <Button
-                                onClick={() => postUserTransaction("crypto")}
+                                onClick={() => postUserTransaction("crypto", true)}
                                 disabled={isDisable} variant="primary">Create</Button>
 
                         )}
                     </Modal.Footer>
                 </Modal>
             }
+            {otpModal && (
+                <Modal className="fade modal89"
+                    show={otpModal}
+                    onHide={closeDeposit}
+                    centered
+                >
+                    <Modal.Header className="d-block">
+                        <div className="d-flex justify-content-between align-items-center w-100">
+                            <Modal.Title>Two-Factor Authentication</Modal.Title>
+                            <Button
+                                variant=""
+                                onClick={closeDeposit}
+                                className="btn-close"
+                            />
+                        </div>
+                    </Modal.Header>
+
+                    <Modal.Body>
+                        {/* Professional instruction */}
+                        <h6 className="font-heading text-muted-400 text-sm mb-3">
+                            For your security, we’ve sent a <strong>6-digit verification code </strong>
+                            to your registered email address.
+                            Please enter the code below to continue with your withdrawal.
+                        </h6>
+
+                        {/* OTP Input */}
+                        <div className="mb-3">
+                            <input
+                                type="text"
+                                maxLength={6}
+                                className="form-control text-center fw-semibold fs-5"
+                                placeholder="Enter 6-digit OTP"
+                                value={otp}
+                                onChange={(e) => {
+                                    setOtp(e.target.value.replace(/\D/g, "")); // only digits
+                                    setIsError({ show: false, type: "" });     // clear error on change
+                                }}
+                            />
+                            {isError.show && (
+                                <small className="text-danger d-block mt-1 fw-semibold">
+                                    {isError.type}
+                                </small>
+                            )}
+                        </div>
+
+                        {/* Resend Button */}
+                        <div className="text-center">
+                            <Button
+                                variant="outline-primary"
+                                size="sm"
+                                disabled={isDisable2 || counterDisable}
+                                onClick={reSend}
+                            >
+                                {counterDisable ? `Resend in ${counter}s` : "Resend OTP"}
+                            </Button>
+                        </div>
+
+                        <DropdownDivider />
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        <Button
+                            onClick={closeDeposit}
+                            variant="danger light"
+                        >
+                            Cancel
+                        </Button>
+
+                        {activeBank ? (
+
+                            <Button
+                                onClick={() => verifyOtp("bank")}
+                                disabled={isDisable || otp.length !== 6}
+
+                                variant="primary">Verify & Withdraw</Button>
+                        ) : (
+
+                            <Button
+                                onClick={() => verifyOtp("crypto")}
+                                disabled={isDisable || otp.length !== 6}
+                                variant="primary">Verify & Withdraw</Button>
+
+                        )}
+
+                    </Modal.Footer>
+                </Modal>
+            )}
 
         </>
 

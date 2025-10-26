@@ -1,6 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
 
-
 export const ThemeContext = createContext();
 
 const ThemeContextProvider = (props) => {
@@ -170,8 +169,6 @@ const ThemeContextProvider = (props) => {
         name.value === "boxed" &&
             changeSideBarStyle({ value: "overlay", label: "Overlay" });
     };
-
-
 
     useEffect(() => {
         const body = document.querySelector("body");

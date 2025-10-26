@@ -3,7 +3,6 @@ import { Link } from "react-scroll";
 import Highlight from 'react-highlight';
 import { Row, Col, Card, Accordion, Tab, Nav } from "react-bootstrap";
 
-
 const UiAccordion = () => {
 	const defaultAccordion = [
       {

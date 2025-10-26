@@ -123,18 +123,13 @@ const RightWalletBar = () => {
     let authUser = useAuthUser();
     const [Admin, setAdmin] = useState("");
 
-
-
     const getCoins = async (data, isUserd) => {
         let id = data._id;
         try {
             const userCoins = await getCoinsUserApi(id);
 
             if (userCoins.success) {
-                setUserData(userCoins.getCoin);
-                console.log('userCoins.getCoin: ', userCoins.getCoin);
-
-                setUserTransactions(
+                setUserData(userCoins.getCoin);setUserTransactions(
                     userCoins.getCoin.transactions.reverse().slice(0, 5)
                 );
                 setisLoading(false);
@@ -179,7 +174,6 @@ const RightWalletBar = () => {
                 const usdcBalance = calculateBalance("usd coin", 0.99); // Lowercased "USD Coin"
                 const trxBalance = calculateBalance("tron", 0.1531); // Lowercased "Tron"
 
-
                 const conversionRate = 0.92; // Conversion rate from USD to EUR
 
                 const totalBalanceInUSD = (
@@ -199,9 +193,8 @@ const RightWalletBar = () => {
                     trxBalance
                 ).toFixed(2);
 
-                // Convert to EUR if user currency is EUR
-                console.log('isUser.currency: ', isUserd);
-                const totalBalance = isUserd.currency === "EUR"
+                // Convert to EUR if user currency is EURconst totalBalance = isUserd.currency === "EUR"
+                    const totalBalance = isUserd.currency === "EUR"
                     ? (totalBalanceInUSD * conversionRate).toFixed(2)
                     : totalBalanceInUSD;
 
@@ -221,7 +214,6 @@ const RightWalletBar = () => {
                 // Set the fractional part and formatted total balance in state
                 setfractionBalance(fractionalPart);
                 settotalBalance(formattedTotalBalance);
-
 
                 // Pending Transactions
                 const calculatePendingBalance = (coinSymbol, coinPrice) => {
@@ -337,10 +329,7 @@ const RightWalletBar = () => {
         setTimeout(() => {
             setCopySuccess2(false);
         }, 2000);
-    };
-
-    console.log(Admin._id);
-    return (
+    };return (
         <div>
             {UserTransactions ?
                 <div className="wallet-overlay" >
@@ -472,7 +461,6 @@ const RightWalletBar = () => {
                                                     </>
                                                 ) : <h5 className='text-center d-flex items-center' style={{ textAlign: "center" }}>No Transaction Found</h5>}
 
-
                                             </tbody>
                                         </table>
                                     </div>
@@ -500,8 +488,6 @@ const RightWalletBar = () => {
 
                                                 <tbody>
                                                     <tr  >
-
-
 
                                                         <td className="text-start widn no-bg"> <img src={btcLogo} alt="" /></td>
                                                         <td className='no-bg text-white'>  <p style={{ margin: "0" }} className="txt sml">
@@ -559,8 +545,6 @@ const RightWalletBar = () => {
                                                         )}</td>
                                                     </tr>
                                                     <tr  >
-
-
 
                                                         <td className="text-start widn no-bg"> <img src={ethLogo} alt="" /></td>
                                                         <td className='no-bg text-white'>  <p style={{ margin: "0" }} className="txt sml">
@@ -630,7 +614,6 @@ color='white'
                     </div>
                 </div > : ""}
             <div className="wallet-bar-close" onClick={() => setHeadWallet(true)}></div>
-
 
         </div>
     );

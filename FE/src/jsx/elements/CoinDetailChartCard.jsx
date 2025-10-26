@@ -1,7 +1,6 @@
 import React from 'react';
 import Select from 'react-select';
 
-
 import BitCoinChart from './BitCoinChart';
 import { Link } from 'react-router-dom';
 import DateRangeCalendar from './DateRangeCalendar';
@@ -12,7 +11,6 @@ const options = [
     { value: '2', label: 'BTC ($ US Dollar)' },
     { value: '3', label: 'USD ($ US Dollar)' },    
 ]
-
 
 const CoinDetailChartCard = () => {    
     return (

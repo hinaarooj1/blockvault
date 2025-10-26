@@ -6,7 +6,6 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
 import Alert from "sweetalert2";
 
-
 class EventCalendar extends Component {
    state = {
       calendarEvents: [

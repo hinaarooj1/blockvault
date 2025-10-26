@@ -2,11 +2,11 @@ import { useContext, createContext } from "react";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const storeTokenInLs = (serverToken) => {
-    return localStorage.setItem("token", serverToken);
-  };
+  // const storeTokenInLs = (serverToken) => {
+  //   return localStorage.setItem("token", serverToken);
+  // };
   return (
-    <AuthContext.Provider value={{ storeTokenInLs }}>
+    <AuthContext.Provider value={{  }}>
       {children}
     </AuthContext.Provider>
   );

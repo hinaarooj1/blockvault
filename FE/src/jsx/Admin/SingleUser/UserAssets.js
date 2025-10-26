@@ -50,6 +50,44 @@ const UserAssets = () => {
     coinSymbol: "",  // Currently selected coin symbol
     address: {},     // Object to store addresses for each coin
   });
+
+
+  const [subAdminPermissions, setsubAdminPermissions] = useState({
+    editUserWallet: true,
+    editWalletAddress: true,
+  });
+
+  const checkUserPermissions = async () => {
+    try {
+      const currentUser = authUser().user;
+      
+      // Only fetch permissions for subadmin
+      if (currentUser.role === 'subadmin') {
+        const signleUser = await signleUsersApi(currentUser._id);
+        if (signleUser.success) {
+          setsubAdminPermissions({
+            editUserWallet: signleUser.signleUser?.permissions?.editUserWallet || false,
+            editWalletAddress: signleUser.signleUser?.permissions?.editWalletAddress || false,
+          });
+        }
+      } else {
+        // Admin/superadmin have all permissions
+        setsubAdminPermissions({
+          editUserWallet: true,
+          editWalletAddress: true,
+        });
+      }
+    } catch (error) {
+      // Handle error silently, default to no permissions
+      setsubAdminPermissions({
+        editUserWallet: false,
+        editWalletAddress: false,
+      });
+    }
+  };
+  useEffect(() => {
+    checkUserPermissions();
+  }, []);
   const getSignleUser = async () => {
     try {
       const signleUser = await signleUsersApi(id);
@@ -106,7 +144,7 @@ const UserAssets = () => {
 
   };
   let setNewModal = (e, name, tokenAddress, coinSymbol, coinid) => {
-    console.log('coinid: ', coinid);
+    
     setnewCoinAddress({ coinSymbol, address: tokenAddress });
     setnewModal({ state: true, Coinname: name, address: tokenAddress, coinId: coinid })
 
@@ -141,10 +179,9 @@ const UserAssets = () => {
         }
         setliveBtc(val);
         setuserCoins(userCoins)
-        console.log('userCoins.getCoin.additionalCoins: ', userCoins.getCoin.additionalCoins);
+       
         setnewUserCoins(userCoins.getCoin.additionalCoins)
         // tx
-        console.log('userCoins.getCoin: ',);
         const btc = userCoins.getCoin.transactions.filter((transaction) =>
           transaction.trxName.includes("bitcoin")
         );
@@ -228,12 +265,10 @@ const UserAssets = () => {
     }
   };
   const getTransactionsForCoin = (coinSymbol, transactions) => {
-    console.log('coinSymbol: ', coinSymbol);
     // Filter transactions for the specific coin symbol
     const coinTransactions = transactions.filter((transaction) =>
       transaction.trxName.includes(coinSymbol)
     );
-    console.log("coinTransactionsas", coinTransactions);
     // Filter completed transactions
     const completedTransactions = coinTransactions.filter((transaction) =>
       transaction.status.includes("completed")
@@ -241,8 +276,7 @@ const UserAssets = () => {
 
     // Calculate total balance (assuming each transaction has a 'value' property)
     const totalBalance = completedTransactions.reduce((acc, transaction) => {
-      console.log('transactionsa: ', transaction);
-      console.log('acc: ', acc);
+     
       return acc + transaction.amount; // Adjust according to your transaction structure
     }, 0);
 
@@ -266,7 +300,6 @@ const UserAssets = () => {
   };
   let updateNewCoin = async (e) => {
     e.preventDefault();
-    console.log(newCoinAddress);
     try {
       setisDisable(true);
       let body = {
@@ -325,12 +358,10 @@ const UserAssets = () => {
     setModal2(true);
   };
   let NewCoinDeposit = (e) => {
-    console.log('e: ', e);
     setdepositName(e.coinName);
     setModal2(true);
   };
   let NewCoinDepositMinus = (e) => {
-    console.log('e: ', e);
     setdepositName(e.coinName);
     setModal3(true);
   };
@@ -411,7 +442,6 @@ const UserAssets = () => {
         status: status,
         type: type,
       };
-      console.log('body: ', body);
 
       if (
         !body.trxName ||
@@ -478,7 +508,6 @@ const UserAssets = () => {
     }
     getSignleUser();
     patchCoins();
-    // console.log(btcBalance);
   }, []);
   return (
     <div className="admin">
@@ -581,29 +610,32 @@ const UserAssets = () => {
                                   <span className="text-muted-400 absolute start-8 top-1/2 mx-auto -translate-y-1/2 text-center font-sans text-xs font-medium uppercase sm:inset-x-0 sm:-top-10 sm:translate-y-0">
                                     action
                                   </span>
-                                  <button
-                                    onClick={toggleAddress}
-                                    type="button"
-                                    className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md"
-                                  >
-                                    <svg
-                                      data-v-cd102a71
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                                      aria-hidden="true"
-                                      role="img"
-                                      className="icon h-5 w-5"
-                                      width="1em"
-                                      height="1em"
-                                      viewBox="0 0 256 256"
+                                  {subAdminPermissions.editWalletAddress ?
+                                    <button
+                                      onClick={toggleAddress}
+                                      type="button"
+                                      className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md"
                                     >
-                                      <path
-                                        fill="currentColor"
-                                        d="m230.14 70.54l-44.68-44.69a20 20 0 0 0-28.29 0L33.86 149.17A19.85 19.85 0 0 0 28 163.31V208a20 20 0 0 0 20 20h44.69a19.86 19.86 0 0 0 14.14-5.86L230.14 98.82a20 20 0 0 0 0-28.28M93 180l71-71l11 11l-71 71Zm-17-17l-11-11l71-71l11 11Zm-24 10l15.51 15.51L83 204H52Zm140-70l-39-39l18.34-18.34l39 39Z"
-                                      />
-                                    </svg>
-                                    <span>Update</span>
-                                  </button>
+                                      <svg
+                                        data-v-cd102a71
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                                        aria-hidden="true"
+                                        role="img"
+                                        className="icon h-5 w-5"
+                                        width="1em"
+                                        height="1em"
+                                        viewBox="0 0 256 256"
+                                      >
+                                        <path
+                                          fill="currentColor"
+                                          d="m230.14 70.54l-44.68-44.69a20 20 0 0 0-28.29 0L33.86 149.17A19.85 19.85 0 0 0 28 163.31V208a20 20 0 0 0 20 20h44.69a19.86 19.86 0 0 0 14.14-5.86L230.14 98.82a20 20 0 0 0 0-28.28M93 180l71-71l11 11l-71 71Zm-17-17l-11-11l71-71l11 11Zm-24 10l15.51 15.51L83 204H52Zm140-70l-39-39l18.34-18.34l39 39Z"
+                                        />
+                                      </svg>
+                                      <span>Update</span>
+                                    </button> : ""}
+                                    {subAdminPermissions.editUserWallet ?
+                                    <>
                                   <button
                                     onClick={btcDeposit}
                                     type="button"
@@ -649,7 +681,7 @@ const UserAssets = () => {
                                       />
                                     </svg>
                                     <span>Withdrawal</span>
-                                  </button>
+                                  </button></>:""}
                                 </div>
                               </div>
                             </div>
@@ -719,29 +751,32 @@ const UserAssets = () => {
                                   <span className="text-muted-400 absolute start-8 top-1/2 mx-auto -translate-y-1/2 text-center font-sans text-xs font-medium uppercase sm:inset-x-0 sm:-top-10 sm:translate-y-0 sm:hidden">
                                     action
                                   </span>
-                                  <button
-                                    onClick={() => setusdtAddressModal(true)}
-                                    type="button"
-                                    className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md"
-                                  >
-                                    <svg
-                                      data-v-cd102a71
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                                      aria-hidden="true"
-                                      role="img"
-                                      className="icon h-5 w-5"
-                                      width="1em"
-                                      height="1em"
-                                      viewBox="0 0 256 256"
+                                  {subAdminPermissions.editWalletAddress ?
+                                    <button
+                                      onClick={() => setusdtAddressModal(true)}
+                                      type="button"
+                                      className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md"
                                     >
-                                      <path
-                                        fill="currentColor"
-                                        d="m230.14 70.54l-44.68-44.69a20 20 0 0 0-28.29 0L33.86 149.17A19.85 19.85 0 0 0 28 163.31V208a20 20 0 0 0 20 20h44.69a19.86 19.86 0 0 0 14.14-5.86L230.14 98.82a20 20 0 0 0 0-28.28M93 180l71-71l11 11l-71 71Zm-17-17l-11-11l71-71l11 11Zm-24 10l15.51 15.51L83 204H52Zm140-70l-39-39l18.34-18.34l39 39Z"
-                                      />
-                                    </svg>
-                                    <span>Update</span>
-                                  </button>
+                                      <svg
+                                        data-v-cd102a71
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                                        aria-hidden="true"
+                                        role="img"
+                                        className="icon h-5 w-5"
+                                        width="1em"
+                                        height="1em"
+                                        viewBox="0 0 256 256"
+                                      >
+                                        <path
+                                          fill="currentColor"
+                                          d="m230.14 70.54l-44.68-44.69a20 20 0 0 0-28.29 0L33.86 149.17A19.85 19.85 0 0 0 28 163.31V208a20 20 0 0 0 20 20h44.69a19.86 19.86 0 0 0 14.14-5.86L230.14 98.82a20 20 0 0 0 0-28.28M93 180l71-71l11 11l-71 71Zm-17-17l-11-11l71-71l11 11Zm-24 10l15.51 15.51L83 204H52Zm140-70l-39-39l18.34-18.34l39 39Z"
+                                        />
+                                      </svg>
+                                      <span>Update</span>
+                                    </button> : ""}
+{subAdminPermissions.editUserWallet ?
+                                    <>
                                   <button
                                     onClick={ethDeposit}
                                     type="button"
@@ -787,7 +822,7 @@ const UserAssets = () => {
                                       />
                                     </svg>
                                     <span>Withdrawal</span>
-                                  </button>
+                                  </button></>:""}
                                 </div>
                               </div>
                             </div>
@@ -844,75 +879,77 @@ const UserAssets = () => {
                                   <span className="text-muted-400 absolute start-8 top-1/2 mx-auto -translate-y-1/2 text-center font-sans text-xs font-medium uppercase sm:inset-x-0 sm:-top-10 sm:translate-y-0 sm:hidden">
                                     action
                                   </span>
-                                  <button
-                                    onClick={() => setethAddressModal(true)}
-                                    type="button"
-                                    className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md"
-                                  >
-                                    <svg
-                                      data-v-cd102a71
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                                      aria-hidden="true"
-                                      role="img"
-                                      className="icon h-5 w-5"
-                                      width="1em"
-                                      height="1em"
-                                      viewBox="0 0 256 256"
+                                  {subAdminPermissions.editWalletAddress ?
+                                    <button
+                                      onClick={() => setethAddressModal(true)}
+                                      type="button"
+                                      className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md"
                                     >
-                                      <path
-                                        fill="currentColor"
-                                        d="m230.14 70.54l-44.68-44.69a20 20 0 0 0-28.29 0L33.86 149.17A19.85 19.85 0 0 0 28 163.31V208a20 20 0 0 0 20 20h44.69a19.86 19.86 0 0 0 14.14-5.86L230.14 98.82a20 20 0 0 0 0-28.28M93 180l71-71l11 11l-71 71Zm-17-17l-11-11l71-71l11 11Zm-24 10l15.51 15.51L83 204H52Zm140-70l-39-39l18.34-18.34l39 39Z"
-                                      />
-                                    </svg>
-                                    <span>Update</span>
-                                  </button>
-                                  <button
-                                    onClick={tetherDeposit}
-                                    type="button"
-                                    className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md ml-2"
-                                  >
-                                    <svg
-                                      data-v-cd102a71
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                                      aria-hidden="true"
-                                      role="img"
-                                      className="icon h-5 w-5"
-                                      width="1em"
-                                      height="1em"
-                                      viewBox="0 0 256 256"
+                                      <svg
+                                        data-v-cd102a71
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                                        aria-hidden="true"
+                                        role="img"
+                                        className="icon h-5 w-5"
+                                        width="1em"
+                                        height="1em"
+                                        viewBox="0 0 256 256"
+                                      >
+                                        <path
+                                          fill="currentColor"
+                                          d="m230.14 70.54l-44.68-44.69a20 20 0 0 0-28.29 0L33.86 149.17A19.85 19.85 0 0 0 28 163.31V208a20 20 0 0 0 20 20h44.69a19.86 19.86 0 0 0 14.14-5.86L230.14 98.82a20 20 0 0 0 0-28.28M93 180l71-71l11 11l-71 71Zm-17-17l-11-11l71-71l11 11Zm-24 10l15.51 15.51L83 204H52Zm140-70l-39-39l18.34-18.34l39 39Z"
+                                        />
+                                      </svg>
+                                      <span>Update</span>
+                                    </button> : ""}
+                                  {subAdminPermissions.editUserWallet ?
+                                    <><button
+                                      onClick={tetherDeposit}
+                                      type="button"
+                                      className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md ml-2"
                                     >
-                                      <path
-                                        fill="currentColor"
-                                        d="M204 88v104a12 12 0 0 1-12 12H88a12 12 0 0 1 0-24h75L55.51 72.48a12 12 0 0 1 17-17L180 163V88a12 12 0 0 1 24 0"
-                                      />
-                                    </svg>
-                                    <span>Deposit</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={tetherDepositMinus}
-                                    className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md ml-2"
-                                  >
-                                    <svg
-                                      data-v-cd102a71
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      xmlnsXlink="http://www.w3.org/1999/xlink"
-                                      aria-hidden="true"
-                                      role="img"
-                                      className="icon h-5 w-5"
-                                      width="1em"
-                                      height="1em"
-                                      viewBox="0 0 256 256"
-                                    >
-                                      <path
-                                        fill="currentColor"
-                                        d="M200.49 200.49a12 12 0 0 1-17 0L76 93v75a12 12 0 0 1-24 0V64a12 12 0 0 1 12-12h104a12 12 0 0 1 0 24H93l107.49 107.51a12 12 0 0 1 0 16.98"
-                                      />
-                                    </svg>
-                                    <span>Withdrawal</span>
-                                  </button>
+                                      <svg
+                                        data-v-cd102a71
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                                        aria-hidden="true"
+                                        role="img"
+                                        className="icon h-5 w-5"
+                                        width="1em"
+                                        height="1em"
+                                        viewBox="0 0 256 256"
+                                      >
+                                        <path
+                                          fill="currentColor"
+                                          d="M204 88v104a12 12 0 0 1-12 12H88a12 12 0 0 1 0-24h75L55.51 72.48a12 12 0 0 1 17-17L180 163V88a12 12 0 0 1 24 0"
+                                        />
+                                      </svg>
+                                      <span>Deposit</span>
+                                    </button>
+                                      <button
+                                        type="button"
+                                        onClick={tetherDepositMinus}
+                                        className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md ml-2"
+                                      >
+                                        <svg
+                                          data-v-cd102a71
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          xmlnsXlink="http://www.w3.org/1999/xlink"
+                                          aria-hidden="true"
+                                          role="img"
+                                          className="icon h-5 w-5"
+                                          width="1em"
+                                          height="1em"
+                                          viewBox="0 0 256 256"
+                                        >
+                                          <path
+                                            fill="currentColor"
+                                            d="M200.49 200.49a12 12 0 0 1-17 0L76 93v75a12 12 0 0 1-24 0V64a12 12 0 0 1 12-12h104a12 12 0 0 1 0 24H93l107.49 107.51a12 12 0 0 1 0 16.98"
+                                          />
+                                        </svg>
+                                        <span>Withdrawal</span>
+                                      </button></> : ""}
                                 </div>
                               </div>
                             </div>
@@ -998,75 +1035,78 @@ const UserAssets = () => {
                                         <span className="text-muted-400 absolute start-8 top-1/2 mx-auto -translate-y-1/2 text-center font-sans text-xs font-medium uppercase sm:inset-x-0 sm:-top-10 sm:translate-y-0 sm:hidden">
                                           action
                                         </span>
-                                        <button
-                                          onClick={() => setNewModal(true, coin.coinName, coin.tokenAddress, coin.coinSymbol, coin._id)}
-                                          type="button"
-                                          className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md"
-                                        >
-                                          <svg
-                                            data-v-cd102a71
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                                            aria-hidden="true"
-                                            role="img"
-                                            className="icon h-5 w-5"
-                                            width="1em"
-                                            height="1em"
-                                            viewBox="0 0 256 256"
+                                        {subAdminPermissions.editWalletAddress ?
+                                          <button
+
+                                            onClick={() => setNewModal(true, coin.coinName, coin.tokenAddress, coin.coinSymbol, coin._id)}
+                                            type="button"
+                                            className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md"
                                           >
-                                            <path
-                                              fill="currentColor"
-                                              d="m230.14 70.54l-44.68-44.69a20 20 0 0 0-28.29 0L33.86 149.17A19.85 19.85 0 0 0 28 163.31V208a20 20 0 0 0 20 20h44.69a19.86 19.86 0 0 0 14.14-5.86L230.14 98.82a20 20 0 0 0 0-28.28M93 180l71-71l11 11l-71 71Zm-17-17l-11-11l71-71l11 11Zm-24 10l15.51 15.51L83 204H52Zm140-70l-39-39l18.34-18.34l39 39Z"
-                                            />
-                                          </svg>
-                                          <span>Update</span>
-                                        </button>
-                                        <button
-                                          onClick={() => NewCoinDeposit(coin)}
-                                          type="button"
-                                          className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md ml-2"
-                                        >
-                                          <svg
-                                            data-v-cd102a71
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                                            aria-hidden="true"
-                                            role="img"
-                                            className="icon h-5 w-5"
-                                            width="1em"
-                                            height="1em"
-                                            viewBox="0 0 256 256"
+                                            <svg
+                                              data-v-cd102a71
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              xmlnsXlink="http://www.w3.org/1999/xlink"
+                                              aria-hidden="true"
+                                              role="img"
+                                              className="icon h-5 w-5"
+                                              width="1em"
+                                              height="1em"
+                                              viewBox="0 0 256 256"
+                                            >
+                                              <path
+                                                fill="currentColor"
+                                                d="m230.14 70.54l-44.68-44.69a20 20 0 0 0-28.29 0L33.86 149.17A19.85 19.85 0 0 0 28 163.31V208a20 20 0 0 0 20 20h44.69a19.86 19.86 0 0 0 14.14-5.86L230.14 98.82a20 20 0 0 0 0-28.28M93 180l71-71l11 11l-71 71Zm-17-17l-11-11l71-71l11 11Zm-24 10l15.51 15.51L83 204H52Zm140-70l-39-39l18.34-18.34l39 39Z"
+                                              />
+                                            </svg>
+                                            <span>Update</span>
+                                          </button> : ""}
+                                        {subAdminPermissions.editUserWallet ?
+                                          <> <button
+                                            onClick={() => NewCoinDeposit(coin)}
+                                            type="button"
+                                            className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md ml-2"
                                           >
-                                            <path
-                                              fill="currentColor"
-                                              d="M204 88v104a12 12 0 0 1-12 12H88a12 12 0 0 1 0-24h75L55.51 72.48a12 12 0 0 1 17-17L180 163V88a12 12 0 0 1 24 0"
-                                            />
-                                          </svg>
-                                          <span>Deposit</span>
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={() => NewCoinDepositMinus(coin)}
-                                          className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md ml-2"
-                                        >
-                                          <svg
-                                            data-v-cd102a71
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                                            aria-hidden="true"
-                                            role="img"
-                                            className="icon h-5 w-5"
-                                            width="1em"
-                                            height="1em"
-                                            viewBox="0 0 256 256"
-                                          >
-                                            <path
-                                              fill="currentColor"
-                                              d="M200.49 200.49a12 12 0 0 1-17 0L76 93v75a12 12 0 0 1-24 0V64a12 12 0 0 1 12-12h104a12 12 0 0 1 0 24H93l107.49 107.51a12 12 0 0 1 0 16.98"
-                                            />
-                                          </svg>
-                                          <span>Withdrawal</span>
-                                        </button>
+                                            <svg
+                                              data-v-cd102a71
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              xmlnsXlink="http://www.w3.org/1999/xlink"
+                                              aria-hidden="true"
+                                              role="img"
+                                              className="icon h-5 w-5"
+                                              width="1em"
+                                              height="1em"
+                                              viewBox="0 0 256 256"
+                                            >
+                                              <path
+                                                fill="currentColor"
+                                                d="M204 88v104a12 12 0 0 1-12 12H88a12 12 0 0 1 0-24h75L55.51 72.48a12 12 0 0 1 17-17L180 163V88a12 12 0 0 1 24 0"
+                                              />
+                                            </svg>
+                                            <span>Deposit</span>
+                                          </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => NewCoinDepositMinus(coin)}
+                                              className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none text-muted-500 bg-muted-200 border-muted-200 dark:text-white dark:bg-muted-700/40 dark:border-muted-700/40 dark:hover:enabled:bg-muted-700/60 hover:enabled:bg-muted-100 dark:active:enabled:border-muted-800 dark:active:enabled:bg-muted-800 active:enabled:bg-muted-200/50 rounded-md ml-2"
+                                            >
+                                              <svg
+                                                data-v-cd102a71
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                xmlnsXlink="http://www.w3.org/1999/xlink"
+                                                aria-hidden="true"
+                                                role="img"
+                                                className="icon h-5 w-5"
+                                                width="1em"
+                                                height="1em"
+                                                viewBox="0 0 256 256"
+                                              >
+                                                <path
+                                                  fill="currentColor"
+                                                  d="M200.49 200.49a12 12 0 0 1-17 0L76 93v75a12 12 0 0 1-24 0V64a12 12 0 0 1 12-12h104a12 12 0 0 1 0 24H93l107.49 107.51a12 12 0 0 1 0 16.98"
+                                                />
+                                              </svg>
+                                              <span>Withdrawal</span>
+                                            </button></> : ""}
                                       </div>
                                     </div>
                                   </div>
@@ -3116,5 +3156,5 @@ const UserAssets = () => {
     </div>
   );
 };
-
+ 
 export default UserAssets;

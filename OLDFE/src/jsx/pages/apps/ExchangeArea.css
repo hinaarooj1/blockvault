@@ -1,0 +1,32 @@
+.hasa {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.nasaaa {
+    /* color: var(--primary); */
+
+    text-decoration: none !important;
+
+}
+
+.mm-active .faris {
+    color: white !important;
+}
+
+.faris {
+    font-size: 1rem;
+    color: #c8c8c8;
+    margin-right: 13px;
+    margin-left: 2px;
+}
+.profile-form 
+label{
+    color: rgb(182, 182, 182) !important; 
+}
+.profile-form input{
+    color: white !important;
+    background-color: #1c252e !important;
+    border: none !important;
+    
+}

@@ -63,8 +63,6 @@ const SidebarExtraContent = () => {
 	let authUser = useAuthUser();
 	const [Admin, setAdmin] = useState("");
 
-
-
 	const getCoins = async (data, isUserd) => {
 		let id = data._id;
 		try {
@@ -74,10 +72,7 @@ const SidebarExtraContent = () => {
 			// );
 
 			if (userCoins.success) {
-				setUserData(userCoins.getCoin);
-				console.log('userCoins.getCoin: ', userCoins.getCoin);
-
-				setUserTransactions(
+				setUserData(userCoins.getCoin);setUserTransactions(
 					userCoins.getCoin.transactions.reverse().slice(0, 5)
 				);
 				setisLoading(false);
@@ -122,7 +117,6 @@ const SidebarExtraContent = () => {
 				const usdcBalance = calculateBalance("usd coin", 0.99); // Lowercased "USD Coin"
 				const trxBalance = calculateBalance("tron", 0.1531); // Lowercased "Tron"
 
-
 				const conversionRate = 0.92;
 				const totalBalanceInUSD = (
 					btcBalance +
@@ -142,7 +136,6 @@ const SidebarExtraContent = () => {
 				).toFixed(2);
 
 				// Convert to EUR if user currency is EUR
-				console.log('isUser.currency: ', isUserd);
 				const totalBalance = isUserd.currency === "EUR"
 					? (totalBalanceInUSD * conversionRate).toFixed(2)
 					: totalBalanceInUSD;
@@ -209,7 +202,6 @@ const SidebarExtraContent = () => {
 					trxPending
 				).toFixed(2);
 				// Convert to EUR if user currency is EUR
-				console.log('isUser.currency: ', isUserd);
 				const totalBalancePendings = isUserd.currency === "EUR"
 					? (totalPendingBalanceUSD * conversionRate).toFixed(2)
 					: totalPendingBalanceUSD;

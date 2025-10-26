@@ -12,7 +12,6 @@ import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinn
 import './style.css'
 import Truncate from 'react-truncate-inside/es';
 
-
 const TransactionSec = () => {
 
     const [modal, setModal] = useState(false);
@@ -63,9 +62,7 @@ const TransactionSec = () => {
             // const response = await axios.get(
             //     "https://api.coindesk.com/v1/bpi/currentprice.json"
             // );
-            const allTransactions = await getUserCoinApi(id);
-            console.log('allTransactions: ', allTransactions.getCoin.transactions);
-            if (allTransactions.success) {
+            const allTransactions = await getUserCoinApi(id);if (allTransactions.success) {
                 setUserTransactions(allTransactions.getCoin.transactions.reverse());
                 let val = 0;
                 if (allTransactions && allTransactions.btcPrice && allTransactions.btcPrice.quote && allTransactions.btcPrice.quote.USD) {
@@ -87,9 +84,7 @@ const TransactionSec = () => {
             setisLoading(false);
         }
     };
-    let toggleModal = async (data) => {
-        console.log('data: ', data);
-        setModal(true);
+    let toggleModal = async (data) => {setModal(true);
 
         setsingleTransaction(data);
     };
@@ -554,7 +549,6 @@ const TransactionSec = () => {
                                     <dt className="text-muted">Note</dt>
                                     <dd className="text-dark">
 
-
                                         <span className="text-muted ms-2">{singleTransaction.note}</span>
                                     </dd>
                                 </div> : ""
@@ -766,7 +760,6 @@ const TransactionSec = () => {
                                 <div className="col-sm-6">
                                     <dt className="text-muted">Note</dt>
                                     <dd className="text-dark">
-
 
                                         <span className="text-muted ms-2">{singleTransaction.note}</span>
                                     </dd>

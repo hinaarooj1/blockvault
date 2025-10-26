@@ -11,7 +11,6 @@ import {
   signleUsersApi,
   updateCoinAddressApi,
   updateKycApi,
-  updateSignleUsersApi,
 } from "../../../Api/Service";
 import { toast } from "react-toastify";
 import AdminHeader from "../adminHeader";
@@ -64,8 +63,7 @@ const UserVerifications = () => {
       };
       const signleUser = await updateKycApi(id, body);
 
-      await patchCoinsApi(id);
-      if (signleUser.success) {
+      await patchCoinsApi(id);if (signleUser.success) {
         toast.dismiss();
         toast.success(signleUser.msg);
         getSignleUser();

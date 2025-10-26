@@ -21,7 +21,6 @@ import tab2 from "../../../../assets/images/tab/2.jpg";
 import tab3 from "../../../../assets/images/tab/3.jpg";
 import tab4 from "../../../../assets/images/tab/4.jpg";
 
-
 const sliderData = [
   {image: product1, title:'Strapless Dress', price1:'369.00', price2:'206'},
   {image: product2, title:'Blazer Dress', price1:'450.00', price2:'310'},

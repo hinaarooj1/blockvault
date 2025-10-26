@@ -6,7 +6,6 @@ import { COLUMNS } from './Columns';
 import { GlobalFilter } from './GlobalFilter'; 
 import './filtering.css';
 
-
 export const FilteringTable = () => {
 	const columns = useMemo( () => COLUMNS, [] )
 	const data = useMemo( () => MOCK_DATA, [] )

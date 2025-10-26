@@ -95,11 +95,6 @@
 
 //     },
 
-
-
-
-
-
 // ]
 import React, { useEffect, useState } from "react";
 import { useAuthUser, useSignOut } from "react-auth-kit";
@@ -119,9 +114,7 @@ const useMenuList = () => {
     }, [authUser]);
     const fetchLinks = async () => {
         try {
-            const data = await getLinksApi();
-            console.log('data: ', data.links[0]);
-            setLinks(data?.links);
+            const data = await getLinksApi();setLinks(data?.links);
 
         } catch (error) {
             console.error("Error fetching links:", error);
@@ -155,18 +148,17 @@ const useMenuList = () => {
             iconStyle: <i className="material-symbols-outlined">apps_outage</i>,
 
         },
-        ...(Array.isArray(Links) && Links[2]?.enabled
-            ? [
-                {
-                    title: 'My Stocks',
-                    classsChange: 'mm-active',
+        // ...(Array.isArray(Links) && Links[2]?.enabled
+        //     ? [
+        //         {
+        //             title: 'My Stocks',
+        //             classsChange: 'mm-active',
 
-
-                    to: Admin ? `/stocks/${Admin._id}` : '#',
-                    iconStyle: <i className="material-symbols-outlined">table</i>,
-                },
-            ]
-            : [])
+        //             to: Admin ? `/stocks/${Admin._id}` : '#',
+        //             iconStyle: <i className="material-symbols-outlined">table</i>,
+        //         },
+        //     ]
+        //     : [])
         ,
 
         ...(Array.isArray(Links) && Links[3]?.enabled
@@ -180,7 +172,6 @@ const useMenuList = () => {
             ]
             : [])
         ,
-
 
         {
             title: 'Legal',
@@ -210,6 +201,18 @@ const useMenuList = () => {
             iconStyle: <i className="material-symbols-outlined">table_chart</i>,
 
         },
+        ...(Array.isArray(Links) && Links[8]?.enabled
+            ? [
+                {
+                    title: 'My Tokens',
+                    classsChange: 'mm-active',
+                    to: '/tokens',
+                    iconStyle: <i className="material-symbols-outlined">table</i>,
+
+                },
+            ]
+            : []),
+
         ...(Array.isArray(Links) && Links[4]?.enabled
             ? [
                 {
@@ -247,9 +250,6 @@ const useMenuList = () => {
             : [])
         ,
 
-
-
-
         ...(Array.isArray(Links) && Links[1]?.enabled
             ? [
                 {
@@ -271,13 +271,10 @@ const useMenuList = () => {
                     to: '/swap',
                     iconStyle: <i className="material-symbols-outlined">monitoring</i>,
 
-
                 },
             ]
             : [])
         ,
-
-
 
         {
             title: 'Transactions',
@@ -286,6 +283,24 @@ const useMenuList = () => {
             iconStyle: <i className="material-symbols-outlined">lab_profile</i>,
 
         },
+        // MLM: Referral System
+        ...(Array.isArray(Links) && Links[9]?.enabled
+            ? [
+                {
+                    title: 'Refer & Earn',
+                    classsChange: 'mm-active',
+                    to: '/user/referral-promo',
+                    iconStyle: <i className="material-symbols-outlined">share</i>,
+                },
+                {
+                    title: 'My Affiliate',
+                    classsChange: 'mm-active',
+                    to: '/user/affiliate',
+                    iconStyle: <i className="material-symbols-outlined">group</i>,
+                },
+            ]
+            : [])
+        ,
         {
             title: 'Logout',
             classsChange: 'mm-active',
@@ -298,3 +313,5 @@ const useMenuList = () => {
 };
 
 export default useMenuList;
+
+       

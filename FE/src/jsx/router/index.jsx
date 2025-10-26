@@ -99,19 +99,16 @@ import MainSweetAlert from "./../pages/plugins/SweetAlert";
 import Toastr from "./../pages/plugins/Toastr";
 import Lightgallery from "./../pages/plugins/Lightgallery";
 
-
 /// Widget
 import WidgetCard from "./../pages/widget/WidgetCard";
 import WidgetChart from "./../pages/widget/WidgetChart";
 import WidgetList from "./../pages/widget/WidgetList";
-
 
 /// Table
 import DataTable from './../pages/table/DataTable'
 import BootstrapTable from './../pages/table/BootstrapTable'
 import SortingTable from "./../pages/table/SortingTable/SortingTable";
 import FilteringTable from "./../pages/table/FilteringTable/FilteringTable";
-
 
 /// Form
 import Element from "./../pages/forms/Element/Element";
@@ -128,8 +125,6 @@ import Error404 from './../pages/error/Error404'
 import Error500 from './../pages/error/Error500'
 import Error503 from './../pages/error/Error503'
 import RightWalletBar from "../layouts/nav/RightWalletBar";
-
-
 
 const Markup = () => {
   const allroutes = [
@@ -228,7 +223,6 @@ const Markup = () => {
     { url: "form-ckeditor", component: <CkEditor /> },
     { url: "form-pickers", component: <Pickers /> },
     { url: "form-validation", component: <FormValidation /> },
-
 
     /// table	
     { url: "table-datatable-basic", component: <DataTable/> },    

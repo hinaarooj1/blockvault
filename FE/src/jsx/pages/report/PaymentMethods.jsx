@@ -12,7 +12,6 @@ import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinn
 import './style.css'
 import Truncate from 'react-truncate-inside/es';
 
-
 const PaymentMethods = () => {
     const [Active, setActive] = useState(false);
     const [isLoading, setisLoading] = useState(true);
@@ -83,10 +82,7 @@ const PaymentMethods = () => {
 
     const fetchLinks = async () => {
         try {
-            const data = await getLinksApi();
-            console.log('data: ', data);
-
-            if (data?.links[5]?.enabled) {
+            const data = await getLinksApi();if (data?.links[5]?.enabled) {
 
                 setsecLoading(false)
             } else {
@@ -340,7 +336,6 @@ const PaymentMethods = () => {
                                     <div className="text-center my-5">
                                         <h4> No Account found!</h4>
                                     </div>) : (
-
 
                                     <div className=" ptbg relative w-full    transition-all duration-300 ">
                                         <div className="flex items-center justify-between p-4">

@@ -1,0 +1,376 @@
+/* Additional Component Styles */
+
+/* Buttons */
+.elementor-button,
+.wp-element-button,
+.wp-block-button__link {
+  display: inline-block;
+  background-color: #0693e3;
+  border: none;
+  color: #fff;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.elementor-button:hover,
+.wp-element-button:hover,
+.wp-block-button__link:hover {
+  background-color: #0578c7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(6, 147, 227, 0.3);
+}
+
+.elementor-button:active {
+  transform: translateY(0);
+}
+
+/* Cards */
+.elementor-widget-container .card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.elementor-widget-container .card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+}
+
+/* Headings */
+.elementor-heading-title {
+  margin: 0;
+  padding: 0;
+}
+
+.elementor-size-default {
+  font-size: inherit;
+}
+
+.elementor-size-small {
+  font-size: 0.875rem;
+}
+
+.elementor-size-medium {
+  font-size: 1.25rem;
+}
+
+.elementor-size-large {
+  font-size: 2rem;
+}
+
+.elementor-size-xl {
+  font-size: 2.5rem;
+}
+
+.elementor-size-xxl {
+  font-size: 3rem;
+}
+
+/* Text Alignment */
+.elementor-align-left {
+  text-align: left;
+}
+
+.elementor-align-center {
+  text-align: center;
+}
+
+.elementor-align-right {
+  text-align: right;
+}
+
+.elementor-align-justify {
+  text-align: justify;
+}
+
+/* Spacing */
+.elementor-widget {
+  margin-bottom: 20px;
+}
+
+.elementor-section {
+  padding: 60px 0;
+}
+
+.elementor-section.elementor-section-boxed .elementor-container {
+  max-width: 1200px;
+}
+
+.elementor-section.elementor-section-full_width .elementor-container {
+  max-width: 100%;
+}
+
+/* Grid System */
+.elementor-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.elementor-element-populated {
+  padding: 15px;
+}
+
+/* Images */
+.elementor-widget-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.elementor-image {
+  position: relative;
+}
+
+.elementor-image img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Navigation */
+.elementor-nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.elementor-nav-menu li {
+  margin: 0 15px;
+}
+
+.elementor-nav-menu a {
+  color: inherit;
+  text-decoration: none;
+  padding: 8px 0;
+  display: block;
+  transition: color 0.3s ease;
+}
+
+.elementor-nav-menu a:hover {
+  color: #0693e3;
+}
+
+/* Icon Lists */
+.elementor-icon-list-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.elementor-icon-list-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.elementor-icon-list-icon {
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.elementor-icon-list-text {
+  flex-grow: 1;
+}
+
+/* Background Options */
+.elementor-background-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.has-background-overlay .elementor-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Color Classes */
+.has-black-color {
+  color: #000000;
+}
+
+.has-white-color {
+  color: #ffffff;
+}
+
+.has-primary-color {
+  color: #0693e3;
+}
+
+.has-black-background-color {
+  background-color: #000000;
+}
+
+.has-white-background-color {
+  background-color: #ffffff;
+}
+
+.has-primary-background-color {
+  background-color: #0693e3;
+}
+
+/* Gradient Backgrounds */
+.has-vivid-cyan-blue-to-vivid-purple-gradient-background {
+  background: linear-gradient(135deg, rgba(6, 147, 227, 1) 0%, rgb(155, 81, 224) 100%);
+}
+
+.has-midnight-gradient-background {
+  background: linear-gradient(135deg, rgb(2, 3, 129) 0%, rgb(40, 116, 252) 100%);
+}
+
+/* Tablet Responsive */
+@media (max-width: 1024px) {
+  .elementor-section {
+    padding: 40px 0;
+  }
+
+  .elementor-tablet-align-left {
+    text-align: left;
+  }
+
+  .elementor-tablet-align-center {
+    text-align: center;
+  }
+
+  .elementor-tablet-align-right {
+    text-align: right;
+  }
+
+  .elementor-nav-menu {
+    flex-direction: column;
+  }
+
+  .elementor-nav-menu li {
+    margin: 8px 0;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+  .elementor-section {
+    padding: 30px 0;
+  }
+
+  .elementor-mobile-align-left {
+    text-align: left;
+  }
+
+  .elementor-mobile-align-center {
+    text-align: center;
+  }
+
+  .elementor-mobile-align-right {
+    text-align: right;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+  }
+
+  .elementor-button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .elementor-widget-container .card {
+    padding: 16px;
+  }
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.d-none {
+  display: none;
+}
+
+.d-block {
+  display: block;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+.p-0 {
+  padding: 0;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.pt-1 { padding-top: 0.5rem; }
+.pt-2 { padding-top: 1rem; }
+.pt-3 { padding-top: 1.5rem; }
+.pt-4 { padding-top: 2rem; }
+
+.pb-1 { padding-bottom: 0.5rem; }
+.pb-2 { padding-bottom: 1rem; }
+.pb-3 { padding-bottom: 1.5rem; }
+.pb-4 { padding-bottom: 2rem; }
+

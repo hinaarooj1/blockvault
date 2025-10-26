@@ -31,9 +31,7 @@ const AllTicket = () => {
 
             let id = authUser().user._id
 
-
             const indivTicket = await getIndivTicketApi(id, ticketId);
-
 
             if (indivTicket.success) {
                 if (indivTicket.ticket.length <= 0 || indivTicket === undefined) {
@@ -41,12 +39,8 @@ const AllTicket = () => {
                     return
                 }
                 setisLoading(false);
-                const ticketData = indivTicket.ticket[0];
-                console.log('ticketData: ', indivTicket);
-                setTicket(ticketData);
-                setMessages(ticketData.ticketContent);
-                console.log('ticketData.ticketContent: ', ticketData.ticketContent);
-                return;
+                const ticketData = indivTicket.ticket[0];setTicket(ticketData);
+                setMessages(ticketData.ticketContent);return;
             } else {
                 toast.dismiss();
                 toast.error(indivTicket.msg);
@@ -62,12 +56,10 @@ const AllTicket = () => {
             setAdmin(authUser().user);
             getTickets()
             return;
-        } else if (authUser().user.role === "admin") {
+        } else if (authUser().user.role === "admin"|| authUser().user.role === "superadmin"|| authUser().user.role === "subadmin") {
             Navigate("/admin/dashboard");
             return;
-        }
-        console.log("messages", messages);
-    }, []);
+        }}, []);
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -98,7 +90,6 @@ const AllTicket = () => {
             </React.Fragment>
         ));
     };
-
 
     const formatDateNew = (dateString) => {
         const date = new Date(dateString);
@@ -219,7 +210,6 @@ const AllTicket = () => {
                                     </div>
                                 ))}
                                 {/* Ticket Message */}
-
 
                                 {isTicketClosed() ? (
                                     <h5 className="text-muted font-bold text-white">This request is closed for comments. You can <Link style={{ textDecoration: "underline" }} to="/create-ticket">create a new ticket</Link>.</h5>

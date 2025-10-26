@@ -16,7 +16,10 @@ const EditProfile = () => {
 
             if (logout.success) {
                 signOut();
-
+   localStorage.removeItem("token");
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("authUser");
+          localStorage.removeItem("auth_state");
                 Navigate("/auth/login");
                 return;
             } else {
@@ -60,10 +63,7 @@ const EditProfile = () => {
 
     const getSignleUser = async () => {
         try {
-            const signleUser = await signleUsersApi(authUser().user._id);
-
-            console.log('signleUser: ', signleUser);
-            if (signleUser.success) {
+            const signleUser = await signleUsersApi(authUser().user._id);if (signleUser.success) {
                 setUserData(signleUser.signleUser);
             } else {
                 toast.dismiss();
@@ -123,17 +123,9 @@ const EditProfile = () => {
         return isValid;
     };
 
-
-
     const updateSignleUser = async (e) => {
-        e.preventDefault();
-        console.log("ds");
-        if (!validateForm()) {
-            console.log("asa");
-            return;
-        }
-        console.log("sa");
-        try {
+        e.preventDefault();if (!validateForm()) {return;
+        }try {
             setisDisable(true);
             const body = { ...userData };
             const signleUser = await updateSignleUsersApi(userData._id, body);
@@ -144,9 +136,7 @@ const EditProfile = () => {
                 onLogout()
                 toast.info("Profile Updated! Please login again with new details")
             } else {
-                toast.dismiss();
-                console.log('signleUsera: ', signleUser);
-                toast.error(signleUser);
+                toast.dismiss();toast.error(signleUser);
             }
         } catch (error) {
             toast.dismiss();
@@ -155,7 +145,6 @@ const EditProfile = () => {
             setisDisable(false);
         }
     };
-
 
     useEffect(() => {
         getSignleUser();
@@ -248,7 +237,6 @@ const EditProfile = () => {
                                                 <i class="fa-solid fa-eye"></i> :
                                                 <i className="fa fa-eye-slash" />}
 
-
                                         </span>
                                         {errors.password && <div className="text-danger fs-12">{errors.password}</div>}
                                     </div>
@@ -267,7 +255,6 @@ const EditProfile = () => {
                                             {showConfirmPassword ?
                                                 <i class="fa-solid fa-eye"></i> :
                                                 <i className="fa fa-eye-slash" />}
-
 
                                         </span>
                                         {errors.confirmPassword && <div className="text-danger fs-12">{errors.confirmPassword}</div>}

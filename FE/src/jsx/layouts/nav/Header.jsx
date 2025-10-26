@@ -57,13 +57,7 @@ const Header = ({ onNote }) => {
     }
   };
   let authUser = useAuthUser();
-  const [Admin, setAdmin] = useState("");
-  console.log('Admin: ', Admin);
-
-
-
-  
-  useEffect(() => {
+  const [Admin, setAdmin] = useState("");useEffect(() => {
     if (authUser().user.role === "user") {
       setAdmin(authUser().user); 
 

@@ -35,7 +35,10 @@ const SideBar = (props) => {
 
       if (logout.success) {
         signOut();
-
+   localStorage.removeItem("token");
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("authUser");
+          localStorage.removeItem("auth_state");
         Navigate("/auth/login");
         return;
       } else {

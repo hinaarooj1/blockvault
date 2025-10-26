@@ -13,7 +13,6 @@ import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinn
 import './style.css'
 import Truncate from 'react-truncate-inside/es';
 
-
 const LetterSec = () => {
 
     const [activeDurationBtc, setActiveDurationBtc] = useState(30);
@@ -57,11 +56,7 @@ const LetterSec = () => {
                     val = userCoins.btcPrice.quote.USD.price
                 } else {
                     val = 96075.25
-                }
-                console.log("val: ", val);
-                setliveBtc(val);
-                console.log("userCoins.success: ", userCoins.success);
-                setisLoading(false);
+                }setliveBtc(val);setisLoading(false);
                 // tx
                 const btc = userCoins.getCoin.transactions.filter((transaction) =>
                     transaction.trxName.includes("bitcoin")
@@ -76,9 +71,7 @@ const LetterSec = () => {
                     btcCount = element.amount;
                     btcValueAdded += btcCount;
                 }
-                setbtcBalance(btcValueAdded);
-                console.log("btcValueAdded: ", btcValueAdded);
-                // tx
+                setbtcBalance(btcValueAdded);// tx
                 // tx
                 const eth = userCoins.getCoin.transactions.filter((transaction) =>
                     transaction.trxName.includes("ethereum")
@@ -93,9 +86,7 @@ const LetterSec = () => {
                     ethCount = element.amount;
                     ethValueAdded += ethCount;
                 }
-                setethBalance(ethValueAdded);
-                console.log("ethValueAdded: ", ethValueAdded);
-                // tx
+                setethBalance(ethValueAdded);// tx
                 // tx
                 const usdt = userCoins.getCoin.transactions.filter((transaction) =>
                     transaction.trxName.includes("tether")
@@ -175,7 +166,7 @@ const LetterSec = () => {
         try {
             const formData = new FormData();
             formData.append("id", authUser().user._id);
-            console.log("authUser().user: ", authUser().user);
+
             const userCoins = await getsignUserApi(formData);
 
             if (userCoins.success) {
@@ -206,11 +197,7 @@ const LetterSec = () => {
     }, []);
     // withdraw
     const handleAmountChange = (e, cryptoName) => {
-        const value = e.target.value;
-
-        console.log("e: ", cryptoName);
-
-        // Allow empty value (when all digits are removed)
+        const value = e.target.value;// Allow empty value (when all digits are removed)
         if (value === "") {
             setAmount("");
             return;
@@ -380,19 +367,13 @@ const LetterSec = () => {
                     e: e,
                     status: "completed",
                 };
-                if (!body.trxName || !body.amount || !body.txId) {
-                    console.log("body.amount: ", body.amount);
-                    console.log("body.trxName: ", body.trxName);
-                    toast.dismiss();
+                if (!body.trxName || !body.amount || !body.txId) {toast.dismiss();
                     toast.error("Fill all the required fields");
                     return;
                 }
             }
 
-            let id = authUser().user._id;
-            console.log("e: ", e);
-
-            const newTransaction = await createUserTransactionApi(id, body);
+            let id = authUser().user._id;const newTransaction = await createUserTransactionApi(id, body);
 
             if (newTransaction.success) {
                 toast.dismiss();
@@ -421,9 +402,7 @@ const LetterSec = () => {
             //     "https://api.coindesk.com/v1/bpi/currentprice.json"
             // );
             const allTransactions = await getUserCoinApi(authUser().user._id);
-            if (allTransactions.success) {
-                console.log('allTransactions: ', allTransactions);
-                setUserTransactions(allTransactions.getCoin.transactions.reverse());
+            if (allTransactions.success) {setUserTransactions(allTransactions.getCoin.transactions.reverse());
 
                 return;
             } else {

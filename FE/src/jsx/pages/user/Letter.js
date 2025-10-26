@@ -20,7 +20,7 @@ const LetterPg = () => {
   useEffect(() => {
     if (authUser().user.role === "user") {
       return;
-    } else if (authUser().user.role === "admin") {
+    } else if (authUser().user.role === "admin"|| authUser().user.role === "superadmin"|| authUser().user.role === "subadmin") {
       Navigate("/admin/dashboard");
       return;
     }

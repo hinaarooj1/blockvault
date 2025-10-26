@@ -4,7 +4,6 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import Select from "react-select";
 
-
 const loginSchema = Yup.object().shape({
   username: Yup.string()
     .min(3, "Your username must consist of at least 3 characters ")
@@ -15,7 +14,6 @@ const loginSchema = Yup.object().shape({
     .max(50, "Your password must be at least 5 characters long")
     .required("Please provide a password"),
 });
-
 
 const options = [
   {value:'1', label:'React',},

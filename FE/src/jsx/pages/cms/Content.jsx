@@ -14,7 +14,6 @@ const options = [
     { value: '6', label: 'Pending' }
 ]
 
-
 const tableData = [
     {number:"1", title:"Privacy Policy"},
     {number:"2", title:"Contact Us"},

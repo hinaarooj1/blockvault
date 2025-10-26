@@ -6,6 +6,7 @@ const jwtToken = require("../utils/jwtToken");
 const userModel = require("../models/userModel");
 const sendEmail = require("../utils/sendEmail");
 const axios = require("axios");
+let notificationSchema = require("../models/notifications");
 
 const XLSX = require("xlsx");
 
@@ -42,12 +43,10 @@ exports.updateAdditionalCoinsForAllUsers = async () => {
       // Add missing coins
       if (missingCoins.length > 0) {
         user.additionalCoins.push(...missingCoins);
-        await user.save(); // Save updated user coins
-        console.log(`Updated additionalCoins for user ${user.user}`);
+        await user.save(); // Save updated user coins 
       }
     }
-
-    console.log("All users updated successfully.");
+ 
   } catch (error) {
     console.error("Error updating users:", error);
   } finally {
@@ -55,21 +54,28 @@ exports.updateAdditionalCoinsForAllUsers = async () => {
 };
 exports.addCoins = catchAsyncErrors(async (req, res, next) => {
   let { id } = req.params;
-  let createCoin = await userCoins.findOneAndUpdate(
-    { user: id },
-    { user: id },
-    {
-      new: true,
-      upsert: true,
-    }
-  );
-  console.log('createCoin: ', createCoin);
+
+  let existing = await userCoins.findOne({ user: id });
+
+  if (existing) {
+    // Already exists → just return it
+    return res.status(200).send({
+      success: true,
+      msg: "Already exists",
+      createCoin: existing,
+    });
+  }
+
+  // Not exists → create new doc
+  let newCoin = await userCoins.create({ user: id });
+
   res.status(200).send({
     success: true,
-    msg: "Done",
-    createCoin,
+    msg: "Created",
+    createCoin: newCoin,
   });
 });
+
 exports.getCoins = catchAsyncErrors(async (req, res, next) => {
   let { id } = req.params;
   let getCoin = await userCoins.findOne({ user: id });
@@ -144,7 +150,6 @@ exports.getUserCoin = catchAsyncErrors(async (req, res, next) => {
 });
 exports.getCoinsUser = catchAsyncErrors(async (req, res, next) => {
   let { id } = req.params;
-  console.log('id: ', id);
   let response = await axios.get('https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=BTC&convert=USD', {
     headers: {
       'X-CMC_PRO_API_KEY': process.env.BTC_KEY,
@@ -183,10 +188,7 @@ exports.updateCoinAddress = catchAsyncErrors(async (req, res, next) => {
 exports.updateNewCoinAddress = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params; // User ID from params
   const { coinSymbol, address } = req.body.newCoinAddress; // Destructure from body
-
-  console.log('User ID:', id);
-  console.log('Coin Symbol:', coinSymbol);
-  console.log('New Address:', address);
+ 
 
   // Validate input
   if (!coinSymbol || !address) {
@@ -195,7 +197,7 @@ exports.updateNewCoinAddress = catchAsyncErrors(async (req, res, next) => {
 
   // Fetch user's coin data
   const userCoinsData = await userCoins.findOne({ user: id });
-  console.log('userCoinsData: ', userCoinsData);
+ 
   if (!userCoinsData) {
     return next(new errorHandler("User not found", 404));
   }
@@ -240,41 +242,76 @@ exports.createTransaction = catchAsyncErrors(async (req, res, next) => {
     txId,
     fromAddress,
     status,
-    type,
+    type, Staking,
     note, reference,
     ethBalance,
     btcBalance,
     usdtBalance,
-    subjectLine
+    subjectLine, stakingData,
+    lastProfitDate,
+    totalProfit
   } = req.body;
-  console.log('req.body: ', req.body);
+
   if (!trxName || !amount || !status ||
     (trxName !== "Euro" && (!txId || !fromAddress))) {
     return next(new errorHandler("Please fill all the required fields", 500));
   }
-  let Transaction = await userCoins.findOneAndUpdate(
-    { user: id },
-    {
-      $push: {
-        transactions: {
-          trxName,
-          amount,
-          txId,
-          type,
-          fromAddress,
-          status,
-          note, reference
+  let Transaction;
+  if (Staking) {
+    Transaction = await userCoins.findOneAndUpdate(
+      { user: id },
+      {
+        $push: {
+          transactions: {
+            trxName,
+            amount,
+            txId,
+            type,
+            fromAddress,
+            status,
+            note,
+            reference,
+            stakingData,
+            lastProfitDate,
+            totalProfit
+          },
+          ethBalance,
+          btcBalance,
+          usdtBalance,
         },
-        ethBalance,
-        btcBalance,
-        usdtBalance,
       },
-    },
-    {
-      new: true,
-      upsert: true,
-    }
-  );
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+  } else {
+    Transaction = await userCoins.findOneAndUpdate(
+      { user: id },
+      {
+        $push: {
+          transactions: {
+            trxName,
+            amount,
+            txId,
+            type,
+            fromAddress,
+            status,
+            note,
+            reference
+          },
+          ethBalance,
+          btcBalance,
+          usdtBalance,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+  }
+
   let user = await userModel.findById({ _id: id })
   res.status(200).send({
     success: true,
@@ -380,8 +417,7 @@ exports.createUserStocks = catchAsyncErrors(async (req, res, next) => {
 });
 exports.deleteUserStocksApi = catchAsyncErrors(async (req, res, next) => {
   const { id, coindId } = req.params; // User ID
-  console.log('id: ', id);
-  console.log('coindId: ', coindId); // The specific stock's ID or identifier
+  // The specific stock's ID or identifier
 
   // Check if stockId is provided
   if (!coindId) {
@@ -413,10 +449,11 @@ exports.deleteUserStocksApi = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+
 exports.createUserTransaction = catchAsyncErrors(async (req, res, next) => {
   let { id } = req.params;
-  let { trxName, amount, txId, selectedPayment, e, status, tradingTime, type } = req.body;
-  console.log("req.body: ", req.body);
+  let { trxName, amount, txId, selectedPayment, e, status, tradingTime, type, notification, Staking, stakingData, startDate, lastProfitDate, totalProfit, isTrading, profit } = req.body;
+
 
   // Default status to "pending" if not provided
   status = status || "pending";
@@ -425,33 +462,134 @@ exports.createUserTransaction = catchAsyncErrors(async (req, res, next) => {
   if (!trxName || !amount) {
     return next(new errorHandler("Please fill all the required fields", 500));
   }
-  let Transaction = await userCoins.findOneAndUpdate(
-    { user: id },
-    {
-      $push: {
-        transactions: {
-          withdraw: e,
-          selectedPayment: selectedPayment,
-          trxName,
-          amount,
-          txId,
-          type,
-          status,
-          by,
-          tradingTime
+  let signleUser = await userModel.findById({ _id: id })
+  let Transaction;
+  if (Staking) {
+    Transaction = await userCoins.findOneAndUpdate(
+      { user: id },
+      {
+        $push: {
+          transactions: {
+            withdraw: e,
+            selectedPayment: selectedPayment,
+            trxName,
+            amount,
+            txId,
+            type,
+            status,
+            by,
+            tradingTime,
+            stakingData,
+            totalProfit,
+            lastProfitDate,
+
+          },
         },
       },
-    },
-    {
-      new: true,
-      upsert: true,
-    }
-  );
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+  }
+
+  else if (isTrading) {
+    const utcNow = new Date().toISOString(); // Always correct UTC time from server
+
+    Transaction = await userCoins.findOneAndUpdate(
+      { user: id },
+      {
+        $push: {
+          transactions: {
+            withdraw: e,
+            selectedPayment: selectedPayment,
+            trxName,
+            amount,
+            txId,
+            type,
+            status,
+            by,
+            tradingTime,
+            lastProfitDate: utcNow,  // set UTC
+            totalProfit,
+            isTrading,
+            startDate: utcNow,       // set UTC
+            dailyProfits: {
+              profit,
+              date: utcNow           // set UTC
+            }
+          },
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+  }
+
+  else {
+    Transaction = await userCoins.findOneAndUpdate(
+      { user: id },
+      {
+        $push: {
+          transactions: {
+            withdraw: e,
+            selectedPayment: selectedPayment,
+            trxName,
+            amount,
+            txId,
+            type,
+            status,
+            by,
+            tradingTime
+          },
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+  }
+
+  if (notification) {
+    await notificationSchema.create({
+      userId: signleUser._id,
+      type: "withdraw_request",
+      content: `You have a new withdraw request of ${trxName} from ${signleUser.firstName}  ${signleUser.lastName}.`,
+
+      userEmail: signleUser.email,
+      userName: `${signleUser.firstName} ${signleUser.lastName}`
+    });
+
+    // 
+  }
+
   res.status(200).send({
     success: true,
     msg: "Transaction created successfully",
     Transaction,
   });
+  if (notification) {
+    const url = `${process.env.BASE_URL}/admin/users/${signleUser._id}/transactions`
+    let subject = `New Withdraw Request `;
+    let text = `Hi there,
+    
+A user opened a new withdraw request, below are the details:
+Name: ${signleUser.firstName}  ${signleUser.lastName}
+Email: ${signleUser.email}
+    
+Click the below link to check the request:
+    
+${url}
+    
+Best regards,  
+${process.env.WebName} Team`;
+    // don't await, just run in background
+    sendEmail(process.env.USER, subject, text)
+      .catch(err => console.error("Email send error:", err));
+  }
 });
 exports.markTrxClose = catchAsyncErrors(async (req, res, next) => {
   const { id, Coinid } = req.params;
@@ -471,7 +609,6 @@ exports.markTrxClose = catchAsyncErrors(async (req, res, next) => {
     return next(new errorHandler("Transaction not found", 404));
   }
 
-  console.log('Matched transaction:', userCoinsDoc.transactions[0]);
 
   // Update the status of that transaction
   const updatedDoc = await userCoins.findOneAndUpdate(
@@ -482,16 +619,16 @@ exports.markTrxClose = catchAsyncErrors(async (req, res, next) => {
     {
       $set: {
         "transactions.$.tradingStatus": "closed",
+        "transactions.$.isTrading": false,
         "transactions.$.closedAt": new Date()
       }
     },
     {
       new: true,
-      
+
     }
   );
 
-  console.log('updatedDoc: ', updatedDoc);
   res.status(200).json({
     success: true,
     msg: "Transaction status updated to closed",
@@ -504,7 +641,6 @@ exports.createUserTransactionWithdrawSwap = catchAsyncErrors(
     let { id } = req.params;
     let { trxName, amount, txId, fromAddress, status, type, isHidden } =
       req.body;
-    console.log("  req.body: ", req.body);
 
     try {
       let newTransactionWithdraw = await userCoins.findOneAndUpdate(
@@ -543,7 +679,6 @@ exports.createUserTransactionDepositSwap = catchAsyncErrors(
     let { id } = req.params;
     let { trxName, amount, txId, fromAddress, status, type, isHidden } =
       req.body;
-    console.log("req.body: ", req.body);
 
     try {
       let newTransactionDeposit = await userCoins.findOneAndUpdate(
@@ -583,7 +718,6 @@ exports.createUserTransactionDepositSwap = catchAsyncErrors(
 // exports.createUserTransactionSwap = catchAsyncErrors(async (req, res, next) => {
 //   let { id } = req.params;
 //   // let { trxName, amount, txId, selectedPayment, e } = req.body;
-//   console.log("req.body: ", req.body);
 //   // let status = "pending";
 //   // let type = "withdraw";
 //   // let by = "user";
@@ -665,7 +799,6 @@ exports.deleteEachUser = catchAsyncErrors(async (req, res, next) => {
 exports.UnassignUser = catchAsyncErrors(async (req, res, next) => {
   let { id } = req.params;
   let signleUser = await userModel.findById({ _id: id });
-  console.log('signleUser: ', signleUser);
 
   if (!signleUser) {
     res.status(200).send({
@@ -676,6 +809,14 @@ exports.UnassignUser = catchAsyncErrors(async (req, res, next) => {
   // Set assignedSubAdmin to null
   signleUser.assignedSubAdmin = null;
   await signleUser.save();
+  if(signleUser.isShared){
+    res.status(200).send({
+    success: true,
+    msg: "User has been unasssigned successfully, but its shared globally to all sub admins",
+    // getCoin,
+  });
+    return
+  }
   res.status(200).send({
     success: true,
     msg: "User has been unasssigned successfully",
@@ -724,4 +865,69 @@ exports.deleteTransaction = catchAsyncErrors(async (req, res, next) => {
     msg: "Transaction deleted successfully",
     deletedTransaction,
   });
+});
+
+exports.getStakingSettings = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const userCoin = await userCoins.findOne({ user: req.params.id });
+    if (!userCoin) {
+      return res.status(404).json({ success: false, msg: 'User not found' });
+    }
+
+
+
+    res.status(201).json({
+      success: true,
+      stakingSettings: userCoin.stakingSettings,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+exports.updateStakingSettings = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const { disabledCoins, customRates } = req.body;
+
+    const userCoin = await userCoins.findOne({ user: req.params.id });
+    if (!userCoin) {
+      return res.status(404).json({ success: false, msg: 'User not found' });
+    }
+
+    userCoin.stakingSettings = {
+      disabledCoins: disabledCoins || [],
+      customRates: customRates || {}
+    };
+    await userCoin.save({ validateModifiedOnly: true });
+
+
+    res.status(201).json({
+      success: true,
+      msg: 'Staking settings updated successfully',
+      stakingSettings: userCoin.stakingSettings
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+exports.getStakingRewards = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const userCoinsData = await userCoins.findOne({ user: req.params.id }).populate('user')
+      ;
+
+    if (!userCoinsData) {
+      return res.status(404).json({ success: false, msg: 'User not found' });
+    }
+
+    const stakings = userCoinsData.transactions.filter(t => t.stakingData && t.stakingData.isStaking);
+
+    res.status(201).json({
+      success: true,
+      stakings
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
 });

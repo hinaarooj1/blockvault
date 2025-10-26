@@ -59,10 +59,7 @@ const ExchangeAreaa = () => {
     let Navigate = useNavigate();
     const fetchLinks = async () => {
         try {
-            const data = await getLinksApi();
-            console.log('data: ', data);
-
-            if (data?.links[4]?.enabled) {
+            const data = await getLinksApi();if (data?.links[4]?.enabled) {
 
                 setsecLoading(false)
             } else {

@@ -1,0 +1,173 @@
+/* Modal Container */
+
+.this-model .modal.fade.show {
+    display: block;
+    padding-left: 0;
+    padding-right: 0;
+    z-index: 1050;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Darkened background */
+}
+.dark-bgs{
+    background-color: black;
+    padding: 20px;
+    border-radius: 10px;
+}
+.note-head{
+    font-size: 23px !important;
+    margin-bottom: 10px !important;
+    color: black;
+    font-weight: bold;
+}
+
+.this-model .modal-dialog-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    max-height: 100vh;
+}
+
+.this-model .modal-dialog {
+    margin: 0;
+    max-width: 600px;
+    width: 100%;
+}
+
+.this-model .modal-content {
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.this-model .modal-header {
+    padding: 1rem 1.5rem;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.this-model .btn::after,
+.this-model .btn::before {
+    display: none !important;
+}
+
+.this-model .modal-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0;
+    color: #333;
+}
+
+.this-model .btn-close {
+    font-size: 1.5rem;
+    background: none;
+    margin-top: 3px;
+    border: none;
+    color: #888;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.this-model .modal-body {
+    padding: 1.5rem;
+}
+
+.this-model .form-group label {
+    font-size: 0.875rem;
+    color: #555;
+}
+
+.this-model .form-control {
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    width: 100%;
+}
+
+.this-model .btn.btn-primary {
+    color: #ffffff !important;
+    font-weight: normal;
+    border: 1px solid royalblue !important;
+    background-color: royalblue !important;
+}
+
+.this-model .form-group {
+    margin-top: 10px;
+}
+
+.this-model .btn.btn-secondary {
+    color: #ffffff !important;
+    font-weight: normal;
+    border: 1px solid #dc3545 !important;
+    background-color: #dc3545 !important;
+}
+
+.this-model .form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.this-model .invalid-feedback {
+    color: #dc3545;
+    font-size: 0.75rem;
+}
+
+.this-model .modal-footer {
+    padding: 1rem;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.this-model .btn-secondary,
+.this-model .btn-primary {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 5px;
+}
+
+.this-model .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.this-model .btn-secondary {
+    background-color: #f8f9fa;
+    color: #495057;
+    border: none;
+}
+
+.this-model .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+
+.this-model
+
+/* Button hover effects */
+.btn-secondary:hover {
+    background-color: #e2e6ea;
+}
+
+.this-model .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.this-model .modal-dialog {
+    margin: auto;
+}

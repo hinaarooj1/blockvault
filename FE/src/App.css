@@ -1,0 +1,8 @@
+/* NProgress customization */
+#nprogress .bar {
+  background: #29d;   /* color of the top bar */
+  height: 2px;
+}
+#nprogress .peg {
+  box-shadow: 0 0 10px #29d, 0 0 5px #29d;
+}

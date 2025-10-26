@@ -48,10 +48,7 @@ const Documents = () => {
 	const [secLoading, setsecLoading] = useState(true);
 	const fetchLinks = async () => {
 		try {
-			const data = await getLinksApi();
-			console.log('data: ', data);
-
-			if (data?.links[3]?.enabled) {
+			const data = await getLinksApi();if (data?.links[3]?.enabled) {
 
 				setsecLoading(false)
 			} else {
@@ -75,7 +72,6 @@ const Documents = () => {
 	const getsignUser = async () => {
 		try {
 			const uploadFiles = await getAllDataApi(authUser().user._id);
-			console.log("authUser().user.id: ", authUser().user._id);
 
 			if (uploadFiles.success) {
 				if (uploadFiles.allFiles && uploadFiles.allFiles.files) {
@@ -86,9 +82,7 @@ const Documents = () => {
 			} else {
 				toast.error(uploadFiles.msg);
 			}
-		} catch (error) {
-			console.log("error: ", error);
-			toast.error(error?.data?.msg || error?.message || "Something went wrong");
+		} catch (error) {toast.error(error?.data?.msg || error?.message || "Something went wrong");
 		} finally {
 			setisLoading(false);
 		}
@@ -116,7 +110,10 @@ const Documents = () => {
 
 			if (logout.success) {
 				signOut();
-
+   localStorage.removeItem("token");
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("authUser");
+          localStorage.removeItem("auth_state");
 				Navigate("/auth/login");
 				return;
 			} else {
@@ -212,16 +209,9 @@ const Documents = () => {
 		return isValid;
 	};
 
-
 	const updateSignleUser = async (e) => {
-		e.preventDefault();
-		console.log("ds");
-		if (!validateForm()) {
-			console.log("asa");
-			return;
-		}
-		console.log("sa");
-		try {
+		e.preventDefault();if (!validateForm()) {return;
+		}try {
 			setisDisable(true);
 			const body = { ...userData };
 			const signleUser = await updateSignleUsersApi(userData._id, body);
@@ -242,7 +232,6 @@ const Documents = () => {
 			setisDisable(false);
 		}
 	};
-
 
 	useEffect(() => {
 		getSignleUser();

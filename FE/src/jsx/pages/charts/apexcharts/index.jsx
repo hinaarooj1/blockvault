@@ -5,7 +5,6 @@ import { Row, Col, Card } from "react-bootstrap";
 
 import pMinDelay from "p-min-delay";
 
-
 const ApexBar2 = loadable(() => pMinDelay(import("./Bar2"), 1000));
 const ApexBar3 = loadable(() => pMinDelay(import("./Bar3"), 1000));
 const ApexRedialBar = loadable(() => pMinDelay(import("./RadialBar"), 1000));

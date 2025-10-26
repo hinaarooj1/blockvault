@@ -1,0 +1,80 @@
+.ticket-message {
+    background-color: #f8f9fa;
+    /* Light gray background for ticket messages */
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.profile-pic {
+    width: 40px;
+    /* Adjust size as needed */
+    height: 40px;
+    border-radius: 50%;
+    /* Make the image circular */
+}
+.saasasa{
+    color: white !important;
+}
+
+.main-head-not button {
+    border: none !important;
+    background-color: transparent !important;
+}
+
+.main-head-not .topakd {
+    margin-bottom: 0 !important;
+}
+
+.main-head-not .groupas {
+    display: none !important
+}
+
+.fla .badgea {
+    margin-left: 20px;
+    padding-block: 5px !important;
+}
+
+.bgas {
+    background-color: white !important;
+    min-height: 100vh;
+    padding-bottom: 30px;
+}
+
+.border-infoas p span {
+    margin-left: 5px;
+}
+
+.border-infoas p {
+    margin-bottom: 10px;
+}
+
+.border-infoas {
+    height: auto;
+    padding: 0 10px;
+    background-color: #8c52ff;
+    color: white;
+}
+
+.tckt0mn {
+    border-bottom: 1px solid gray !important;
+    padding-bottom: 30px !important;
+    border: none;
+}
+
+.fla {
+    line-height: normal;
+    align-items: center;
+}
+
+.loas {
+    width: 200px;
+}
+
+.paddint {
+    padding-top: 100px
+}
+
+.sasas {
+    padding-block: 10px !important;
+    background-color: var(--headerbg);
+}

@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import { Nav, Tab } from 'react-bootstrap';
 import MoneyFlowChart from './MoneyFlowChart';
 
-
 const option = [
     {value:'1', label:'Monthly'},
     {value:'2', label:'Daily'},
@@ -22,7 +21,6 @@ const tableData = [
     {amount:'-$1,000',name:'Withdraw', icon: SVGICON.WithDrowicon , status:'Canceled', color:'danger' },
     {amount:'-$1,102',name:'Withdraw', icon: SVGICON.WithDrowicon , status:'Canceled', color:'danger' },
 ];
-
 
 const Banking = () => {
     return (
@@ -85,7 +83,6 @@ const Banking = () => {
                                     </svg>
                                 </div>
 
-
                             </div>
                             <div className="card-body pb-0 custome-tooltip d-flex align-items-center">
                                 <div id="chartBar2" className="chartBar">
@@ -115,7 +112,6 @@ const Banking = () => {
                                         </g>
                                     </svg>
                                 </div>
-
 
                             </div>
                             <div className="card-body pb-0 custome-tooltip d-flex align-items-center">

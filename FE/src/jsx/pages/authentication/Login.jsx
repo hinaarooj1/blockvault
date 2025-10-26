@@ -8,9 +8,7 @@ import { loginApi } from "../../../Api/Service";
 import { useSignIn, useIsAuthenticated, useAuthUser } from "react-auth-kit";
 import { useAuth } from "../../../store/auth";
 
-
 import { IMAGES } from '../../constant/theme';
-
 
 function Login(props) {
 	// 
@@ -33,15 +31,23 @@ function Login(props) {
 				: settype1("password");
 	};
 
-	const { storeTokenInLs } = useAuth();
+	// const { storeTokenInLs } = useAuth();
 	const onLogin = async (e) => {
 		e.preventDefault();
 		let error = false;
 		const errorObj = { ...errorsObj };
-		if (email === '') {
-			errorObj.email = 'Email is Required';
+		if (email.trim() === '') {
+			errorObj.email = 'Email is required';
 			error = true;
+		} else {
+			// Email Format Validation (simple regex)
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email.trim())) {
+				errorObj.email = 'Please enter a valid email address';
+				error = true;
+			}
 		}
+
 		if (password === '') {
 			errorObj.password = 'Password is Required';
 			error = true;
@@ -57,7 +63,6 @@ function Login(props) {
 			const updateHeader = await loginApi(data);
 			let newData = updateHeader;
 			if (updateHeader.success === true && updateHeader.link === false) {
-
 
 				newData = {
 					success: updateHeader.success,
@@ -91,19 +96,17 @@ function Login(props) {
 					sameSite: false,
 				})
 			) {
-				storeTokenInLs(updateHeader.token);
+				// storeTokenInLs(updateHeader.token);
 				toast.dismiss();
-				toast.success(updateHeader.msg);
-				console.log('location.state?.from: ', location.state?.from);
-				if (updateHeader.user.role === "user") {
+				toast.success(updateHeader.msg);if (updateHeader.user.role === "user") {
 					const redirectTo = location.state?.from || '/dashboard';
 					navigate(redirectTo);
-
 
 					return;
 				} else if (
 					updateHeader.user.role === "admin" ||
-					updateHeader.user.role === "subadmin"
+					updateHeader.user.role === "subadmin" ||
+					updateHeader.user.role === "superadmin"
 				) {
 					const redirectTo = location.state?.from || '/admin/dashboard';
 					navigate(redirectTo);
@@ -112,18 +115,12 @@ function Login(props) {
 				}
 			} else if (updateHeader.success === true && updateHeader.link === true) {
 				toast.dismiss();
-				toast.info(updateHeader.msg);
-				console.log(updateHeader);
-				setPassword("");
+				toast.info(updateHeader.msg);setPassword("");
 				return
 			} else {
 				toast.dismiss();
-				toast.error(updateHeader.msg);
-				console.log(updateHeader);
-			}
-		} catch (error) {
-			console.log('error: ', error);
-			toast.dismiss();
+				toast.error(updateHeader.msg);}
+		} catch (error) {toast.dismiss();
 			toast.error(error?.data?.msg || "Something went wrong");
 		} finally {
 			setisloading(false);
@@ -142,13 +139,13 @@ function Login(props) {
 			navigate("/admin/dashboard");
 		} else if (isAuthenticated() && authUser().user.role === "subadmin") {
 			navigate("/admin/dashboard");
+		} else if (isAuthenticated() && authUser().user.role === "superadmin") {
+			navigate("/admin/dashboard");
 		}
 	}, []);
 	// 
 	let errorsObj = { email: '', password: '' };
 	const [errors, setErrors] = useState(errorsObj);
-
-
 
 	return (
 
@@ -268,7 +265,6 @@ function Login(props) {
 					</div>
 				</main>
 			</div>
-
 
 		</main>
 	);

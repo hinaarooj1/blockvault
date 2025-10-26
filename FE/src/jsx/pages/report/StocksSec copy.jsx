@@ -12,7 +12,6 @@ import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinn
 import './style.css'
 import Truncate from 'react-truncate-inside/es';
 
-
 const StocksSec = () => {
     const [stocksNew, setStocksNew] = useState([]);
     const [selectedStock, setSelectedStock] = useState('');
@@ -66,16 +65,13 @@ const StocksSec = () => {
 
                 // Check if stocks is defined and is an array
                 if (Array.isArray(stocks) && stocks !== null && stocks !== undefined) {
-                    if (stocks.length > 0) {
-                        console.log('stocks: ', stocks);
-                        setUserTransactions(stocks.reverse()); // Set the stocks if available
+                    if (stocks.length > 0) {setUserTransactions(stocks.reverse()); // Set the stocks if available
                     } else {
                         setUserTransactions(null); // Set to null if no stocks are available
                     }
                 } else {
                     setUserTransactions(null); // Set to null if stocks is not defined or not an array
                 }
-
 
                 return;
             } else {
@@ -104,15 +100,10 @@ const StocksSec = () => {
             const stockValuePromises = symbols.map(symbol =>
                 axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${apiKey}`)
             );
-            const responses = await Promise.all(stockValuePromises);
-            console.log('responses: ', responses);
-
-            const values = {};
+            const responses = await Promise.all(stockValuePromises);const values = {};
             responses.forEach((response, index) => {
                 const symbol = symbols[index];
-                const timeSeries = response.data['Time Series (5min)'];
-                console.log('timeSeries: ', timeSeries);
-                if (timeSeries) {
+                const timeSeries = response.data['Time Series (5min)'];if (timeSeries) {
                     const latestTime = Object.keys(timeSeries)[0];
                     const latestData = timeSeries[latestTime]['1. open'];
                     values[symbol] = latestData;

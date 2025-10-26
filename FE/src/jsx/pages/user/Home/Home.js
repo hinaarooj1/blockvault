@@ -21,7 +21,6 @@ import Leo from '../../../../assets/images/leo.jpg'
 import Lily from '../../../../assets/images/lily.jpg'
 import Sophie from '../../../../assets/images/sophie.jpg'
 
-
 const Home = () => {
   const sliderRef = useRef(null);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -31,8 +30,6 @@ const Home = () => {
   const toggleTab = (tabIndex) => {
     setActiveTab((prev) => (prev === tabIndex ? null : tabIndex));
   };
-
-
 
   const toggleAccordion = (index) => {
     setOpenAccordion(openAccordion === index ? null : index);
@@ -96,9 +93,9 @@ const Home = () => {
   const faqData = [
     {
       id: 1,
-      question: "What is Blockvault Wallet?",
+      question: "What is Fortivault Wallet?",
       answer:
-        "Blockvault Wallet is a secure, easy-to-use platform for managing, sending, and receiving cryptocurrencies. It supports multiple tokens and offers advanced security features to protect your digital assets.",
+        "Fortivault Wallet is a secure, easy-to-use platform for managing, sending, and receiving cryptocurrencies. It supports multiple tokens and offers advanced security features to protect your digital assets.",
     },
     {
       id: 2,
@@ -108,7 +105,7 @@ const Home = () => {
     },
     {
       id: 3,
-      question: "Is my crypto safe in Blockvault Wallet?",
+      question: "Is my crypto safe in Fortivault Wallet?",
       answer:
         "Yes, your crypto is protected with top-level encryption, multi-layer authentication, and cold storage solutions, ensuring maximum security for your digital assets.",
     },
@@ -116,19 +113,19 @@ const Home = () => {
       id: 4,
       question: "What crypto is supported?",
       answer:
-        "Blockvault Wallet supports a wide variety of cryptocurrencies, including Bitcoin, Ethereum, and many popular altcoins. Check our supported tokens list for the full range of assets you can store and manage.",
+        "Fortivault Wallet supports a wide variety of cryptocurrencies, including Bitcoin, Ethereum, and many popular altcoins. Check our supported tokens list for the full range of assets you can store and manage.",
     },
     {
       id: 5,
-      question: "Can I stake my crypto in Blockvault Wallet?",
+      question: "Can I stake my crypto in Fortivault Wallet?",
       answer:
-        "Yes, Blockvault Wallet offers a simple staking option that allows you to earn rewards by staking your tokens directly within the app. Just choose your desired crypto, and start staking to maximize your returns.",
+        "Yes, Fortivault Wallet offers a simple staking option that allows you to earn rewards by staking your tokens directly within the app. Just choose your desired crypto, and start staking to maximize your returns.",
     },
     {
       id: 6,
-      question: "Can I connect my bank account or credit card to Blockvault Wallet?",
+      question: "Can I connect my bank account or credit card to Fortivault Wallet?",
       answer:
-        "Yes, Blockvault Wallet allows you to link your bank account or credit card for easy purchasing and transferring of cryptocurrencies. Enjoy a simple, secure way to fund your wallet and manage your assets.",
+        "Yes, Fortivault Wallet allows you to link your bank account or credit card for easy purchasing and transferring of cryptocurrencies. Enjoy a simple, secure way to fund your wallet and manage your assets.",
     },
   ];
 
@@ -143,7 +140,6 @@ const Home = () => {
               </Link>
             </div>
             <div style={{ display: 'flex', flexDirection: "row" }} className="collapse fldla navbar-collapse justify-content-end"   >
-
 
               {/* <div className="header-cta nnmmn" ><a target="_blank" href="https://drive.google.com/file/d/1XVfhTww7tjdo2vXMQA8SJ5z6hQuhnwtA/view?usp=sharing"  >
                 <div className="d-inline-block elementor-button-link elementor-button elementor-size-md" >Download Windows App</div>
@@ -625,7 +621,7 @@ const Home = () => {
                                     <div className="elementor-widget-container" >
                                       The Toka Wallet lets you store your private keys on your
                                       card while maintaining easy access to them. </div>
-                                  </div>Sign up for Blockvault Wallet today and start managing, securing, and growing your digital assets with confidence. Experience seamless transactions, top-notch security, and a wide range of features designed to help you succeed in the world of cryptocurrency. Take action now and unlock the future of finance!
+                                  </div>Sign up for Fortivault Wallet today and start managing, securing, and growing your digital assets with confidence. Experience seamless transactions, top-notch security, and a wide range of features designed to help you succeed in the world of cryptocurrency. Take action now and unlock the future of finance!
 
                                   <div className="elementor-element elementor-element-c92040a elementor-tablet-align-center elementor-align-center elementor-widget elementor-widget-button" data-id="c92040a" data-element_type="widget" data-widget_type="button.default" >
                                     <div className="elementor-widget-container" >
@@ -675,7 +671,7 @@ const Home = () => {
                         <h4 className="widget-title">Contact Us</h4>
                         <div className="textwidget" >
                           <p>Place de La Defense, Puteaux, 92400</p>
-                          <p><a href="mailto:support@Blockvault.pro" >support@Blockvault.pro</a></p>
+                          <p><a href="mailto:admin@fortivault.io" >admin@fortivault.io</a></p>
                         </div>
                       </div>
                     </div>
@@ -685,7 +681,7 @@ const Home = () => {
               </div>
               <div className="footer-bottom" >
                 <div className="footer-credits" >
-                  <p className="footer-copyright">Copyright ©2025 Blockvault. All rights reserved.
+                  <p className="footer-copyright">Copyright ©2025 Fortivault. All rights reserved.
                   </p>{/* .footer-copyright */}
                 </div>{/* .footer-credits */}
 

@@ -1,6 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
 
-
 export const ThemeContext = createContext();
 
 const ThemeContextProvider = (props) => {

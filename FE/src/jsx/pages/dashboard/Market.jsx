@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import MarketOverViewChart2 from '../../elements/dashboard/MarketOverViewChart2';
 import MarketBarChart from '../../elements/MarketBarChart';
 
-
 const marketBlog = [
     {icon : SVGICON.LtcUsdIcon, name:'LTC/USD', chartcolor:'#3ab67a', month:'March', amount:'120.45', percent:'1.24%', color:'success'},
     {icon : SVGICON.BtcUsdIcon, name:'BTC/USD', chartcolor:'#EE3232', month:'January', amount:'149.50', percent:'1.24%', color:'danger'},

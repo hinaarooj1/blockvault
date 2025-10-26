@@ -26,10 +26,8 @@ const UserLinks = () => {
   }, []);
 
   const fetchLinks = async () => {
-    try { 
-      const data = await getLinksApi();
-      console.log('data: ', data);
-      setLinks(data.links);
+    try {
+      const data = await getLinksApi();setLinks(data.links);
       setLoadingNew(false)
 
     } catch (error) {
@@ -41,12 +39,10 @@ const UserLinks = () => {
 
   const toggleLink = async (id, currentStatus) => {
     try {
-      let enabled = !currentStatus 
+      let enabled = !currentStatus
       const linkData = await updateLinksApi(id, enabled)
-      console.log('linkData: ', linkData);
-      setLoadingNew(true)
-      // await patch(`/api/links/${id}`, { enabled: !currentStatus }); // 👈 backend update
-      console.log('linkData.success: ', linkData.success);
+      // const linkData= await patch(`/api/links/${id}`, { enabled: !currentStatus }); // 👈 backend update
+      setLoadingNew(true);
       if (linkData.success) {
         toast.success("link status updated")
         fetchLinks()
@@ -54,15 +50,20 @@ const UserLinks = () => {
         setLoadingNew(false)
       }
     } catch (error) {
-      console.error("Error updating link:", error);
-    } finally {
+      toast.error("Error updating link status");
+      setLoadingNew(false);
     }
   };
-
 
   useEffect(() => {
     if (authUser().user.role === "user") {
       Navigate("/dashboard");
+      return;
+    } else if (authUser().user.role === "admin") {
+      Navigate("/admin/dashboard");
+      return;
+    } else if (authUser().user.role === "subadmin") {
+      Navigate("/admin/dashboard");
       return;
     }
   }, []);
@@ -107,7 +108,7 @@ const UserLinks = () => {
                               onChange={() => toggleLink(link._id, link.enabled)}
                               className="sr-only"
                             />
-                            <button style={{opacity:loadingNew?'0.8':"1"}} onClick={() => toggleLink(link._id, link.enabled)} disabled={loadingNew}><div
+                            <button style={{ opacity: loadingNew ? '0.8' : "1" }} onClick={() => toggleLink(link._id, link.enabled)} disabled={loadingNew}><div
                               className={`toggleit ${link.enabled ? "active" : ""}`}
 
                             ></div></button>

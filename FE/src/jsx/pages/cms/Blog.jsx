@@ -3,7 +3,6 @@ import {Link} from 'react-router-dom';
 import Select from 'react-select';
 import Collapse from 'react-bootstrap/Collapse';
 
-
 const options = [
     //{ value: '1', label: 'Select Status' },
     { value: '2', label: 'Published' },
@@ -12,7 +11,6 @@ const options = [
     { value: '5', label: 'Private' },
     { value: '6', label: 'Pending' }
 ]
-
 
 const tableData = [
     {number:"1", title:"Title of first blog post entry"},
@@ -31,7 +29,6 @@ const Blog = () =>{
 	const sort = 8;
 	const activePag = useRef(0);
 	const [test, settest] = useState(0);
-
 
 	const chageData = (frist, sec) => {
 		for (var i = 0; i < data.length; ++i) {
@@ -53,7 +50,6 @@ const Blog = () =>{
    let paggination = Array(Math.ceil(data.length / sort))
       .fill()
      .map((_, i) => i + 1);
-
 
 	const onClick = (i) => {
 		activePag.current = i;

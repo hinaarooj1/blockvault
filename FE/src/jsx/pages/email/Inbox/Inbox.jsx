@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 import PageTitle from "../../../layouts/PageTitle";
 
-
 const Inbox = () => {
   const [openMailBar, setOpenMailBar] = useState();
   const [data, setData] = useState(

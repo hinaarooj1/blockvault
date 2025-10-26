@@ -74,10 +74,7 @@ const Swap = () => {
 
     const fetchLinks = async () => {
         try {
-            const data = await getLinksApi();
-            console.log('data: ', data);
-
-            if (data?.links[7]?.enabled) {
+            const data = await getLinksApi();if (data?.links[7]?.enabled) {
 
                 setsecLoading(false)
             } else {
@@ -111,18 +108,9 @@ const Swap = () => {
             }
 
             if (ethResponse && ethResponse.data) {
-                setLiveEthPrice(parseFloat(ethResponse.data.price));
-                console.log(
-                    "ethResponse.data.data.price: ",
-                    ethResponse.data.data.price
-                );
-            }
+                setLiveEthPrice(parseFloat(ethResponse.data.price));}
             if (userCoins) {
-                let val = userCoins?.btcPrice?.quote?.USD?.price ?? 96075.25;
-
-                console.log("val: ", val);
-
-                setLiveBtcPrice(parseFloat(val));
+                let val = userCoins?.btcPrice?.quote?.USD?.price ?? 96075.25;setLiveBtcPrice(parseFloat(val));
             }
         } catch (error) {
             toast.dismiss();
@@ -138,12 +126,7 @@ const Swap = () => {
             const userCoins = await getCoinsUserApi(id);
 
             if (userCoins.success) {
-                setUserData(userCoins.getCoin);
-                console.log("userCoins.getCoin: ", userCoins.getCoin);
-                // setUserTransactions;
-                console.log("liveBtc", userCoins.getCoin.transactions);
-
-                setisLoading(false);
+                setUserData(userCoins.getCoin);// setUserTransactions;setisLoading(false);
                 // tx
                 const btc = userCoins.getCoin.transactions.filter((transaction) =>
                     transaction.trxName.includes("bitcoin")
@@ -158,9 +141,7 @@ const Swap = () => {
                     btcCount = element.amount;
                     btcValueAdded += btcCount;
                 }
-                setbtcBalance(btcValueAdded);
-                console.log("btcValueAdded: ", btcValueAdded);
-                // tx
+                setbtcBalance(btcValueAdded);// tx
                 // tx
                 const eth = userCoins.getCoin.transactions.filter((transaction) =>
                     transaction.trxName.includes("ethereum")
@@ -469,14 +450,9 @@ const Swap = () => {
             if (newTransactionDeposit.success) {
                 toast.success(newTransactionDeposit.msg);
                 Navigate("/assets");
-            } else {
-                console.log("neemdone");
-
-                toast.error("One or both transactions failed.");
+            } else {toast.error("One or both transactions failed.");
             }
-        } catch (error) {
-            console.log("notdone", error);
-            toast.error(error);
+        } catch (error) {toast.error(error);
         } finally {
             setisDisable(false);
         }
@@ -796,7 +772,6 @@ const Swap = () => {
                             Cancel
                         </Button>
                         {activeBank ? (
-
 
                             <Button
                                 onClick={() => postUserTransaction("bank")}

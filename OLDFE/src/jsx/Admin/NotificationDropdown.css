@@ -1,0 +1,171 @@
+.notification-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 360px !important;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #fff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+.notification-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 6px;
+}
+
+.notification-dropdown h4 {
+    margin: 0;
+    padding: 14px 18px;
+    background-color: #f5f5f5;
+    font-size: 16px;
+    font-weight: 600;
+    color: gray;
+    border-bottom: 1px solid #ddd;
+}
+
+.notification-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.notification-dropdown li {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+    position: relative;
+}
+
+.notification-dropdown li:hover {
+    background-color: #f9f9f9;
+}
+
+.notification-dropdown li.unread {
+    background-color: #eef5ff;
+}
+
+.notification-wrapper {
+    display: flex;
+    align-items: center;
+
+}
+
+.notification-header {
+    display: flex;
+    margin-bottom: 5px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-em:hover {
+    text-decoration: underline;
+}
+
+.user-em {
+    color: royalblue !important;
+}
+
+.notification-content {
+    font-size: 14px !important;
+    color: #333 !important;
+    font-weight: 500 !important;
+    margin-bottom: 0 !important;
+}
+
+.mark-read-icon {
+    cursor: pointer;
+    color: #007bff;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.mark-read-icon:hover {
+    color: #0056b3;
+}
+
+.user-email,
+.notification-time,
+.card-status {
+    display: block !important;
+    font-size: 12px !important;
+    color: #666 !important;
+    margin-top: 4px !important;
+    margin-bottom: 0px !important;
+}
+
+.notification-icon {
+    position: relative;
+}
+
+.notf:hover {
+    opacity: 0.9;
+}
+
+.notf {
+    border-bottom: 1px solid rgb(202, 202, 202) !important;
+}
+
+.notf span {
+    margin-top: 0;
+}
+
+.mark-read-icon img {
+    width: 20px;
+}
+
+.notification-icon img {
+    width: 22px;
+}
+
+.notification-icon .dot {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 8px;
+    height: 8px;
+    background: red;
+    border-radius: 50%;
+    animation: pulseDot 1.5s infinite ease-in-out;
+}
+
+.notf {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width:400px) {
+
+    .notification-dropdown {
+        width: 100%;
+
+    }
+
+}
+
+/*  */
+@keyframes pulseDot {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.6);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

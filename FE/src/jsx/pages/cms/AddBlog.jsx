@@ -7,7 +7,6 @@ import { Collapse } from 'react-bootstrap';
 import CkEditorBlog from '../../elements/CkEditor/CkEditorBlog';
 import NoImage from '../../../assets/images/no-image.jpg';
 
-
 const options = [
     { value: '2', label: 'admin@gmail.com' },
     { value: '3', label: 'India' },
@@ -26,7 +25,6 @@ export const foodOptions = [
     { value: "fashion", label: "Fashion", color: "#FFC400" },
     { value: "lifestyle", label: "Lifestyle", color: "#36B37E" },
  ];
-
 
 const initialState = true;
 const reducer = (state, action) =>{

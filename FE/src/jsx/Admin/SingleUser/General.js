@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import SideBar from "../../layouts/AdminSidebar/Sidebar";
 import UserSideBar from "./UserSideBar";
 import Log from "../../../assets/images/img/log.jpg";
+import New from "../../../assets/images/new3.gif";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { signleUsersApi, updateSignleUsersApi } from "../../../Api/Service";
+import { patchCoinsApi, signleUsersApi, updateSignleUsersApi } from "../../../Api/Service";
 import { toast } from "react-toastify";
 import { useAuthUser } from "react-auth-kit";
 import ReactQuill from "react-quill";
@@ -28,6 +29,7 @@ const General = () => {
     country: "",
     postalCode: "",
     progress: 0,
+    AiTradingPercentage: 1.5,
   });
   let handleInput = (e) => {
     let name = e.target.name;
@@ -50,15 +52,33 @@ const General = () => {
     }
   };
   const [currency, setCurrency] = useState("");
+  const patchCoins = async () => {
+    try {
+      const userCoins = await patchCoinsApi(id);
 
+      if (userCoins.success) {
+
+      } else {
+        toast.dismiss();
+        toast.error(userCoins.msg);
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error);
+    } finally {
+    }
+  };
   const handleCurrencyChange = (event) => {
     setCurrency(event.target.value);
   };
+
   const getSignleUser = async () => {
     try {
       const signleUser = await signleUsersApi(id);
 
       if (signleUser.success) {
+
+        checkPermissions(signleUser.signleUser)
         setUserData(signleUser.signleUser); setCurrency(signleUser.signleUser.currency)
         setnewDescription(signleUser.signleUser.note);
       } else {
@@ -71,7 +91,36 @@ const General = () => {
     } finally {
     }
   };
+  const checkPermissions = async (targetUser) => {
+    try {
+      const currentUser = authUser().user;
+
+      // For role-based checks, use authUser data first
+      if (currentUser.role === "admin") {
+        // Only fetch fresh data for admin permission checks
+        const signleUser = await signleUsersApi(currentUser._id);
+      if (signleUser.success) {
+          if (targetUser.role !== "user" && signleUser.signleUser.adminPermissions?.isSubManagement === false) {
+            Navigate("/admin/dashboard");
+            return;
+          }
+        }
+      } else if (currentUser.role === "subadmin") {
+        // For subadmin, we need fresh permissions data
+        const signleUser = await signleUsersApi(currentUser._id);
+        if (signleUser.success && signleUser.signleUser.permissions.editUserProfile === false) {
+          Navigate(`/admin/users/${id}/assets`);
+          return;
+        }
+      }
+      // Superadmin has all permissions, no need to check
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error);
+    }
+  };
   const updateSignleUser = async (e) => {
+
     e.preventDefault();
     try {
       let editDesc = newDescription;
@@ -101,8 +150,8 @@ const General = () => {
         country: userData.country,
         postalCode: userData.postalCode,
         currency: currency,
-      };
-
+        AiTradingPercentage: userData.AiTradingPercentage,
+      }; 
       if (
         !body.firstName.trim() ||
         !body.lastName.trim() ||
@@ -113,7 +162,8 @@ const General = () => {
         !body.country.trim() ||
         !body.phone ||
         !body.postalCode ||
-        !currency
+        !currency ||
+        !body.AiTradingPercentage
       ) {
         toast.error("Fields cannot be left blank except the note field!");
 
@@ -139,21 +189,27 @@ const General = () => {
     }
   };
   useEffect(() => {
+    if (id === authUser().user._id) {
+      Navigate("/admin/dashboard");
+      return
+    }
     if (authUser().user.role === "user") {
       Navigate("/dashboard");
       return;
     }
     getSignleUser();
+    patchCoins()
   }, []);
   return (
     <>
       <div className="">
         <div className="bg-muted-100 dark:bg-muted-900 pb-20">
+
           <SideBar state={Active} toggle={toggleBar} />
           <div className="bg-muted-100 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10 lg:max-w-[calc(100%_-_280px)] lg:ms-[280px]">
             <div className="mx-auto w-full max-w-7xl">
 
-              <AdminHeader toggle={toggleBar} pageName="User Management" />
+              <AdminHeader toggle={toggleBar} pageName="Member  Management" />
               <div
                 className="nuxt-loading-indicator"
                 style={{
@@ -177,7 +233,8 @@ const General = () => {
               <div className="admin">
                 <div className="min-h-screen overflow-hidden">
                   <div className="grid gap-8 sm:grid-cols-12">
-                    <UserSideBar userid={id} />
+                    {userData.role === "admin" || userData.role === "subadmin" ? "" : <UserSideBar userid={id} />}
+
                     <div className="col-span-12 sm:col-span-8">
                       <form method="POST" action className="w-full ">
                         <div className="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative w-full border bg-white transition-all duration-300 rounded-md">
@@ -214,6 +271,34 @@ const General = () => {
                             </div>
                           </div>
                           <div className="p-4">
+
+                            {userData.role === "admin" || userData.role === "subadmin" ? "" :
+                              <div className="col-span-12">
+                                <div className="relative">
+                                  {/**/}
+                                  <label style={{ display: 'flex ', alignItems: 'center' }}>Ai Trading % </label>
+                                  <div className="group/nui-input relative">
+                                    <input
+                                      id="ninja-input-11"
+                                      type="number"
+                                      onChange={handleInput}
+                                      value={userData.AiTradingPercentage}
+                                      name="AiTradingPercentage"
+                                      className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                      placeholder="Ai trading Rate %"
+                                    />
+                                    {/**/}
+                                    {/**/}
+                                    <div className="text-muted-400 group-focus-within/nui-input:text-primary-500 absolute start-0 top-0 flex items-center justify-center transition-colors duration-300 peer-disabled:cursor-not-allowed peer-disabled:opacity-75 h-10 w-10">
+                                      <svg data-v-cd102a71="true" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" className="icon h-4 w-4" width="1em" height="1em" viewBox="0 0 20 20"><g fill="currentColor"><path d="M9 2a1 1 0 0 0 0 2h2a1 1 0 1 0 0-2z" /><path fillRule="evenodd" d="M4 5a2 2 0 0 1 2-2a3 3 0 0 0 3 3h2a3 3 0 0 0 3-3a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm3 4a1 1 0 0 0 0 2h.01a1 1 0 1 0 0-2zm3 0a1 1 0 0 0 0 2h3a1 1 0 1 0 0-2zm-3 4a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3 0a1 1 0 1 0 0 2h3a1 1 0 1 0 0-2z" clipRule="evenodd" /></g></svg>
+
+                                    </div>
+                                    {/**/}
+                                  </div>
+                                </div>
+                              </div>
+                            }
+
                             <div className=" space-y-12 py-8">
                               {/**/}
                               {/**/}
@@ -625,59 +710,62 @@ const General = () => {
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="col-span-12">
-                                    <div className="relative">
-                                      <div className="group/nui-input relative">
-                                        {/* Label */}
-                                        <div className="text-sm text-gray-500 py-1 font-medium">
-                                          User Currency:
-                                        </div>
+                                  {userData.role === "admin" || userData.role === "subadmin" ? "" :
 
-                                        {/* Radio Options */}
-                                        <div className="flex items-center space-x-4 mt-2">
-                                          <label
-                                            htmlFor="eur"
-                                            className={`flex items-center space-x-2 cursor-pointer p-2 rounded-md ${currency === "EUR" ? "bg-blue-100" : "hover:bg-gray-100"
-                                              }`}
-                                          >
-                                            <input
-                                              type="radio"
-                                              id="eur"
-                                              name="currency"
-                                              value="EUR"
-                                              checked={currency === "EUR"}
-                                              onChange={handleCurrencyChange}
-                                              className=" me-2"
-                                            />
-                                            <div className="text-blue-600 font-medium">EUR</div>
-                                          </label>
+                                    <div className="col-span-12">
+                                      <div className="relative">
+                                        <div className="group/nui-input relative">
+                                          {/* Label */}
+                                          <div className="text-sm text-gray-500 py-1 font-medium">
+                                            User Currency:
+                                          </div>
 
-                                          <label
-                                            htmlFor="usd"
-                                            className={`flex items-center space-x-2 cursor-pointer p-2 rounded-md ${currency === "USD" ? "bg-blue-100" : "hover:bg-gray-100"
-                                              }`}
-                                          >
-                                            <input
-                                              type="radio"
-                                              id="usd"
-                                              name="currency"
-                                              value="USD"
-                                              checked={currency === "USD"}
-                                              onChange={handleCurrencyChange}
-                                              className=" me-2"
-                                            />
-                                            <div className="text-blue-600 font-medium">USD</div>
-                                          </label>
+                                          {/* Radio Options */}
+                                          <div className="flex items-center space-x-4 mt-2">
+                                            <label
+                                              htmlFor="eur"
+                                              className={`flex items-center space-x-2 cursor-pointer p-2 rounded-md ${currency === "EUR" ? "bg-blue-100" : "hover:bg-gray-100"
+                                                }`}
+                                            >
+                                              <input
+                                                type="radio"
+                                                id="eur"
+                                                name="currency"
+                                                value="EUR"
+                                                checked={currency === "EUR"}
+                                                onChange={handleCurrencyChange}
+                                                className=" me-2"
+                                              />
+                                              <div className="text-blue-600 font-medium">EUR</div>
+                                            </label>
+
+                                            <label
+                                              htmlFor="usd"
+                                              className={`flex items-center space-x-2 cursor-pointer p-2 rounded-md ${currency === "USD" ? "bg-blue-100" : "hover:bg-gray-100"
+                                                }`}
+                                            >
+                                              <input
+                                                type="radio"
+                                                id="usd"
+                                                name="currency"
+                                                value="USD"
+                                                checked={currency === "USD"}
+                                                onChange={handleCurrencyChange}
+                                                className=" me-2"
+                                              />
+                                              <div className="text-blue-600 font-medium">USD</div>
+                                            </label>
+                                          </div>
                                         </div>
                                       </div>
+                                      {/* Display Selected Value */}
+                                      {currency && (
+                                        <div className="mt-4 text-sm text-gray-600">
+                                          Selected Currency: <span className="font-semibold">{currency}</span>
+                                        </div>
+                                      )}
                                     </div>
-                                    {/* Display Selected Value */}
-                                    {currency && (
-                                      <div className="mt-4 text-sm text-gray-600">
-                                        Selected Currency: <span className="font-semibold">{currency}</span>
-                                      </div>
-                                    )}
-                                  </div>
+                                  }
                                   {/* <div className="col-span-12">
                                     <div className="relative">
                                       <div className="group/nui-input relative">
@@ -920,3 +1008,4 @@ const General = () => {
 };
 
 export default General;
+ 

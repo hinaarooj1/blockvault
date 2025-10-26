@@ -9,6 +9,7 @@ import "./assets/css/style.css";
 import "./assets/css/styles.css";
 import "./assets/css/main.css";
 import "./assets/css/stylemain.css";
+
 // import { AuthProvider } from "react-auth-kit"; // Ensure this is correct
 // // import Login from './jsx/pages/authentication/Login'
 // const SignUp = lazy(() => import('./jsx/pages/authentication/Registration'));
@@ -79,15 +80,13 @@ import "./assets/css/stylemain.css";
 //     );
 // };
 
-
 // export default withRouter(connect(App));
-import React from 'react';import './i18n'
+import React from 'react'; import './i18n'
 import Router from './config/router';
 import { useTranslation } from 'react-i18next';
-// import Login from './jsx/pages/authentication/Login';
 
 const App = () => {
-    
+
     const { t, i18n } = useTranslation();
     return (
         <div>

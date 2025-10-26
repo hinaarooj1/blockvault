@@ -51,5 +51,3 @@ const Gradient = () => {
 
 export default Gradient;
 
-
-

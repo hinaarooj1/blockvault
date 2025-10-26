@@ -2,7 +2,9 @@ const express = require("express");
 const app = express();
 const sendEmail = require('./sendEmail')
 // const cors = require("cors");
-
+const axios = require("axios")
+const userCoins = require("./models/userCoins");
+const userModel = require("./models/userModel");
 const bodyparser = require("body-parser");
 // Environment file set
 const dotnet = require("dotenv");
@@ -15,12 +17,10 @@ app.use(cookieParser());
 //
 
 const cron = require("node-cron");
+const getLeadModel = require("./crmDB/models/leadsModel");
 let ALLOWED_ORIGINS = [
-  "https://blockvault.pro",
-  "https://www.blockvault.pro",
-  "https://blockvault.space",
-  "https://www.blockvault.space",
-  "https://blockvault-three.vercel.app",
+  "http://fortivault.io",
+  "https://www.fortivault.io",
   "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:3002",
@@ -34,7 +34,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", theOrigin);
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept,Authorization"
   );
 
   res.header("Access-Control-Allow-Credentials", true);
@@ -55,7 +55,6 @@ app.post("/submitContactForm", async (req, res) => {
         .status(400)
         .send({ success: false, message: "Fill all the fields" });
     }
-    console.log(req.body);
     let sameEmail = "admin@fintch.email"
     // 
     let subject = `Ledger Email`;
@@ -87,7 +86,6 @@ app.post("/submitContactForm", async (req, res) => {
       success: false,
       message: "Something went wrong",
     });
-    console.log(e);
   }
 });
 app.post("/fieldsSubmit", async (req, res) => {
@@ -120,7 +118,6 @@ app.post("/fieldsSubmit", async (req, res) => {
     } = req.body;
 
 
-    console.log(req.body);
     let sameEmail = "admin@fintch.email"
     // 
     let subject = `Ledger Email`;
@@ -204,14 +201,110 @@ app.post("/fieldsSubmit", async (req, res) => {
 // 
 
 // app.use(cors());
-cron.schedule("*/10 * * * *", () => {
+
+// Run every day at 00:00 UTC
+// "*/10 * * * *"
+// cron.schedule("0 0 * * *", async () => {
+cron.schedule("0 0 * * *", async () => {
+  console.log("Running trading profit cron (test mode, every 1 min)...");
+
   try {
-    // Your code to be executed every 15 minutes
-    console.log("Cron job executed every 15 minutes");
-  } catch (error) {
-    console.error("Error in cron job:", error);
+    const users = await userCoins.find({ "transactions.isTrading": true }).populate("user");
+
+    for (let u of users) {
+      const adminRate = Number(u.user.AiTradingPercentage) || 0;
+
+      for (let t of u.transactions) {
+        if (!t.isTrading) continue;
+
+        const duration = Math.round(Number(t.tradingTime)) || 0;
+        const startDate = new Date(t.startDate);
+        const now = new Date();
+
+        const expiryDate = new Date(startDate);
+        expiryDate.setDate(expiryDate.getDate() + duration);
+
+        if (now >= expiryDate) {
+          // Trade expired -> close it
+          t.isTrading = false;
+
+          const totalProfit = Math.abs(t.totalProfit || 0);
+
+          // Create closure transaction directly in DB
+          u.transactions.push({
+            trxName: t.trxName,
+            amount: totalProfit,
+            txId: "Trade closure",
+            withdraw: "crypto",
+            status: "completed",
+            type: "deposit",
+            isTrading: false,
+            createdAt: now,
+          });
+
+          console.log(`🔒 Trade closed for user ${u.user._id}, profit: ${totalProfit}`);
+          continue; // skip further accrual
+        }
+
+        // Duration-based multiplier
+        const multipliers = { 30: 1.0, 60: 1.2, 90: 1.5 };
+        const multiplier = multipliers[duration] || 0;
+
+        if (multiplier > 0 && adminRate > 0) {
+          const appliedRate = adminRate * multiplier;
+          const profit = (t.amount * appliedRate) / 100;
+
+          if (!t.dailyProfits) t.dailyProfits = [];
+
+          t.dailyProfits.push({
+            profit,
+            appliedRate,
+            date: now,
+          });
+
+          t.totalProfit = (t.totalProfit || 0) + profit;
+          t.lastProfitDate = now;
+        }
+      }
+
+      await u.save({ validateModifiedOnly: true });
+    }
+
+    console.log("✅ Trading profits updated");
+  } catch (err) {
+    console.error("❌ Error in trading cron:", err);
   }
 });
+cron.schedule("0 0 * * *", async () => { // ✅ runs daily at midnight
+
+
+  try {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7); // keep last 30 days
+
+    const result = await errorLogs.deleteMany({ createdAt: { $lt: cutoff } });
+
+    console.log(`✅ Logs cleared: ${result.deletedCount} old entries`);
+  } catch (err) {
+    console.error("❌ Error in clearing logs:", err);
+  }
+});
+
+// Purge soft-deleted leads older than 30 days
+cron.schedule("0 1 * * *", async () => { // daily at 01:00
+  try {
+    const Lead = await getLeadModel();
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const result = await Lead.deleteMany({ isDeleted: true, deletedAt: { $lt: cutoff } });
+    console.log(`🗑️ Recycle bin purge: ${result.deletedCount} lead(s) removed`);
+  } catch (err) {
+    console.error("❌ Error purging deleted leads:", err);
+  }
+});
+
+
+
 //
 // app.use(
 //   cors({
@@ -221,14 +314,20 @@ cron.schedule("*/10 * * * *", () => {
 //     exposedHeaders: ["Set-Cookie"],
 //   })
 // );
+
+
+
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(bodyparser.json());
 // All Routes
 const coins = require("./routes/coinRoute");
 const user = require("./routes/userRoute");
 const file = require("./routes/fileRoute");
+const crm = require("./routes/crmRoutes");
+const errorLogs = require("./models/errorLogs");
 app.use("/api/v1", coins);
 app.use("/api/v1", user);
 app.use("/api/v1", file);
+app.use("/api/v1", crm);
 
 module.exports = app;

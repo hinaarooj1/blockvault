@@ -1,6 +1,6 @@
 let express = require("express");
 
-const { authorizedRoles } = require("../middlewares/auth");
+const { authorizedRoles, isAuthorizedUser } = require("../middlewares/auth");
 const {
   addCoins,
   getCoins,
@@ -9,7 +9,7 @@ const {
   updateTransaction,
   getTransactions,
   getEachUser,
-  getCoinsUser,UnassignUser,
+  getCoinsUser, UnassignUser,
   getUserCoin,
   deleteEachUser,
   createUserTransaction,
@@ -18,40 +18,45 @@ const {
   createUserTransactionDepositSwap,
   createUserStocks,
   deleteUserStocksApi, updateNewCoinAddress, updateAdditionalCoinsForAllUsers,
-  exportExcel,markTrxClose
+  exportExcel, markTrxClose,
+  getStakingSettings, updateStakingSettings, getStakingRewards
 } = require("../controllers/coinsController");
 
 let router = express.Router();
 
-router.route("/updateCoins").patch(updateAdditionalCoinsForAllUsers);
-router.route("/addCoins/:id").patch(addCoins);
-router.route("/updateCoinAddress/:id").patch(updateCoinAddress);
-router.route("/updateNewCoinAddress/:id").patch(updateNewCoinAddress);
-router.route("/getCoins/:id").get(getCoins);
-router.route("/getUserCoin/:id").get(getUserCoin);
-router.route("/markTrxClose/:id/:Coinid").patch(markTrxClose);
+router.route("/updateCoins").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),updateAdditionalCoinsForAllUsers);
+router.route("/addCoins/:id").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),addCoins);
+router.route("/updateCoinAddress/:id").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),updateCoinAddress);
+router.route("/updateNewCoinAddress/:id").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),updateNewCoinAddress);
+router.route("/getCoins/:id").get(isAuthorizedUser, getCoins);
+router.route("/getUserCoin/:id").get(isAuthorizedUser, getUserCoin);
+router.route("/markTrxClose/:id/:Coinid").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),markTrxClose);
 
-router.route("/getCoinsUser/:id").get(getCoinsUser);
-router.route("/exportExcel").get(exportExcel);
+router.route("/getCoinsUser/:id").get(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),getCoinsUser);
+router.route("/exportExcel").get(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),exportExcel);
 router
   .route("/deleteTransaction/:userId/:transactionId")
-  .get(deleteTransaction);
+  .get(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin"),deleteTransaction);
 router
   .route("/deleteUserStocksApi/:id/:coindId")
-  .delete(deleteUserStocksApi);
-router.route("/createTransaction/:id").patch(createTransaction);
-router.route("/createUserStocks/:id").post(createUserStocks);
-router.route("/createUserTransaction/:id").patch(createUserTransaction);
+  .delete(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin"),deleteUserStocksApi);
+
+router.route("/createTransaction/:id").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin"),createTransaction);
+router.route("/createUserStocks/:id").post(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin"),createUserStocks);
+router.route("/createUserTransaction/:id").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),createUserTransaction);
 router
   .route("/createUserTransactionWithdrawSwap/:id")
-  .patch(createUserTransactionWithdrawSwap);
+  .patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),createUserTransactionWithdrawSwap);
 router
   .route("/createUserTransactionDepositSwap/:id")
-  .patch(createUserTransactionDepositSwap);
-router.route("/updateTransaction/:id").patch(updateTransaction);
-router.route("/getTransactions").get(getTransactions);
-router.route("/getEachUser/:id").get(getEachUser);
-router.route("/deleteEachUser/:id").delete(deleteEachUser);
-router.route("/UnassignUser/:id").delete(UnassignUser);
+  .patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),createUserTransactionDepositSwap);
+router.route("/updateTransaction/:id").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),updateTransaction);
+router.route("/getTransactions").get(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),getTransactions);
+router.route("/getEachUser/:id").get(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),getEachUser);
+router.route("/deleteEachUser/:id").delete(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin" ),deleteEachUser);
+router.route("/UnassignUser/:id").delete(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin"),UnassignUser);
 
+router.route("/getStakingSettings/:id").get(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),getStakingSettings);
+router.route("/updateStakingSettings/:id").patch(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),updateStakingSettings);
+router.route("/getStakingRewards/:id/stakings").get(isAuthorizedUser, authorizedRoles("superadmin", "admin", "subadmin","user"),getStakingRewards);
 module.exports = router;

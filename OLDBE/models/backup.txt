@@ -1,0 +1,104 @@
+const mongoose = require("mongoose");
+
+let userCoins = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "user",
+    required: true,
+    unique: true,
+  },
+  btc: {
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    tokenAddress: {
+      type: String,
+      default: "",
+    },
+
+    transactions: [
+      {
+        amount: {
+          type: Number,
+        },
+        txId: {
+          type: String,
+        },
+        fromAddress: {
+          type: String,
+        },
+        status: {
+          type: String,
+        },
+        note: {
+          type: String,
+        },
+      },
+    ],
+  },
+  eth: {
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    tokenAddress: {
+      type: String,
+      default: "",
+    },
+
+    transactions: [
+      {
+        amount: {
+          type: Number,
+        },
+        txId: {
+          type: String,
+        },
+        fromAddress: {
+          type: String,
+        },
+        status: {
+          type: String,
+        },
+        note: {
+          type: String,
+        },
+      },
+    ],
+  },
+  usdt: {
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    tokenAddress: {
+      type: String,
+      default: "",
+    },
+
+    transactions: [
+      {
+        amount: {
+          type: Number,
+        },
+        txId: {
+          type: String,
+        },
+        fromAddress: {
+          type: String,
+        },
+        status: {
+          type: String,
+        },
+        note: {
+          type: String,
+        },
+      },
+    ],
+  },
+});
+
+let userModel = mongoose.model("userCoin", userCoins);
+
+module.exports = userModel;

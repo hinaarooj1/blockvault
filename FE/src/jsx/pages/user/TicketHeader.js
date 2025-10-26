@@ -45,14 +45,12 @@ const TicketHeader = (props) => {
                                             <ul id="menu-1-8e54fb7" className="navigation">
                                                 {Admin ?
 
-
                                                     <><li id="menu-item-1274" className="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-home menu-item-1274"><Link to="/admin/dashboard" aria-current="page">Dashboard</Link></li>
                                                         <li id="menu-item-1275" className="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-home menu-item-1275"><Link to="/admin/support" aria-current="page">Tickets</Link></li>
                                                     </> :
                                                     <>                                              <li id="menu-item-1274" className="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-home menu-item-1274"><Link to="/dashboard" aria-current="page">Dashboard</Link></li>
                                                         <li id="menu-item-1275" className="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-home menu-item-1275"><Link to="/support" aria-current="page">Tickets</Link></li>
                                                     </>}
-
 
                                             </ul>                                      </div>
                                         <div className='main-head-not '>

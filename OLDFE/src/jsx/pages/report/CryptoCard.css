@@ -1,0 +1,214 @@
+/* CryptoCard.css */
+.crypto-card {
+    margin: auto;
+    width: 350px;
+    height: 200px;
+    background: linear-gradient(135deg, #004d40, #00bfa5);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-family: "Inconsolata", monospace;
+    position: relative;
+    overflow: hidden;
+}
+.thatv th,
+.thatv td{
+    color: white !important;
+    background-color: transparent !important;
+}
+
+.cc-button:hover {
+    transition: all 0.3s ease;
+    background-color: #029380;
+}
+
+.cc-button:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.cc-button {
+    transition: all 0.3s ease;
+
+}
+
+.crypto-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.crypto-sim-chip {
+    width: 40px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.crypto-logo {
+    width: 50px;
+    height: 50px;
+}
+
+.crypto-balance {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.crypto-card-body {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.crypto-card-number {
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-family: "Inconsolata", monospace;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 12px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.crypto-card-footer-2 {
+    font-size: 14px;
+}
+
+.crypto-card-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+.crypto-card-holder,
+.crypto-card-expiry {
+    opacity: 0.8;
+}
+
+.crypto-card::before {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    top: -40px;
+    left: -40px;
+}
+
+.crypto-card::after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    bottom: -20px;
+    right: -20px;
+}
+
+/*  */
+
+.crypto-card.skeleton {
+    background: linear-gradient(135deg, #004d40, #00bfa5);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.crypto-card .skeleton-box {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    display: inline-block;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.crypto-card .logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.crypto-card .text {
+    width: 70%;
+    height: 20px;
+}
+
+.crypto-card .small {
+    width: 30%;
+    height: 14px;
+}
+
+.reveal-button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    background-color: #029380;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: max-content;
+    margin: auto;
+
+    color: white;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.rev-btn {
+    margin: 20px auto;
+    display: flex;
+    justify-content: center
+}
+
+.reveal-button:hover {
+    background-color: #004d40;
+}
+
+.card-term p {
+    font-size: 12px;
+}
+
+.card-term h2 {
+    font-size: 16px;
+}
+
+.card-term {
+    background-color: #ffd6cc;
+    max-width: 500px;
+    color: black;
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: auto;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    50% {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    100% {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+@media (max-width:768px) {
+    .crypto-card {
+        margin-top: 40px;
+        max-width: 350px;
+        width: 100%;
+    }
+}

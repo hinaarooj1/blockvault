@@ -5,7 +5,6 @@ import { Nav, Tab } from 'react-bootstrap';
 import P2ptable from './P2ptable';
 import P2ptableSell from './P2ptableSell';
 
-
 const datarup = [
     {label:'INR', value:"0"},
     {label:'JPY', value:"1"},
@@ -17,7 +16,6 @@ const datarup = [
     {label:'LBP', value:"7"},
     {label:'LKR', value:"8"},
 ];
-
 
 const payment = [
     {label:'All Payments', value:'1'},

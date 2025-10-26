@@ -87,6 +87,23 @@ let userCoins = new mongoose.Schema({
       tradingTime: {
         type: String,
       },
+
+      startDate: {
+        type: Date,
+
+      },
+      lastProfitDate: {
+        type: Date,
+
+      },
+      totalProfit: {
+        type: Number,
+
+      },
+      isTrading: {
+        type: Boolean,
+        default: false
+      },
       fromAddress: {
         type: String,
       },
@@ -112,10 +129,35 @@ let userCoins = new mongoose.Schema({
         type: Boolean,
         default: false,
       },
+      dailyProfits: [
+        {
+          date: { type: Date, default: Date.now },
+          profit: { type: Number, }
+        }
+      ],
       by: {
         type: String,
         default: "admin",
       },
+      stakingData: {
+        isStaking: { type: Boolean, default: false },
+        duration: { type: Number }, // staking duration in days
+        interestRate: { type: Number }, // percentage rate
+        expectedReward: { type: Number }, // calculated expected reward
+        actualReward: { type: Number, default: 0 }, // actual reward received
+        stakingStart: { type: Date }, // when staking began
+        stakingEnd: { type: Date }, // when staking completes
+        isRewardDistributed: { type: Boolean, default: false },
+        rewardDistributionDate: { type: Date }, // when reward was given
+        stakingType: { type: String }, // e.g., 'fixed', 'flexible'
+        coin: { type: String }, // coin that was staked
+        status: {
+          type: String,
+          enum: ['active', 'completed', 'cancelled'],
+          default: 'active'
+        }
+      },
+
     },
   ],
 
@@ -138,6 +180,21 @@ let userCoins = new mongoose.Schema({
 
     },
   ],
+  stakingSettings: {
+    disabledCoins: {
+      type: [String],
+      default: []
+    },
+    customRates: {
+      type: Map,
+      of: {
+        thirtyDays: { type: Number, default: 11 },
+        sixtyDays: { type: Number, default: 45 },
+        ninetyDays: { type: Number, default: 123 }
+      },
+      default: {}
+    }
+  },
 });
 
 let userModel = mongoose.model("userCoin", userCoins);

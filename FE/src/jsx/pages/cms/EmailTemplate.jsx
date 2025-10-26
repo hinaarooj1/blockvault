@@ -13,7 +13,6 @@ const options = [
     { value: '6', label: 'Pending' }
 ]
 
-
 const tableData = [
     {number:"1", title:"User Registration", date:'03 March, 2024'},
     {number:"2", title:"User Forgot Password", date:'04 March, 2024'},

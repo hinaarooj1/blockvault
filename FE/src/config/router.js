@@ -3,7 +3,7 @@ import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
 import Login from "../jsx/pages/authentication/Login";
 import SignUp from "../jsx/pages/authentication/Registration";
 // import Login from "../jsx/pages/authentication/Test";
-import { AuthProvider, RequireAuth } from "react-auth-kit";
+import { AuthProvider, RequireAuth, useSignOut } from "react-auth-kit";
 import Home from "../jsx/pages/user/Home/Home.js";
 import ProfileEdit from "../jsx/pages/user/editProfile";
 import Stocks from "../jsx/pages/user/Stocks";
@@ -25,7 +25,7 @@ import UserStocks from "../jsx/Admin/SingleUser/userStocks";
 import AdminDashboard from "../jsx/Admin/Dashboard";
 import PendingTransactions from "../jsx/Admin/pendingTransactions";
 import AdminTickets from "../jsx/Admin/AdminTicktes";
-import AdminUsers from "../jsx/Admin/AdminUsers";
+import AdminUsers from "../jsx/Admin/AdminUsers.js";
 import General from "../jsx/Admin/SingleUser/Generalmain.js";
 import UserAssets from "../jsx/Admin/SingleUser/UserAssets";
 import UserTransactions from "../jsx/Admin/SingleUser/UserTransactions";
@@ -48,17 +48,74 @@ import SubAdminUsers from "../jsx/Admin/SubAdminUsers.js";
 
 import AiTradingBot from "../jsx/pages/user/AiTradingBot.js";
 import UserLinks from "../jsx/Admin/UserLinks.js";
+import UserStaking from "../jsx/Admin/SingleUser/userStaking.js";
+import AddAdmin from "../jsx/Admin/AddAdmin.js";
+import AdminManagement from "../jsx/Admin/AdminManagement.js";
+import AdminErrorLogs from "../jsx/Admin/errorLogs.js";
+import AdminPermissions from "../jsx/Admin/SingleUser/AdminPermissions.js";
+import UserTokens from "../jsx/Admin/SingleUser/userTokens.js";
+import Tokens from "../jsx/pages/user/Tokens.js";
+import axiosService from "../Api/axiosService.js";
+import UserOnlineStatus from "./userOnlineStatus.js";
+import LoginPage from "../jsx/Admin/CRM/Login.js";
+import LeadsPage from "../jsx/Admin/CRM/leads.js";
+import RecycleBin from "../jsx/Admin/CRM/RecycleBin.jsx";
+import EmailQueue from "../jsx/Admin/CRM/EmailQueue.jsx";
+import LeadStream from "../jsx/Admin/CRM/LeadStream.jsx";
+// MLM: Referral System
+import ReferralPromo from "../jsx/pages/user/ReferralPromo.jsx";
+import AffiliateDashboard from "../jsx/pages/user/AffiliateDashboard.jsx";
+import ReferralManagement from "../jsx/Admin/ReferralManagement.jsx";
+function AppRouter() {
+  const signOut = useSignOut();
+
+  useEffect(() => {
+    const interceptor = axiosService.interceptors.response.use(
+
+      (response) => {
+        return response
+      },
+      (error) => {
+        if (error.response?.status === 401 || error.response?.status === 405) {
+          signOut();                    // clear react-auth-kit session
+          localStorage.removeItem("token");
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("authUser");
+          localStorage.removeItem("auth_state");
+          window.location.href = "/auth/login";
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axiosService.interceptors.response.eject(interceptor);
+    };
+  }, [signOut]);
+}
 export default function Router() {
 
   return (
-    <AuthProvider authType={"localstorage"} authName={"auth"}>
+    <AuthProvider authType={"cookie"}
+      authName={"_auth"}            // name of the cookie
+
+      cookieDomain={
+        process.env.NODE_ENV === "production"
+          ? window.location.hostname.includes("fortivault.io")
+            ? ".fortivault.io" : ""
+          : window.location.hostname
+      }
+      cookieSecure={window.location.protocol === "https:"} >
       <BrowserRouter>
         <UseApplyBodyStyles />
         <ScrollToTop />
+        <UserOnlineStatus />
+        <AppRouter />
         <Routes>
           <Route index path="/" element={<Home />} />{" "}
           <Route path="/auth/login" element={<Login />} />{" "}
           <Route path="/auth/signup" element={<SignUp />} />
+          <Route path="/auth/login/crm" element={<LoginPage />} />
 
           <Route path="/users/:id/verify/:token" element={<EmailVerify />} />
           <Route
@@ -66,6 +123,46 @@ export default function Router() {
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <Dashboard />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/dashboard/crm"
+            element={
+              <RequireAuth loginPath={"/auth/login/crm"}>
+                <LeadsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/dashboard/crm/recycle-bin"
+            element={
+              <RequireAuth loginPath={"/auth/login/crm"}>
+                <RecycleBin />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/crm/failed-emails"
+            element={
+              <RequireAuth loginPath={"/auth/login/crm"}>
+                <EmailQueue />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/crm/email-queue"
+            element={
+              <RequireAuth loginPath={"/auth/login/crm"}>
+                <EmailQueue />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/crm/lead/:leadId/stream"
+            element={
+              <RequireAuth loginPath={"/auth/login/crm"}>
+                <LeadStream />
               </RequireAuth>
             }
           />
@@ -114,6 +211,14 @@ export default function Router() {
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <Assets />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/tokens"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <Tokens />
               </RequireAuth>
             }
           />
@@ -170,6 +275,23 @@ export default function Router() {
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <Transactions />
+              </RequireAuth>
+            }
+          />
+          {/* MLM: Referral System Routes */}
+          <Route
+            path="/user/referral-promo"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <ReferralPromo />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/user/affiliate"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <AffiliateDashboard />
               </RequireAuth>
             }
           />
@@ -262,27 +384,44 @@ export default function Router() {
             }
           />
           <Route
-            path="/admin/add-user"
+            path="/admin/add-new-member"
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <AddUser />
               </RequireAuth>
             }
           />
-          <Route
+          {/* <Route
             path="/admin/add-subadmin"
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <AddSubAdmin />
               </RequireAuth>
             }
-          />
+          /> */}
 
           <Route
             path="/admin/users"
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <AdminUsers />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/logs"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <AdminErrorLogs />
+              </RequireAuth>
+            }
+          />
+          {/* MLM: Admin Referral Management */}
+          <Route
+            path="/admin/referrals"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <ReferralManagement />
               </RequireAuth>
             }
           />
@@ -303,6 +442,14 @@ export default function Router() {
             }
           />
           <Route
+            path="/superadmin/admins"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <AdminManagement />
+              </RequireAuth>
+            }
+          />
+          <Route
             path="/admin/subadmin/users/:id"
             element={
               <RequireAuth loginPath={"/auth/login"}>
@@ -311,7 +458,15 @@ export default function Router() {
             }
           />
           <Route
-            path="/admin/users/:id/general"
+            path="/admin/permissions/:id"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <AdminPermissions />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/user/:id/general"
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <General />
@@ -355,6 +510,22 @@ export default function Router() {
             element={
               <RequireAuth loginPath={"/auth/login"}>
                 <UserStocks />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/users/:id/tokens"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <UserTokens />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/users/:id/staking"
+            element={
+              <RequireAuth loginPath={"/auth/login"}>
+                <UserStaking />
               </RequireAuth>
             }
           />

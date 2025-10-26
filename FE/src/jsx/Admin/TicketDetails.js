@@ -1,43 +1,71 @@
 import React, { useEffect, useRef, useState } from 'react';
-// import profilePic from './path_to_your_profile_picture.jpg'; // Update the path to your profile picture
 import profile from "../../assets/images/7309681.jpg";
 import adminDp from "../../assets/admin.jpg";
 import { format, isWithinInterval, subDays, differenceInDays } from 'date-fns';
-
-import LogoNew from '../../assets/images/logo.png'
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Dropdown, Spinner } from 'react-bootstrap';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthUser } from 'react-auth-kit';
 import { allUsersApi, getIndivTicketApi, signleUsersApi, updateMessageApi } from '../../Api/Service';
 import { toast } from 'react-toastify';
-import TicketHeader from '../pages/user/TicketHeader';
-
+import SideBar from "../layouts/AdminSidebar/Sidebar";
+import AdminHeader from "./adminHeader";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Button,
+  TextField,
+  Paper,
+  Avatar,
+  Stack,
+  LinearProgress,
+  FormControl,
+  Select,
+  MenuItem,
+  Divider,
+  IconButton
+} from '@mui/material';
+import {
+  Send as SendIcon,
+  ArrowBack as ArrowBackIcon,
+  Person as PersonIcon,
+  Email as EmailIcon,
+  CalendarToday as CalendarIcon,
+  Support as SupportIcon,
+  AdminPanelSettings as AdminIcon
+} from '@mui/icons-material';
 
 const AllTicket = () => {
     const messagesEndRef = useRef(null);
-
-    let Navigate = useNavigate()
+    const Navigate = useNavigate();
     const authUser = useAuthUser();
     const [isDisable, setIsDisable] = useState(false);
     const [Admin, setAdmin] = useState("");
     const [isLoading, setisLoading] = useState(true);
     const [Ticket, setTicket] = useState({});
-    let { ticketId, id } = useParams()
-    const [messages, setMessages] = useState([]); // New state for messages
+    const { ticketId, id } = useParams();
+    const [messages, setMessages] = useState([]);
     const [status, setStatus] = useState("");
     const [newMessage, setNewMessage] = useState("");
     const [TicketUser, setTicketUser] = useState("");
-    const getTickets = async () => {
+    const [Active, setActive] = useState(false);
+
+    const toggleBar = () => {
+        setActive(!Active);
+    };
+    const getTickets = async (showLoading = true) => {
         try {
-            // setisLoading(true);
+            if (showLoading) setisLoading(true);
+            
             if (authUser().user.role === "subadmin") {
                 // Get user ID from params
                 const allUsers = await allUsersApi();
 
-                console.log('All Users:', allUsers);
-
                 if (!allUsers || !Array.isArray(allUsers.allUsers) || allUsers.allUsers.length === 0) {
-                    console.log("No users found or invalid data structure.");
+                    toast.error("Unable to fetch users");
+                    if (showLoading) setisLoading(false);
                     return;
                 }
 
@@ -45,76 +73,69 @@ const AllTicket = () => {
                 const user = allUsers.allUsers.find(user => user._id === id);
 
                 if (!user) {
-                    console.log(`User with ID ${id} not found.`);
+                    toast.error("User not found");
+                    if (showLoading) setisLoading(false);
                     return;
                 }
 
                 const hasPermission = user.isShared === true ||
                     (user.isShared === false && user.assignedSubAdmin === authUser().user._id);
 
-                console.log(`Checking permissions for User ID: ${id}`, hasPermission);
-
                 if (!hasPermission) {
-                    console.log("Permission denied for this user.");
+                    toast.error("You don't have permission to view this ticket");
+                    if (showLoading) setisLoading(false);
                     Navigate("/admin/support");
                     return;
                 }
-
-                console.log("Access granted. Proceeding to the next block.");
-                // Continue with the next block of code
             }
 
-
-            const indivTicket = await getIndivTicketApi(id, ticketId);
-
-            if (indivTicket.success) {
-
-                console.log('indivTicket: ', indivTicket);
-                if (indivTicket.ticket.length <= 0) {
+            const indivTicket = await getIndivTicketApi(id, ticketId);if (indivTicket.success) {
+                if (!indivTicket.ticket || indivTicket.ticket.length <= 0) {
+                    toast.error("Ticket not found");
+                    if (showLoading) setisLoading(false);
                     Navigate("/admin/support");
                     return;
                 }
+                
                 const ticketData = indivTicket.ticket[0];
-                console.log('User ID: ', ticketData.user); // Check the user ID
                 setTicket(ticketData);
-                setMessages(ticketData.ticketContent);
-
+                setMessages(ticketData.ticketContent || []);
 
                 const userDetails = await signleUsersApi(ticketData.user);
                 if (userDetails.success) {
-                    // Log user details response
                     setTicketUser(userDetails.signleUser);
                 } else {
                     setTicketUser(null);
-
                 }
-
-                console.log('ticketUserDetails: ', userDetails);
-
-                return;
             } else {
                 toast.dismiss();
-                toast.error(indivTicket.msg);
+                toast.error(indivTicket.msg || 'Failed to fetch ticket');
             }
         } catch (error) {
+            console.error('Error fetching ticket:', error);
             toast.dismiss();
-            toast.error(error);
+            toast.error(error?.message || 'An error occurred while fetching the ticket');
         } finally {
-            setisLoading(false);
+            if (showLoading) setisLoading(false);
         }
     };
 
     useEffect(() => {
-        console.log('authUser().user.role: ', authUser().user.role);
-        if (authUser().user.role === "admin" || authUser().user.role === "subadmin") {
-            setAdmin(authUser().user);
-            getTickets()
+        const user = authUser()?.user;
+        if (!user) {
+            Navigate("/login");
             return;
-        } else if (authUser().user.role === "user") {
+        }
+
+        if (user.role === "admin" || user.role === "subadmin" || user.role === "superadmin") {
+            setAdmin(user);
+            getTickets();
+        } else if (user.role === "user") {
             Navigate("/dashboard");
+        } else {
+            Navigate("/login");
         }
     }, []);
-
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -146,7 +167,6 @@ const AllTicket = () => {
             </React.Fragment>
         ));
     };
-
 
     const formatDateNew = (dateString) => {
         const date = new Date(dateString);
@@ -194,7 +214,11 @@ const AllTicket = () => {
                 toast.success("Ticket updated successfully!");
                 // Update messages array
                 setNewMessage(""); // Clear the textarea
-                getTickets()
+                setStatus(""); // Clear the status
+                // Don't refresh immediately - let the email failure flag be added first
+                setTimeout(() => {
+                    getTickets(false); // Refresh after a delay to allow email processing
+                }, 2000);
             } else {
                 toast.error(response.msg);
             }
@@ -221,130 +245,413 @@ const AllTicket = () => {
             }
         }, 500);
     }, [messages]);
+
+    const getStatusColor = (status) => {
+        switch(status) {
+            case 'open':
+                return { bg: 'rgba(255, 152, 0, 0.2)', color: '#ff9800' };
+            case 'solved':
+                return { bg: 'rgba(76, 175, 80, 0.2)', color: '#4caf50' };
+            case 'awaiting reply':
+                return { bg: 'rgba(33, 150, 243, 0.2)', color: '#2196f3' };
+            default:
+                return { bg: 'rgba(255, 255, 255, 0.1)', color: 'grey.400' };
+        }
+    };
+
+    const statusColors = Ticket.status ? getStatusColor(Ticket.status) : { bg: 'rgba(255, 255, 255, 0.1)', color: 'grey.400' };
+
     return (
-        <>
-            <TicketHeader Admin={Admin} />
-            {
-                isLoading ? <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-                    <Spinner animation="border" variant="primary" />
-                    <div style={{ opacity: 0, position: "absolute", left: "-2000%" }}></div>
-                </div> : <div className='  bgas '>
+        <div className="admin dark-new-ui">
+            <div className="bg-gray-900 min-h-screen">
+                <SideBar state={Active} toggle={toggleBar} />
+                
+                <div className="bg-gray-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10 lg:max-w-[calc(100%_-_280px)] lg:ms-[280px]">
+                    <div className="mx-auto w-full max-w-7xl">
+                        <AdminHeader toggle={toggleBar} pageName="Ticket Details" />
 
-                    <div className="container paddint mt-4">
-                        {/* Bootstrap Navbar */}
-
-                        {/* Ticket Section */}
-                        <div className="row">
-                            {/* Left Side: Ticket Messages */}
-                            <div className="col-md-8 mb-3">
-                                <h2 className="mb-4   fla"><span style={{ marginRight: "20px", cursor: "pointer" }} onClick={() => Navigate("/admin/support")}><i style={{ fontSize: "23px" }} className="fa-solid fa-arrow-left"></i> </span>{Ticket.title}
-
-                                    {Ticket.status === "open" ?
-
-                                        <span className="badge-open badgea">{Ticket.status}</span> : Ticket.status === "solved" ?
-                                            <span className="badge-solved badgea">{Ticket.status}</span> : Ticket.status === "awaiting reply" ?
-                                                <span className="bg-warning badgea badge">{Ticket.status}</span> :
-
-                                                "Unknown"}
-                                </h2>
-                                {messages.map((message, index) => (
-                                    <div key={index} className=" mb-4 p-4     tckt0mn">
-                                        <div className="d-flex align-items-start">
-
-                                            <div>
-                                                {
-                                                    message.sender === "user" ?
-                                                        <h5 onClick={(() => Navigate(`/admin/users/${TicketUser?._id}/general`))} className="card-title axa" style={{ cursor: "pointer", display: 'flex', alignItems: 'center', textTransform: "capitalize" }}> <img src={profile} alt="Profile" className="profile-pic me-3" /> <span> <span className="axa">{TicketUser != null ? TicketUser.firstName + ' ' + TicketUser.lastName : "User not available"}</span>
-                                                        </span></h5>
-                                                        : message.sender === "admin" ?
-
-                                                            <h5 className="card-title" style={{ display: 'flex', alignItems: 'center', textTransform: "capitalize" }}> <img src={adminDp} alt="Profile" className="profile-pic me-3" /> <span> Support Team</span></h5>
-
-                                                            : ""
-                                                }
-                                                <p className="card-text py-4" >
-
-                                                    {formatMessage(message.description)}
-                                                </p>
-
-                                                <p className="card-text"><small className="text-muted">{formatDate(message.createdAt)}</small></p>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                ))}
-                                {/* Ticket Message */}
-
-
-
-                                <>
-                                    <div ref={messagesEndRef} className="form-group mb-4 mt-5">
-
-
-                                        <p htmlFor="message" className='bold mb-1'>Send a Message:</p>
-                                        <textarea
-                                            value={newMessage}
-                                            onChange={(e) => setNewMessage(e.target.value)}
-                                            className="form-control"
-                                            id="message"
-                                            rows="3"
-                                            placeholder="Type your message here..."
-                                        ></textarea>
-                                        <label htmlFor="status" className='bold mb-1 mt-2'>Status:</label>
-                                        <select
-                                            className="form-control mb-3"
-                                            id="status"
-                                            value={status}
-                                            onChange={(e) => setStatus(e.target.value)}
-                                        >
-                                            <option value="" disabled>Select ticket status</option>
-                                            <option value="open">open</option>
-                                            <option value="solved">solved</option>
-                                            <option value="awaiting reply">awaiting reply</option>
-                                        </select>
-                                    </div>
-                                    <button
-                                        disabled={isDisable}
-                                        onClick={handleSendMessage}
-                                        className="btn btn-primary"
+                        {isLoading ? (
+                            <Box sx={{ width: '100%', p: 4 }}>
+                                <LinearProgress
+                                    sx={{
+                                        height: 8,
+                                        borderRadius: 4,
+                                        backgroundColor: 'grey.800',
+                                        '& .MuiLinearProgress-bar': {
+                                            backgroundColor: 'primary.main'
+                                        }
+                                    }}
+                                />
+                                <Typography variant="h6" align="center" sx={{ mt: 2, color: 'grey.300' }}>
+                                    Loading ticket details...
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Box sx={{ px: { xs: 2, md: 4 }, py: 3 }}>
+                                {/* Back Button & Ticket Title */}
+                                <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <IconButton 
+                                        onClick={() => Navigate("/admin/support")}
+                                        sx={{ 
+                                            color: 'primary.main',
+                                            bgcolor: 'rgba(66, 165, 245, 0.1)',
+                                            '&:hover': { bgcolor: 'rgba(66, 165, 245, 0.2)' }
+                                        }}
                                     >
-                                        {isDisable ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>{" "}
-                                                Submitting...
-                                            </>
-                                        ) : (
-                                            "Submit"
-                                        )}
-                                    </button>
-                                </>
-                            </div>
+                                        <ArrowBackIcon />
+                                    </IconButton>
+                                    <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
+                                        {Ticket.title}
+                                    </Typography>
+                                    <Chip
+                                        label={Ticket.status}
+                                        size="medium"
+                                        sx={{
+                                            bgcolor: statusColors.bg,
+                                            color: statusColors.color,
+                                            fontWeight: 600,
+                                            textTransform: 'capitalize',
+                                            fontSize: '0.875rem'
+                                        }}
+                                    />
+                                </Box>
 
-                            {/* Right Side: Ticket Info */}
-                            <div className="col-md-4">
-                                <h2 className="mb-4">Ticket Info</h2>
-                                <div className="card mb-4 border-infoas">
-                                    <div className="card-body">
-                                        <p><strong>ID:</strong> <span className="">{Ticket.ticketId}</span></p>
-                                        <p onClick={(() => Navigate(`/admin/users/${TicketUser?._id}/general`))} className='axa'><strong>User Name:</strong> <span className="">{TicketUser != null ? TicketUser.firstName + ' ' + TicketUser.lastName : "User not available"}</span></p>
-                                        <p onClick={(() => Navigate(`/admin/users/${TicketUser?._id}/general`))} className='axa'><strong>User Email:</strong> <span className="">{TicketUser != null ? TicketUser.email : "User not available"}</span></p>
-                                        <p><strong>Created:</strong> <span className="">{formatDateNew(Ticket.createdAt)}</span></p>
-                                        <p><strong>Last Activity:</strong> <span className="">{formatDateNew(Ticket.updatedAt)}</span></p>
-                                        <p><strong>Status:</strong>   {Ticket.status === "open" ?
+                                <Grid container spacing={3}>
+                                    {/* Left Side: Messages */}
+                                    <Grid item xs={12} md={8}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                background: 'rgba(255, 255, 255, 0.02)',
+                                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                                                borderRadius: 3,
+                                                p: 3,
+                                                mb: 3
+                                            }}
+                                        >
+                                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, mb: 3 }}>
+                                                Messages
+                                            </Typography>
 
-                                            <span className="badge-open badgea">{Ticket.status}</span> : Ticket.status === "solved" ? <span className="badge-solved badgea">{Ticket.status}</span> :
-                                                Ticket.status === "awaiting reply" ?
-                                                    <span className="bg-warning badgea badge">{Ticket.status}</span> :
-                                                    "Unknown"}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div></div>
-            }
-        </>
+                                            {/* Messages List */}
+                                            <Stack spacing={3} sx={{ mb: 4 }}>
+                                                {messages.map((message, index) => (
+                                                    <Card
+                                                        key={index}
+                                                        elevation={0}
+                                                        sx={{
+                                                            background: message.sender === 'admin' 
+                                                                ? 'linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%)'
+                                                                : 'linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)',
+                                                            border: message.sender === 'admin'
+                                                                ? '1px solid rgba(66, 165, 245, 0.2)'
+                                                                : '1px solid rgba(255, 255, 255, 0.1)',
+                                                            borderRadius: 2,
+                                                            position: 'relative'
+                                                        }}
+                                                    >
+                                                        <CardContent>
+                                                            <Stack direction="row" spacing={2} alignItems="flex-start">
+                                                                <Avatar
+                                                                    src={message.sender === 'user' ? profile : adminDp}
+                                                                    sx={{
+                                                                        width: 48,
+                                                                        height: 48,
+                                                                        border: '2px solid',
+                                                                        borderColor: message.sender === 'admin' ? 'primary.main' : 'grey.600'
+                                                                    }}
+                                                                >
+                                                                    {message.sender === 'admin' ? <AdminIcon /> : <PersonIcon />}
+                                                                </Avatar>
+                                                                <Box sx={{ flex: 1 }}>
+                                                                    <Typography 
+                                                                        variant="subtitle1" 
+                                                                        sx={{ 
+                                                                            color: 'white', 
+                                                                            fontWeight: 600,
+                                                                            mb: 1,
+                                                                            textTransform: 'capitalize',
+                                                                            cursor: message.sender === 'user' ? 'pointer' : 'default'
+                                                                        }}
+                                                                        onClick={message.sender === 'user' ? () => Navigate(`/admin/user/${TicketUser?._id}/general`) : undefined}
+                                                                    >
+                                                                        {message.sender === 'user' 
+                                                                            ? (TicketUser ? `${TicketUser.firstName} ${TicketUser.lastName}` : 'User')
+                                                                            : 'Support Team'
+                                                                        }
+                                                                    </Typography>
+                                                                    <Typography 
+                                                                        variant="body1" 
+                                                                        sx={{ 
+                                                                            color: 'rgba(255, 255, 255, 0.9)', 
+                                                                            whiteSpace: 'pre-wrap',
+                                                                            mb: 2,
+                                                                            lineHeight: 1.6
+                                                                        }}
+                                                                    >
+                                                                        {message.description}
+                                                                    </Typography>
+                                                                    <Typography variant="caption" sx={{ color: 'grey.400' }}>
+                                                                        {formatDate(message.createdAt)}
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Stack>
+                                                        </CardContent>
+                                                        
+                                                        {/* Email Failure Indicator - Admin Only */}
+                                                        {message.emailFailed && (
+                                                            <Box
+                                                                sx={{
+                                                                    position: 'absolute',
+                                                                    top: 8,
+                                                                    right: 8,
+                                                                    bgcolor: 'error.main',
+                                                                    color: 'white',
+                                                                    borderRadius: '50%',
+                                                                    width: 24,
+                                                                    height: 24,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    fontSize: '12px',
+                                                                    fontWeight: 'bold',
+                                                                    border: '2px solid rgba(255, 255, 255, 0.1)',
+                                                                    boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)'
+                                                                }}
+                                                                title="Email notification failed to send"
+                                                            >
+                                                                ⚠️
+                                                            </Box>
+                                                        )}
+                                                    </Card>
+                                                ))}
+                                                <div ref={messagesEndRef} />
+                                            </Stack>
 
+                                            {/* Send Message Section */}
+                                            <Divider sx={{ my: 3, borderColor: 'rgba(255, 255, 255, 0.08)' }} />
+                                            
+                                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, mb: 2 }}>
+                                                Send a Message
+                                            </Typography>
+
+                                            <TextField
+                                                fullWidth
+                                                multiline
+                                                rows={4}
+                                                placeholder="Type your message here..."
+                                                value={newMessage}
+                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                sx={{
+                                                    mb: 2,
+                                                    '& .MuiInputLabel-root': { color: 'grey.400' },
+                                                    '& .MuiOutlinedInput-root': {
+                                                        color: 'white',
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                                        '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.1)' },
+                                                        '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+                                                        '&.Mui-focused fieldset': { borderColor: 'primary.main' }
+                                                    }
+                                                }}
+                                            />
+
+                                            <FormControl fullWidth sx={{ mb: 3 }} size="small">
+                                                <Select
+                                                    value={status}
+                                                    onChange={(e) => setStatus(e.target.value)}
+                                                    displayEmpty
+                                                    sx={{
+                                                        color: 'grey.100',
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                                        borderRadius: 2,
+                                                        height: '40px',
+                                                        '& .MuiOutlinedInput-notchedOutline': {
+                                                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                                                        },
+                                                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                                                        },
+                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                            borderColor: 'primary.main',
+                                                            borderWidth: '2px'
+                                                        },
+                                                        '& .MuiSvgIcon-root': {
+                                                            color: 'grey.400',
+                                                        }
+                                                    }}
+                                                >
+                                                    <MenuItem value="" disabled>Select ticket status</MenuItem>
+                                                    <MenuItem value="open">Open</MenuItem>
+                                                    <MenuItem value="solved">Solved</MenuItem>
+                                                    <MenuItem value="awaiting reply">Awaiting Reply</MenuItem>
+                                                </Select>
+                                            </FormControl>
+
+                                            <Button
+                                                fullWidth
+                                                variant="contained"
+                                                startIcon={<SendIcon />}
+                                                onClick={handleSendMessage}
+                                                disabled={isDisable}
+                                                sx={{
+                                                    background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                                                    color: 'white !important',
+                                                    textTransform: 'none',
+                                                    fontWeight: 600,
+                                                    height: '48px',
+                                                    borderRadius: 2,
+                                                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                                                    '&:hover': {
+                                                        background: 'linear-gradient(45deg, #1565c0, #1e88e5)',
+                                                        color: 'white !important',
+                                                        boxShadow: '0 6px 16px rgba(33, 150, 243, 0.4)'
+                                                    },
+                                                    '&:disabled': {
+                                                        background: 'grey.600 !important',
+                                                        color: 'grey.400 !important'
+                                                    }
+                                                }}
+                                            >
+                                                {isDisable ? 'Submitting...' : 'Submit'}
+                                            </Button>
+                                        </Paper>
+                                    </Grid>
+
+                                    {/* Right Side: Ticket Info */}
+                                    <Grid item xs={12} md={4}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                background: 'rgba(255, 255, 255, 0.02)',
+                                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                                                borderRadius: 3,
+                                                p: 3,
+                                                position: 'sticky !important',
+                                                top: '100px !important',
+                                                height: 'fit-content !important',
+                                                maxHeight: 'calc(100vh - 120px) !important',
+                                                overflow: 'auto !important',
+                                                zIndex: '10 !important'
+                                            }}
+                                        >
+                                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, mb: 3 }}>
+                                                Ticket Information
+                                            </Typography>
+
+                                            <Stack spacing={2.5}>
+                                                {/* Ticket ID */}
+                                                <Box>
+                                                    <Typography variant="caption" sx={{ color: 'grey.400', textTransform: 'uppercase', fontWeight: 600 }}>
+                                                        Ticket ID
+                                                    </Typography>
+                                                    <Typography variant="body1" sx={{ color: 'primary.light', fontWeight: 600, mt: 0.5 }}>
+                                                        {Ticket.ticketId}
+                                                    </Typography>
+                                                </Box>
+
+                                                <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.08)' }} />
+
+                                                {/* User Info */}
+                                                {TicketUser && (
+                                                    <Box 
+                                                        onClick={() => Navigate(`/admin/user/${TicketUser._id}/general`)}
+                                                        sx={{ 
+                                                            cursor: 'pointer',
+                                                            p: 2,
+                                                            borderRadius: 2,
+                                                            background: 'rgba(66, 165, 245, 0.05)',
+                                                            border: '1px solid rgba(66, 165, 245, 0.1)',
+                                                            transition: 'all 0.2s',
+                                                            '&:hover': {
+                                                                background: 'rgba(66, 165, 245, 0.1)',
+                                                                border: '1px solid rgba(66, 165, 245, 0.2)',
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Stack direction="row" spacing={2} alignItems="center">
+                                                            <Avatar 
+                                                                src={profile}
+                                                                sx={{ 
+                                                                    width: 40, 
+                                                                    height: 40,
+                                                                    border: '2px solid rgba(66, 165, 245, 0.3)'
+                                                                }}
+                                                            >
+                                                                <PersonIcon />
+                                                            </Avatar>
+                                                            <Box>
+                                                                <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                                                                    {TicketUser.firstName} {TicketUser.lastName}
+                                                                </Typography>
+                                                                <Typography variant="caption" sx={{ color: 'grey.400' }}>
+                                                                    {TicketUser.email}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </Box>
+                                                )}
+
+                                                <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.08)' }} />
+
+                                                {/* Created Date */}
+                                                <Box>
+                                                    <Typography variant="caption" sx={{ color: 'grey.400', textTransform: 'uppercase', fontWeight: 600 }}>
+                                                        Created
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ color: 'white', mt: 0.5 }}>
+                                                        {formatDateNew(Ticket.createdAt)}
+                                                    </Typography>
+                                                </Box>
+
+                                                {/* Last Activity */}
+                                                <Box>
+                                                    <Typography variant="caption" sx={{ color: 'grey.400', textTransform: 'uppercase', fontWeight: 600 }}>
+                                                        Last Activity
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ color: 'white', mt: 0.5 }}>
+                                                        {formatDateNew(Ticket.updatedAt)}
+                                                    </Typography>
+                                                </Box>
+
+                                                <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.08)' }} />
+
+                                                {/* Status */}
+                                                <Box>
+                                                    <Typography variant="caption" sx={{ color: 'grey.400', textTransform: 'uppercase', fontWeight: 600, mb: 1, display: 'block' }}>
+                                                        Current Status
+                                                    </Typography>
+                                                    <Chip
+                                                        label={Ticket.status}
+                                                        size="medium"
+                                                        sx={{
+                                                            bgcolor: statusColors.bg,
+                                                            color: statusColors.color,
+                                                            fontWeight: 600,
+                                                            textTransform: 'capitalize',
+                                                            width: '100%'
+                                                        }}
+                                                    />
+                                                </Box>
+
+                                                {/* Messages Count */}
+                                                <Box>
+                                                    <Typography variant="caption" sx={{ color: 'grey.400', textTransform: 'uppercase', fontWeight: 600 }}>
+                                                        Total Messages
+                                                    </Typography>
+                                                    <Typography variant="h4" sx={{ color: 'primary.light', fontWeight: 700, mt: 0.5 }}>
+                                                        {messages.length}
+                                                    </Typography>
+                                                </Box>
+                                            </Stack>
+                                        </Paper>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 

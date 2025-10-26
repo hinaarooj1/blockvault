@@ -13,7 +13,8 @@ import './style.css'
 import Truncate from 'react-truncate-inside/es';
 import { useTranslation } from 'react-i18next';
 import './trading.css'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+
 const AiTrading = () => {
     const { t } = useTranslation()
     const [activeDurationBtc, setActiveDurationBtc] = useState(30);
@@ -24,15 +25,20 @@ const AiTrading = () => {
     const [liveBtc, setliveBtc] = useState(null);
     const [UserTransactions, setUserTransactions] = useState([]);
     const navigate = useNavigate();
-    
+
     const [secLoading, setsecLoading] = useState(true);
- const fetchLinks = async () => {
+    const [adminMode, setAdminMode] = useState(false);
+    const [dailyRates, setDailyRates] = useState({
+        bitcoin: { rate: 1.25, history: [] },
+        ethereum: { rate: 1.25, history: [] },
+        tether: { rate: 1.25, history: [] }
+    });
+    const [editingRate, setEditingRate] = useState({ crypto: null, value: '' });
+
+    const fetchLinks = async () => {
         try {
             const data = await getLinksApi();
-            console.log('data: ', data);
-            
             if (data?.links[1]?.enabled) {
-
                 setsecLoading(false)
             } else {
                 navigate(-1);
@@ -41,6 +47,7 @@ const AiTrading = () => {
             console.error("Error fetching links:", error);
         }
     };
+
     const [btcBalance, setbtcBalance] = useState(0);
     const [UserData, setUserData] = useState(true);
     const [fractionBalance, setfractionBalance] = useState("00");
@@ -51,95 +58,37 @@ const AiTrading = () => {
         setActiveDurationBtc(duration);
     };
     const activeEth = (duration) => {
-        console.log('duration: ', duration);
         setActiveDurationEth(duration);
     };
     const activeUsdt = (duration) => {
         setActiveDurationUsdt(duration);
     };
-   
+
     const getCoins = async (data) => {
         let id = data._id;
         try {
-            // const response = await axios.get(
-            //     "https://api.coindesk.com/v1/bpi/currentprice.json"
-            // );
             const userCoins = await getCoinsUserApi(id);
 
             if (userCoins.success) {
                 setUserData(userCoins.getCoin);
-                // setUserTransactions;
                 let val = 0;
                 if (userCoins && userCoins.btcPrice && userCoins.btcPrice.quote && userCoins.btcPrice.quote.USD) {
-
                     val = userCoins.btcPrice.quote.USD.price
                 } else {
                     val = 96075.25
                 }
-                console.log("val: ", val);
                 setliveBtc(val);
-                console.log("userCoins.success: ", userCoins.success);
                 setisLoading(false);
-                // tx
-                const btc = userCoins.getCoin.transactions.filter((transaction) =>
-                    transaction.trxName.includes("bitcoin")
-                );
-                const btccomplete = btc.filter((transaction) =>
-                    transaction.status.includes("completed")
-                );
-                let btcCount = 0;
-                let btcValueAdded = 0;
-                for (let i = 0; i < btccomplete.length; i++) {
-                    const element = btccomplete[i];
-                    btcCount = element.amount;
-                    btcValueAdded += btcCount;
-                }
-                setbtcBalance(btcValueAdded);
-                console.log("btcValueAdded: ", btcValueAdded);
-                // tx
-                // tx
-                const eth = userCoins.getCoin.transactions.filter((transaction) =>
-                    transaction.trxName.includes("ethereum")
-                );
-                const ethcomplete = eth.filter((transaction) =>
-                    transaction.status.includes("completed")
-                );
-                let ethCount = 0;
-                let ethValueAdded = 0;
-                for (let i = 0; i < ethcomplete.length; i++) {
-                    const element = ethcomplete[i];
-                    ethCount = element.amount;
-                    ethValueAdded += ethCount;
-                }
-                setethBalance(ethValueAdded);
-                console.log("ethValueAdded: ", ethValueAdded);
-                // tx
-                // tx
-                const usdt = userCoins.getCoin.transactions.filter((transaction) =>
-                    transaction.trxName.includes("tether")
-                );
-                const usdtcomplete = usdt.filter((transaction) =>
-                    transaction.status.includes("completed")
-                );
-                let usdtCount = 0;
-                let usdtValueAdded = 0;
-                for (let i = 0; i < usdtcomplete.length; i++) {
-                    const element = usdtcomplete[i];
-                    usdtCount = element.amount;
-                    usdtValueAdded += usdtCount;
-                }
-                setusdtBalance(usdtValueAdded);
-                // tx
+
+                processTransactions(userCoins.getCoin.transactions, val);
 
                 const totalValue = (
-                    btcValueAdded * liveBtc +
-                    ethValueAdded * 2640 +
-                    usdtValueAdded
+                    btcBalance * liveBtc +
+                    ethBalance * 2640 +
+                    usdtBalance
                 ).toFixed(2);
 
-                //
                 const [integerPart, fractionalPart] = totalValue.split(".");
-
                 const formattedTotalValue = parseFloat(integerPart).toLocaleString(
                     "en-US",
                     {
@@ -150,7 +99,6 @@ const AiTrading = () => {
                     }
                 );
 
-                //
                 setfractionBalance(fractionalPart);
                 return;
             } else {
@@ -163,6 +111,48 @@ const AiTrading = () => {
         } finally {
         }
     };
+
+    const processTransactions = (transactions, btcPrice) => {
+        const btc = transactions.filter((transaction) =>
+            transaction.trxName.includes("bitcoin")
+        );
+        const btccomplete = btc.filter((transaction) =>
+            transaction.status.includes("completed")
+        );
+        let btcValueAdded = 0;
+        for (let i = 0; i < btccomplete.length; i++) {
+            const element = btccomplete[i];
+            btcValueAdded += element.amount;
+        }
+        setbtcBalance(btcValueAdded);
+
+        const eth = transactions.filter((transaction) =>
+            transaction.trxName.includes("ethereum")
+        );
+        const ethcomplete = eth.filter((transaction) =>
+            transaction.status.includes("completed")
+        );
+        let ethValueAdded = 0;
+        for (let i = 0; i < ethcomplete.length; i++) {
+            const element = ethcomplete[i];
+            ethValueAdded += element.amount;
+        }
+        setethBalance(ethValueAdded);
+
+        const usdt = transactions.filter((transaction) =>
+            transaction.trxName.includes("tether")
+        );
+        const usdtcomplete = usdt.filter((transaction) =>
+            transaction.status.includes("completed")
+        );
+        let usdtValueAdded = 0;
+        for (let i = 0; i < usdtcomplete.length; i++) {
+            const element = usdtcomplete[i];
+            usdtValueAdded += element.amount;
+        }
+        setusdtBalance(usdtValueAdded);
+    };
+
     const [Active, setActive] = useState(false);
     const [stakingModal, setstakingModal] = useState(false);
     let toggleBar = () => {
@@ -176,12 +166,10 @@ const AiTrading = () => {
     let toggleStaking = (cryptoType) => {
         if (stakingModal === true) {
             setstakingModal(false);
-
             setCurrentCrypto(null);
             setAmount("");
         } else {
             setstakingModal(true);
-
             setCurrentCrypto(cryptoType);
         }
     };
@@ -193,12 +181,18 @@ const AiTrading = () => {
         try {
             const formData = new FormData();
             formData.append("id", authUser().user._id);
-            console.log("authUser().user: ", authUser().user);
             const userCoins = await getsignUserApi(formData);
 
             if (userCoins.success) {
                 setIsUser(userCoins.signleUser);
-
+                setDailyRates({
+                    bitcoin: { rate: userCoins?.signleUser?.AiTradingPercentage },
+                    ethereum: { rate: userCoins?.signleUser?.AiTradingPercentage },
+                    tether: { rate: userCoins?.signleUser?.AiTradingPercentage },
+                })
+                if (userCoins.signleUser.role === "admin") {
+                    setAdminMode(true);
+                }
                 return;
             } else {
                 toast.dismiss();
@@ -210,70 +204,42 @@ const AiTrading = () => {
         } finally {
         }
     };
-    //
 
     useEffect(() => {
         getCoins(authUser().user);
-        fetchLinks()
+        fetchLinks();
         getsignUser();
         if (authUser().user.role === "user") {
             return;
         } else if (authUser().user.role === "admin") {
-            Navigate("/admin/dashboard");
             return;
         }
     }, []);
-    // withdraw
+
     const handleAmountChange = (e, cryptoName) => {
         const value = e.target.value;
-        console.log('value: ', value);
 
-        console.log("e: ", cryptoName);
-
-        // Allow empty value (when all digits are removed)
         if (value === "") {
             setAmount("");
             return;
         }
 
-        // Parse the value to a number
         const numericValue = parseFloat(value);
-        console.log('numericValue: ', numericValue);
-        if (cryptoName === "bitcoin") {
-            if (!isNaN(numericValue)) {
-                // If value exceeds btcBalance, set it to btcBalance
-                if (numericValue > btcBalance) {
-                    setAmount(btcBalance.toString());
-                } else {
-                    setAmount(value);
-                }
+
+        let balanceLimit = 0;
+        if (cryptoName === "bitcoin") balanceLimit = btcBalance;
+        if (cryptoName === "ethereum") balanceLimit = ethBalance;
+        if (cryptoName === "tether") balanceLimit = usdtBalance;
+
+        if (!isNaN(numericValue)) {
+            if (numericValue > balanceLimit) {
+                setAmount(balanceLimit.toString());
+            } else {
+                setAmount(value);
             }
-            return;
         }
-        if (cryptoName === "ethereum") {
-            if (!isNaN(numericValue)) {
-                // If value exceeds btcBalance, set it to btcBalance
-                if (numericValue > ethBalance) {
-                    setAmount(ethBalance.toString());
-                } else {
-                    setAmount(value);
-                }
-            }
-            return;
-        }
-        if (cryptoName === "tether") {
-            if (!isNaN(numericValue)) {
-                // If value exceeds btcBalance, set it to btcBalance
-                if (numericValue > usdtBalance) {
-                    setAmount(usdtBalance.toString());
-                } else {
-                    setAmount(value);
-                }
-            }
-            return;
-        }
-        // Check if the value is a valid number
     };
+
     const [amount, setAmount] = useState("");
     const [baseRatedUsdt, setbaseRatedUsdt] = useState(0);
     const [baseRatedEth, setbaseRatedEth] = useState(0);
@@ -282,167 +248,80 @@ const AiTrading = () => {
     const [parsrIntBtc, setparsrIntBtc] = useState(0);
     const [estInterest, setEstInterest] = useState(0);
     const [dailyProfitData, setDailyProfitData] = useState([]);
+    const [parseAmountEth, setparseAmountEth] = useState(0);
+    const [parsrIntEth, setparsrIntEth] = useState(0);
+    const [parseAmountUsdt, setparseAmountUsdt] = useState(0);
+    const [parsrIntUsdt, setparsrIntUsdt] = useState(0);
+    useEffect(() => {
+        calculateEstInterest();
+    }, [amount, activeDurationBtc, dailyRates.bitcoin.rate]);
+
+    const calculateEstInterest = () => {
+        setDailyProfitData([]);
+
+        const validAmount = parseFloat(amount) || 0;
+
+        // Select coin-specific settings
+        let baseRate = 0;
+        let duration = 0;
+        let livePrice = 1;
+
+        if (currentCrypto === "btc") {
+            baseRate = dailyRates.bitcoin.rate;
+            duration = activeDurationBtc;
+            livePrice = liveBtc;
+        } else if (currentCrypto === "eth") {
+            baseRate = dailyRates.ethereum.rate;
+            duration = activeDurationEth;
+            livePrice = 2640;
+        } else if (currentCrypto === "usdt") {
+            baseRate = dailyRates.tether.rate;
+            duration = activeDurationUsdt;
+            livePrice = 1;
+        }
+
+        // Adjust baseRate by duration
+        const multipliers = { 30: 1.0, 60: 1.2, 90: 1.5 };
+        baseRate = baseRate * (multipliers[duration] || 0);
+
+        // Calculate interest and totals
+        const totalInterest = (validAmount * baseRate) / 100;
+        const totalAmount = validAmount + totalInterest;
+
+        // Update states per coin
+        if (currentCrypto === "btc") {
+            setbaseRatedBtc(baseRate.toFixed(2));
+            setparseAmountBtc(validAmount);
+            setparsrIntBtc(totalInterest);
+        }
+        if (currentCrypto === "eth") {
+            setbaseRatedEth(baseRate.toFixed(2));
+            setparseAmountEth(validAmount);
+            setparsrIntEth(totalInterest);
+        }
+        if (currentCrypto === "usdt") {
+            setbaseRatedUsdt(baseRate.toFixed(2));
+            setparseAmountUsdt(validAmount);
+            setparsrIntUsdt(totalInterest);
+        }
+
+        // Shared states
+        setEstInterest(totalInterest);
+        setDailyProfitData([
+            {
+                interestRate: baseRate.toFixed(2) + "%",
+                balance: totalAmount.toFixed(2),
+                usdValue: (totalAmount * livePrice).toFixed(2),
+            },
+        ]);
+    };
 
     useEffect(() => {
         calculateEstInterest();
-    }, [amount, activeDurationBtc]);
+    }, [currentCrypto, amount, activeDurationBtc, activeDurationEth, activeDurationUsdt]);
 
-    const generateDailyRates = (days, baseRate) => {
-        const rates = [];
-        let currentRate = baseRate;
-
-        for (let i = 0; i < days; i++) {
-            // Add some randomness to the rate each day (-0.1% to +0.1% variation)
-            const variation = (Math.random() * 0.2 - 0.1);
-            currentRate = Math.max(0.05, Math.min(2, currentRate + variation));
-            rates.push(currentRate);
-        }
-
-        return rates;
-    };
-    const rateValues = [];
-    const calculateEstInterest = () => {
-        setbaseRatedBtc(0);
-        setDailyProfitData([]);
-
-        const today = new Date().toISOString().split('T')[0];
-        let hash = 0;
-        for (let i = 0; i < today.length; i++) {
-            hash = (hash + today.charCodeAt(i) * 17) % 1000;
-        }
-
-        // Base rate based on duration
-        let baseRate;
-        switch (activeDurationBtc) {
-            case 30:
-                baseRate = 0.4 + (hash % 100) / 1000; // 0.4% - 0.5%
-                break;
-            case 60:
-                baseRate = 0.6 + (hash % 150) / 1000; // 0.6% - 0.75%
-                break;
-            case 90:
-                baseRate = 0.8 + (hash % 200) / 1000; // 0.8% - 1.0%
-                break;
-            default:
-                baseRate = 0;
-        }
-
-        // Generate daily rates
-        const dailyRates = generateDailyRates(activeDurationBtc, baseRate);
-
-        // Calculate compounded interest and track daily profits
-        const validAmount = parseFloat(amount) || 0;
-        let totalAmount = validAmount;
-        const dailyProfits = [];
-
-        dailyRates.forEach((rate, index) => {
-            const dailyInterest = (totalAmount * rate) / 100;
-            totalAmount += dailyInterest;
-
-            dailyProfits.push({
-                day: index + 1,
-                interestRate: rate.toFixed(2) + '%',
-                balance: totalAmount.toFixed(2)
-            });
-        });
-
-        const totalInterest = totalAmount - validAmount;
-
-        setbaseRatedBtc(baseRate.toFixed(2));
-        setEstInterest(totalInterest);
-        setparseAmountBtc(parseFloat(validAmount));
-        setparsrIntBtc(parseFloat(totalInterest));
-        setDailyProfitData(dailyProfits);
-    };
-
-    const [parseAmountEth, setparseAmountEth] = useState(0);
-    const [parsrIntEth, setparsrIntEth] = useState(0);
-    const [estInterestEth, setEstInterestEth] = useState(0);
-    useEffect(() => {
-        calculateEstInterestEth();
-    }, [amount, activeDurationEth]);
-
-    const calculateEstInterestEth = () => {
-        setbaseRatedEth(0)
-        const today = new Date().toISOString().split('T')[0];
-
-        let hash = 0;
-        for (let i = 0; i < today.length; i++) {
-            hash = (hash + today.charCodeAt(i) * 17) % 1000;
-        }
-
-        const index = hash % rateValues.length;
-        let baseRate = rateValues[index];
-
-        let rate;
-        console.log('activeDurationEth: ', activeDurationEth);
-        switch (activeDurationEth) {
-            case 30:
-                rate = baseRate * 0.4;
-                break;
-            case 60:
-                rate = 0.3 + baseRate * 0.4;
-                break;
-            case 90:
-                rate = 0.6 + baseRate * 0.4;
-                break;
-            default:
-                rate = 0;
-        }
-        setbaseRatedEth(rate.toFixed(2))
-        const validAmount = parseFloat(amount) || 0;
-        const interest = (validAmount * rate) / 100;
-        const total = validAmount + interest;
-        setEstInterestEth(interest);
-        setparseAmountEth(parseFloat(validAmount));
-        setparsrIntEth(parseFloat(interest));
-    };
-    const [parseAmountUsdt, setparseAmountUsdt] = useState(0);
-    const [parsrIntUsdt, setparsrIntUsdt] = useState(0);
-    const [estInterestUsdt, setEstInterestUsdt] = useState(0);
-    useEffect(() => {
-        calculateEstInterestUsdt();
-    }, [amount, activeDurationUsdt]);
-    console.log('activeDurationUsdt: ', activeDurationUsdt);
-    console.log('activeDurationUsdt: ', activeDurationBtc);
-    console.log('activeDurationUsdt: ', activeDurationEth);
-
-    const calculateEstInterestUsdt = () => {
-        setbaseRatedUsdt(0)
-        const today = new Date().toISOString().split('T')[0];
-
-        let hash = 0;
-        for (let i = 0; i < today.length; i++) {
-            hash = (hash + today.charCodeAt(i) * 17) % 1000;
-        }
-
-        const index = hash % rateValues.length;
-        let baseRate = rateValues[index];
-
-        let rate;
-        switch (activeDurationUsdt) {
-            case 30:
-                rate = baseRate * 0.4;
-                break;
-            case 60:
-                rate = 0.3 + baseRate * 0.4;
-                break;
-            case 90:
-                rate = 0.6 + baseRate * 0.4;
-                break;
-            default:
-                rate = 0;
-        }
-
-        setbaseRatedUsdt(rate.toFixed(2))
-        const validAmount = parseFloat(amount) || 0;
-        const interest = (validAmount * rate) / 100;
-        const total = validAmount + interest;
-        setEstInterestUsdt(interest);
-        setparseAmountUsdt(parseFloat(validAmount));
-        setparsrIntUsdt(parseFloat(interest));
-    };
     const confirmTransaction = async (depositName) => {
+
         let e = "crypto";
         if (amount.trim() === "") {
             toast.error(t("aiBot.notZero"));
@@ -486,11 +365,15 @@ const AiTrading = () => {
                     txId: "Trading amount",
                     e: e,
                     status: "completed",
-                    tradingTime
+                    tradingTime,
+                    // when trade started
+                    lastProfitDate: null,                // will be updated daily at UTC+0
+                    totalProfit: 0,
+                    isTrading: true,
+                    profit: 0,
+
                 };
                 if (!body.trxName || !body.amount || !body.txId) {
-                    console.log("body.amount: ", body.amount);
-                    console.log("body.trxName: ", body.trxName);
                     toast.dismiss();
                     toast.error(t('assetsPage.fillAll'));
                     return;
@@ -498,7 +381,6 @@ const AiTrading = () => {
             }
 
             let id = authUser().user._id;
-            console.log("e: ", e);
 
             const newTransaction = await createUserTransactionApi(id, body);
 
@@ -523,11 +405,15 @@ const AiTrading = () => {
             getTransactions()
         }
     };
+
     const getTransactions = async () => {
         try {
+
             const allTransactions = await getUserCoinApi(authUser().user._id);
+
             if (allTransactions.success) {
-                console.log('allTransactions: ', allTransactions.getCoin.transactions);
+
+                setisDisable(false);
                 setUserTransactions(allTransactions.getCoin.transactions.reverse());
                 return;
             } else {
@@ -541,30 +427,28 @@ const AiTrading = () => {
             setisLoading(false);
         }
     };
+
     useEffect(() => {
         getTransactions()
     }, []);
 
     const handleEndTrade = async (transaction, currentBalance) => {
-        console.log('currentBalance: ', currentBalance);
-        console.log('transaction: ', transaction);
+
         try {
             setisDisable(true);
             const body = {
                 trxName: transaction.trxName,
-                amount: currentBalance,
+                amount: Math.abs(currentBalance),
                 txId: "Trade closure",
                 e: "crypto",
                 status: "completed",
-                type: "deposit"
+                type: "deposit",
+                isTrading: false
             };
             const id = authUser().user._id;
             const response = await markTrxCloseApi(id, transaction._id);
             await createUserTransactionApi(id, body);
             if (response.success) {
-                // Hide the original transaction by setting isHidden to true
-                console.log('trxstatus: ', response);
-
                 toast.success("Trade closed successfully, the profit has been added to your outstanding balance");
                 getTransactions()
             } else {
@@ -573,9 +457,11 @@ const AiTrading = () => {
         } catch (error) {
             toast.error(error.message);
         } finally {
-            setisDisable(false);
         }
     };
+
+    // Admin panel to control daily rates
+
     return (
         <>
             <div className="row">
@@ -583,10 +469,22 @@ const AiTrading = () => {
                     <div className="card no-bg ">
                         <Card.Header className='no-border'>
                             <Card.Title className='text-white'>{t('aiBot.assets')}</Card.Title>
+                            {adminMode && (
+                                <button
+                                    className="admin-toggle-btn"
+                                    onClick={() => setAdminMode(!adminMode)}
+                                >
+                                    {adminMode ? "Hide Admin Panel" : "Show Admin Panel"}
+                                </button>
+                            )}
                         </Card.Header>
                         <div className="card-body">
-                            <div className="bloc-s ">   <h1 className='text-white'>{t("aiBot.titleHead")}</h1>
-                                <p className='text-white'>{t("aiBot.descriptionHead")}</p></div>
+                            {/* {adminMode && <AdminRatePanel />} */}
+
+                            <div className="bloc-s">
+                                <h1 className='text-white'>{t("aiBot.titleHead")}</h1>
+                                <p className='text-white'>{t("aiBot.descriptionHead")}</p>
+                            </div>
                             <div className="custom-col">
                                 <div className="custom-card">
                                     <div className="custom-card-header new-bg-dark ">
@@ -600,49 +498,17 @@ const AiTrading = () => {
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="custom-transaction-grid new-bg-dark">
+                                                <div className="custom-transaction-grid jasja new-bg-dark">
                                                     {UserTransactions &&
                                                         UserTransactions.filter(
                                                             (Transaction) => !Transaction.isHidden && Transaction.txId === "Trading amount"
                                                         ).map((Transaction, index) => {
-                                                            const amount = Math.abs(Transaction.amount);
-                                                            const tradingTime = Number(Transaction.tradingTime);
-                                                            const transactionDate = new Date(Transaction.createdAt);
+                                                            // ✅ Always positive values
+                                                            const amount = Math.abs(Transaction.amount);const totalProfit = Math.abs(Transaction.totalProfit || 0);
+                                                            const currentBalance = amount + totalProfit;
+                                                            const profitPercentage = amount > 0 ? ((totalProfit / amount) * 100).toFixed(2) : "0.00";
 
-                                                            // Use closedAt if tradingStatus === "closed", else use current date
-                                                            const endDate = Transaction.tradingStatus === "closed"
-                                                                ? new Date(Transaction.closedAt)
-                                                                : new Date();
-
-                                                            const daysPassed = Math.floor((endDate - transactionDate) / (1000 * 60 * 60 * 24));
-                                                            const daysRemaining = Math.max(0, tradingTime - daysPassed);
-
-                                                            // Generate consistent daily rates (same as before)
-                                                            const transactionDateStr = transactionDate.toISOString().split('T')[0];
-                                                            let hash = 0;
-                                                            for (let i = 0; i < transactionDateStr.length; i++) {
-                                                                hash = (hash + transactionDateStr.charCodeAt(i) * 17) % 1000;
-                                                            }
-
-                                                            // Base rate calculation (unchanged)
-                                                            let baseRate;
-                                                            switch (tradingTime) {
-                                                                case 30: baseRate = 0.4 + (hash % 100) / 1000; break;
-                                                                case 60: baseRate = 0.6 + (hash % 150) / 1000; break;
-                                                                case 90: baseRate = 0.8 + (hash % 200) / 1000; break;
-                                                                default: baseRate = 0;
-                                                            }
-
-                                                            // Calculate current balance (stop at closedAt if status is "closed")
-                                                            let currentBalance = amount;
-                                                            for (let day = 1; day <= daysPassed; day++) {
-                                                                const dayHash = (hash + day * 19) % 1000;
-                                                                const dailyRate = baseRate + (dayHash % 30) / 1000;
-                                                                const dailyInterest = (currentBalance * dailyRate) / 100;
-                                                                currentBalance += dailyInterest;
-                                                            }
-
-                                                            // USD value calculation (unchanged)
+                                                            // USD value converter
                                                             const getUsdValue = (balance) => {
                                                                 switch (Transaction.trxName) {
                                                                     case "bitcoin": return (balance * liveBtc).toFixed(2);
@@ -652,50 +518,31 @@ const AiTrading = () => {
                                                                 }
                                                             };
 
-                                                            // Update chart data to stop at closedAt
-                                                            const generateMountainChartData = () => {
-                                                                const data = [{ day: 0, balance: 0, usdValue: 0 }];
+                                                            // ✅ Build chart data from dailyProfits
+                                                            const generateProfitChartData = () => {
+                                                                const data = [];
+                                                                let runningBalance = Math.abs(Transaction.amount || 0); // ✅ start with initial deposit
+                           
 
-                                                                if (!amount || amount <= 0) return data;
+                                                                if (Transaction.dailyProfits && Transaction.dailyProfits.length > 0) {
+                                                                    Transaction.dailyProfits.forEach((p, idx) => {
+                                                                        const dailyProfit = Math.abs(p.profit || 0); // ✅ always positive
+                                                                         
+                                                                        runningBalance = dailyProfit;
 
-                                                                let runningBalance = amount;
-                                                                let previousTrend = 1;
-                                                                let trendDuration = 0;
-
-                                                                for (let day = 1; day <= daysPassed; day++) {
-                                                                    const progressRatio = day / tradingTime;
-                                                                    const dynamicRate = baseRate * (1 - progressRatio * 0.5);
-
-                                                                    if (trendDuration <= 0 || Math.random() < 0.2) {
-                                                                        previousTrend *= -1;
-                                                                        trendDuration = 3 + Math.floor(Math.random() * 5);
-                                                                    }
-                                                                    trendDuration--;
-
-                                                                    const volatility = 0.02 + (progressRatio * 0.03);
-                                                                    const randomShift = (Math.random() * 2 - 1) * volatility;
-                                                                    const trendDirection = previousTrend * (0.5 + Math.random() * 0.5);
-
-                                                                    const dailyChange = (
-                                                                        (dynamicRate / 100) *
-                                                                        runningBalance *
-                                                                        (1 + randomShift) *
-                                                                        trendDirection
-                                                                    );
-
-                                                                    runningBalance = Math.max(0, runningBalance + dailyChange);
-
-                                                                    data.push({
-                                                                        day,
-                                                                        balance: parseFloat(runningBalance.toFixed(8)),
-                                                                        usdValue: parseFloat(getUsdValue(runningBalance))
+                                                                        data.push({
+                                                                            day: idx + 1,
+                                                                            balance: parseFloat(runningBalance.toFixed(8)),
+                                                                            usdValue: parseFloat(getUsdValue(runningBalance)),
+                                                                            date: new Date(p.date).toLocaleString(), // user timezone
+                                                                            profit: dailyProfit.toFixed(8),
+                                                                        });
                                                                     });
                                                                 }
 
                                                                 return data;
                                                             };
 
-                                                            const profitPercentage = ((currentBalance - amount) / amount * 100).toFixed(2);
                                                             return (
                                                                 <div className="custom-transaction-card" key={index}>
                                                                     <div className="custom-transaction-body">
@@ -703,15 +550,17 @@ const AiTrading = () => {
                                                                             <div className="custom-transaction-col">
                                                                                 <h6 className="custom-transaction-title">
                                                                                     {Transaction.trxName.replace(/\b\w/g, (char) => char.toUpperCase())} Trading
-                                                                                    {" "}{daysPassed} day(s)
-                                                                                    {Transaction.tradingStatus === "closed" && (
+                                                                                    {" "}({Transaction.tradingTime} days)
+                                                                                    {Transaction.isTrading === false ? (
                                                                                         <span className="status-badge closed">CLOSED</span>
-                                                                                    )}
+                                                                                    ) : <span className="status-badge green">{" "}OPEN</span>}
                                                                                 </h6>
+
+                                                                                {/* Profit Chart */}
                                                                                 <div className="profit-mountain-chart">
                                                                                     <ResponsiveContainer width="100%" height={220}>
                                                                                         <AreaChart
-                                                                                            data={generateMountainChartData()}
+                                                                                            data={generateProfitChartData()}
                                                                                             margin={{ top: 10, right: 5, left: 5, bottom: 5 }}
                                                                                         >
                                                                                             <defs>
@@ -721,58 +570,56 @@ const AiTrading = () => {
                                                                                                 </linearGradient>
                                                                                             </defs>
 
-                                                                                            <CartesianGrid
-                                                                                                strokeDasharray="3 3"
-                                                                                                stroke="#374151"
-                                                                                                horizontal={true}
-                                                                                                vertical={false}
-                                                                                            />
+                                                                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal vertical={false} />
 
                                                                                             <XAxis
                                                                                                 dataKey="day"
-                                                                                                tick={{ fill: '#9CA3AF' }}
-                                                                                                axisLine={{ stroke: '#4B5563' }}
+                                                                                                tick={{ fill: "#9CA3AF" }}
+                                                                                                axisLine={{ stroke: "#4B5563" }}
+                                                                                                label={{ value: "Day", position: "insideBottom", offset: -5, fill: "#9CA3AF" }}
                                                                                             />
 
-                                                                                            <YAxis
-                                                                                                domain={[0, (dataMax) => Math.max(dataMax * 1.15, amount * 1.1)]}
-                                                                                                tick={{ fill: '#9CA3AF' }}
-                                                                                                tickFormatter={(val) => val.toFixed(4)}
-                                                                                            />
+                                                                                            <YAxis tick={{ fill: "#9CA3AF" }} />
 
                                                                                             <Tooltip
                                                                                                 contentStyle={{
-                                                                                                    background: '#1F2937',
-                                                                                                    border: 'none',
-                                                                                                    borderRadius: '8px',
-                                                                                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                                                                                    background: "#1F2937",
+                                                                                                    border: "none",
+                                                                                                    borderRadius: "8px",
+                                                                                                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                                                                                                 }}
-                                                                                                formatter={(value, name) => [
-                                                                                                    name === 'balance'
-                                                                                                        ? `${Number(value).toFixed(6)} ${Transaction.trxName.toUpperCase()}`
-                                                                                                        : `$${Number(value).toFixed(2)}`,
-                                                                                                    name === 'balance' ? 'Amount' : 'USD Value'
-                                                                                                ]}
+                                                                                                formatter={(value, name, props) => {
+                                                                                                    if (name === "balance") {
+                                                                                                        return [`${Number(value).toFixed(6)} ${Transaction.trxName.toUpperCase()}`, "Profit"];
+                                                                                                    }
+                                                                                                    if (name === "usdValue") {
+                                                                                                        return [`$${Number(value).toFixed(2)}`, "USD Value"];
+                                                                                                    }
+                                                                                                    return value;
+                                                                                                }}
+                                                                                                labelFormatter={(label, payload) =>
+                                                                                                    `Day ${label} (${payload[0]?.payload?.date || ""})`
+                                                                                                }
                                                                                             />
 
                                                                                             <Area
-                                                                                                type="basis" // Smoother curves between points
+                                                                                                type="monotone"
                                                                                                 dataKey="balance"
                                                                                                 stroke="#10B981"
                                                                                                 strokeWidth={2}
                                                                                                 fill="url(#mountainGradient)"
-                                                                                                fillOpacity={1}
                                                                                                 activeDot={{
                                                                                                     r: 6,
-                                                                                                    stroke: '#059669',
+                                                                                                    stroke: "#059669",
                                                                                                     strokeWidth: 2,
-                                                                                                    fill: '#D1FAE5'
+                                                                                                    fill: "#D1FAE5",
                                                                                                 }}
                                                                                             />
                                                                                         </AreaChart>
                                                                                     </ResponsiveContainer>
                                                                                 </div>
 
+                                                                                {/* Investment Details */}
                                                                                 <div className="investment-details">
                                                                                     <div className="detail-row">
                                                                                         <span className="detail-label">Initial:</span>
@@ -789,7 +636,7 @@ const AiTrading = () => {
                                                                                     <div className="detail-row">
                                                                                         <span className="detail-label">Profit:</span>
                                                                                         <span className="detail-value profit">
-                                                                                            +{(currentBalance - amount).toFixed(8)} {Transaction.trxName} (${(getUsdValue(currentBalance) - getUsdValue(amount)).toFixed(2)})
+                                                                                            +{totalProfit.toFixed(8)} {Transaction.trxName} (${(getUsdValue(currentBalance) - getUsdValue(amount)).toFixed(2)})
                                                                                         </span>
                                                                                     </div>
                                                                                     <div className="detail-row">
@@ -798,21 +645,16 @@ const AiTrading = () => {
                                                                                             +{profitPercentage}%
                                                                                         </span>
                                                                                     </div>
-                                                                                    <div className="detail-row " style={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
+
+                                                                                    <div className="detail-row" style={{ display: 'flex', alignItems: 'center', justifyContent: "center" }}>
                                                                                         <button
                                                                                             className="end-trade-btn"
                                                                                             onClick={() => handleEndTrade(Transaction, currentBalance)}
-                                                                                            disabled={isDisable || Transaction.tradingStatus === "closed"}
+                                                                                            disabled={isDisable || Transaction.isTrading === false}
                                                                                         >
-                                                                                            {Transaction.tradingStatus === "closed" ? "Trade Closed" : isDisable ? "Closing..." : "End Trade"}
+                                                                                            {Transaction.isTrading === false ? "Trade Closed" : isDisable ? "Closing..." : "End Trade"}
                                                                                         </button>
                                                                                     </div>
-                                                                                    {/* <div className="detail-row">
-                    <span className="detail-label">Progress:</span>
-                    <span className="detail-value">
-                      {daysPassed} of {tradingTime} days completed
-                    </span>
-                  </div> */}
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -821,6 +663,7 @@ const AiTrading = () => {
                                                             );
                                                         })}
                                                 </div>
+
                                                 {(UserTransactions.length === 0 ||
                                                     !UserTransactions.some(
                                                         (transaction) =>
@@ -936,6 +779,9 @@ const AiTrading = () => {
                                     </p>
                                 </div>
                             </div>
+
+                            {/* Rest of your component remains similar but with updated profit calculation */}
+                            {/* I've focused on the key changes for dynamic rate control */}
 
                         </div>
                     </div>
@@ -1056,7 +902,9 @@ const AiTrading = () => {
                                                     {t("aiBot.estInterest")}
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
-                                                    {estInterest.toFixed(8)} BTC
+                                                    {estInterest.toFixed(8)} BTC {`(${(
+                                                        estInterest * liveBtc
+                                                    ).toFixed(2)} USD)`}
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
@@ -1064,7 +912,9 @@ const AiTrading = () => {
                                                     {t("aiBot.totalAmount")}
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
-                                                    {(parseAmountBtc + parsrIntBtc).toFixed(8)} BTC
+                                                    {(parseAmountBtc + parsrIntBtc).toFixed(8)} BTC  {`(${(
+                                                        (parseAmountBtc + parsrIntBtc) * liveBtc
+                                                    ).toFixed(2)} USD)`}
                                                 </span>
                                             </div>
                                             <button
@@ -1162,7 +1012,9 @@ const AiTrading = () => {
                                                     {t("aiBot.estInterest")}
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
-                                                    {estInterestEth.toFixed(8)} ETH
+                                                    {estInterest.toFixed(8)} ETH  {`(${(
+                                                        estInterest * 2640
+                                                    ).toFixed(2)} USD)`}
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
@@ -1170,7 +1022,9 @@ const AiTrading = () => {
                                                     {t("aiBot.totalAmount")}
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
-                                                    {(parseAmountEth + parsrIntEth).toFixed(8)} ETH
+                                                    {(parseAmountEth + parsrIntEth).toFixed(8)} ETH  {`(${(
+                                                        (parseAmountEth + parsrIntEth) * 2640
+                                                    ).toFixed(2)} USD)`}
                                                 </span>
                                             </div>
                                             <button
@@ -1269,7 +1123,7 @@ const AiTrading = () => {
                                                     {t("aiBot.estInterest")}
                                                 </span>
                                                 <span className="MuiTypography-root MuiTypography-caption css-dbb9ax">
-                                                    {estInterestUsdt.toFixed(2)} USDT
+                                                    {estInterest.toFixed(2)} USDT
                                                 </span>
                                             </div>
                                             <div className="MuiStack-root css-j0iiqq">
@@ -1309,8 +1163,8 @@ const AiTrading = () => {
                 </div>
             )}
 
+            {/* Modal and other components remain similar */}
         </>
-
     );
 };
 

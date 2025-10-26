@@ -27,7 +27,7 @@ import eurIco from '../../../assets/images/new/euro.svg';
 import solIco from '../../../assets/images/new/solana.png';
 import { useAuthUser, useSignOut } from 'react-auth-kit';
 import { toast } from 'react-toastify';
-import { getCoinsUserApi, getHtmlDataApi, getsignUserApi } from '../../../Api/Service';
+import { getCoinsUserApi, getHtmlDataApi, getsignUserApi, patchCoinsApi, getLinksApi } from '../../../Api/Service';
 import axios from 'axios';
 
 const coinLogos = {
@@ -55,6 +55,8 @@ export function MainComponent() {
 	const [fractionBalancePending, setfractionBalancePending] = useState(null);
 	const [Description, setDescription] = useState(null);
 	const [Description2, setDescription2] = useState(null);
+	const [showReferralAd, setShowReferralAd] = useState(false);
+	const [referralLinkEnabled, setReferralLinkEnabled] = useState(false);
 
 	const [singleTransaction, setsingleTransaction] = useState();
 	const [UserTransactions, setUserTransactions] = useState([]);
@@ -74,6 +76,22 @@ export function MainComponent() {
 		drop ? setdrop(false) : setdrop(true);
 	};
 	const [drop, setdrop] = useState(false);
+	const patchCoins = async () => {
+		try {
+			const userCoins = await patchCoinsApi(authUser().user._id);
+
+			if (userCoins.success) {
+
+			} else {
+				toast.dismiss();
+				toast.error(userCoins.msg);
+			}
+		} catch (error) {
+			toast.dismiss();
+			toast.error(error);
+		} finally {
+		}
+	};
 	const getsignUser = async () => {
 		try {
 			const formData = new FormData();
@@ -145,8 +163,6 @@ export function MainComponent() {
 			setCopySuccess3(false);
 		}, 2000);
 	};
-
-
 
 	const getCoins = async (data) => {
 		let id = data._id;
@@ -327,8 +343,6 @@ export function MainComponent() {
 	const getHtmlData = async () => {
 		try {
 			const description = await getHtmlDataApi();
-			console.log('description: ', description);
-
 			if (description.success) {
 				setDescription(description?.description[0]?.description);
 				setDescription2(description?.description[1]?.description);
@@ -342,27 +356,154 @@ export function MainComponent() {
 		} finally {
 		}
 	};
+
+	const fetchLinks = async () => {
+		try {
+			const data = await getLinksApi();
+			if (data?.links && Array.isArray(data.links)) {
+				// Check if referral system link (index 9) is enabled
+				const referralLink = data.links[9];
+				if (referralLink) {
+					setReferralLinkEnabled(referralLink.enabled);
+				}
+			}
+		} catch (error) {
+			console.error("Error fetching links:", error);
+		}
+	};
 	useEffect(() => {
 		if (authUser().user.role === "user") {
 			getsignUser()
 			getHtmlData()
+			fetchLinks()
 			setAdmin(authUser().user);
 			getCoins(authUser().user);
-
+			patchCoins()
+			// Check if referral ad was dismissed
+			const adDismissed = localStorage.getItem('referralAdDismissed');
+			if (adDismissed === 'true') {
+				setShowReferralAd(false);
+			}else{
+				setShowReferralAd(true);
+			}
 			return;
 		} else if (authUser().user.role === "admin") {
 			setAdmin(authUser().user);
 			return;
 		}
 	}, []);
+
+	const dismissReferralAd = () => {
+		setShowReferralAd(false);
+		localStorage.setItem('referralAdDismissed', 'true');
+	};
 	return (
 		<Row>
 			<Col xl={12}>
 				<div className="row main-card">
 					<MainSlider />
 				</div>
+				{/* MLM Referral Promo Ad - Dismissible */}
+				{showReferralAd && referralLinkEnabled && (
+					<Row className="my-2">
+						<Col xl={12}>
+							<div className="card new-bg-dark" style={{
+								background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+								border: '2px solid rgba(255, 255, 255, 0.2)',
+								position: 'relative',
+								overflow: 'hidden'
+							}}>
+								<button 
+									onClick={dismissReferralAd}
+									style={{
+										position: 'absolute',
+										top: '10px',
+										right: '10px',
+										background: 'rgba(255, 255, 255, 0.2)',
+										border: 'none',
+										borderRadius: '50%',
+										width: '30px',
+										height: '30px',
+										cursor: 'pointer',
+										color: 'white',
+										fontSize: '18px',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										transition: 'all 0.3s ease',
+										zIndex: 10
+									}}
+									onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.4)'}
+									onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+								>
+									×
+								</button>
+								<div className="card-body" style={{ padding: '30px' }}>
+									<div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+										<div style={{
+											background: 'rgba(255, 255, 255, 0.15)',
+											borderRadius: '50%',
+											width: '80px',
+											height: '80px',
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											fontSize: '40px',
+											flexShrink: 0
+										}}>
+											💰
+										</div>
+										<div style={{ flex: 1, minWidth: '250px' }}>
+											<h3 style={{ 
+												color: 'white', 
+												fontWeight: '700',
+												fontSize: '28px',
+												marginBottom: '15px',
+												textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+											}}>
+												Turn Your Friends Into Cash! 🚀
+											</h3>
+											<p style={{ 
+												color: 'rgba(255, 255, 255, 0.95)', 
+												fontSize: '16px',
+												lineHeight: '1.6',
+												marginBottom: '20px'
+											}}>
+												Turn your friends into crypto buddies and your invites into cash! Share your unique code and get <strong>$100</strong> for every friend who signs up and starts trading. The more you refer, the more you earn — it's that simple. Let's make crypto social — invite, earn, repeat!
+											</p>
+											<Link 
+												to="/user/referral-promo" 
+												style={{
+													display: 'inline-block',
+													background: 'white',
+													color: '#667eea',
+													padding: '12px 30px',
+													borderRadius: '30px',
+													fontWeight: '700',
+													textDecoration: 'none',
+													boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+													transition: 'all 0.3s ease'
+												}}
+												onMouseEnter={(e) => {
+													e.target.style.transform = 'translateY(-2px)';
+													e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+												}}
+												onMouseLeave={(e) => {
+													e.target.style.transform = 'translateY(0)';
+													e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+												}}
+											>
+												Get Your Referral Code Now →
+											</Link>
+										</div>
+									</div>
+								</div>
+							</div>
+						</Col>
+					</Row>
+				)}
 				{
-					Description === "" || Description === null||Description === undefined ? "" :
+					Description === "" || Description === null || Description === undefined ? "" :
 						<Row className="my2 mt-2">
 							<Col xl={12}>
 								<div className="card new-bg-dark kyc-form-card">
@@ -426,8 +567,6 @@ export function MainComponent() {
 											<tbody>
 												<tr>
 
-
-
 													<td className="text-start widn no-bg"> <img src={btcLogo} alt="" /></td>
 													<td className='no-bg text-white'>  <p style={{ margin: "0" }} className="txt no-bg sml">
 														<Truncate
@@ -485,8 +624,6 @@ export function MainComponent() {
 												</tr>
 												<tr>
 
-
-
 													<td className="text-start no-bg widn"> <img src={ethLogo} alt="" /></td>
 													<td className='no-bg text-white'>  <p style={{ margin: "0" }} className="txt sml">
 														<Truncate
@@ -543,8 +680,6 @@ export function MainComponent() {
 													)}</td>
 												</tr>
 												<tr>
-
-
 
 													<td className="text-start no-bg widn"> <img src={usdtLogo} alt="" /></td>
 													<td className='no-bg  text-white'>  <p style={{ margin: "0" }} className="txt no-bg sml">
@@ -677,9 +812,6 @@ export function MainComponent() {
 													})
 												) : ""}
 
-
-
-
 											</tbody>
 										</table>
 									</div>
@@ -707,7 +839,7 @@ export function MainComponent() {
 					<RecentTransaction />
 				</Col>
 				{
-					Description2 === "" || Description2 === null||Description2 === undefined ? "" :
+					Description2 === "" || Description2 === null || Description2 === undefined ? "" :
 						<Row className="my2 mt-2">
 							<Col xl={12}>
 								<div className="card new-bg-dark kyc-form-card">

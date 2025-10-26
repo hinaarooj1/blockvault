@@ -61,7 +61,6 @@ const SpotTab = () => {
     const [marketData, setMarketData] = useState([...marketDataTable]);
     const [iconData, setIconDate] = useState({ complete: false ,ind : Number});
 
-
     function SotingData(name){
         const sortedPeople = [...marketData]; 
         switch (name) {

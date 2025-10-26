@@ -1,0 +1,80 @@
+.for-mbl {
+  display: none !important;
+}
+
+@media (max-width: 1024px) {
+  .for-mbl {
+    display: flex !important;
+  }
+  .for-desk {
+    display: none !important;
+  }
+  .sna {
+    display: flex;
+    justify-content: end;
+    margin-right: 20px;
+  }
+}
+.active.nui-focus {
+  --tw-text-opacity: 1 !important;
+  color: #8b5cf6 !important;
+  color: rgb(139 92 246 / var(--tw-text-opacity)) !important;
+}
+.closes {
+  display: none;
+  text-align: right;
+  margin-top: 15px;
+  font-size: 24px;
+  margin-right: 15px;
+}
+.painchod {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .closes {
+    display: block !important;
+  }
+  .painchod {
+    display: block !important;
+  }
+}
+.dark .nui-focus:hover {
+  background-color: white !important;
+  color: black !important;
+}
+
+.bgdk {
+  background-color: black !important;
+}
+.color-whute {
+  color: white !important;
+}
+.color-whute:hover {
+  color: rgb(0, 0, 0) !important;
+}
+.active.nui-focus {
+  background-color: #8b5cf61a !important;
+}
+.active.nui-focus {
+  --tw-text-opacity: 1 !important;
+  color: #8b5cf6 !important;
+  color: rgb(139 92 246 / var(--tw-text-opacity)) !important;
+}
+.active.nui-focus {
+  background-color: #8b5cf61a !important;
+}
+.logo-to-show {
+  width: 300px;
+  display: block;
+  margin: 10px auto;
+}
+.logo-to-show2 {
+  display: block;
+  margin: 10px auto;
+  width: 200px;
+}
+.nope {
+  margin-top: 30px;
+  padding: 5px 20px;
+  width: fit-content !important;
+}

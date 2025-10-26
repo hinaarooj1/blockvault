@@ -1,11 +1,101 @@
 import React, { useState, useEffect } from "react";
 import { useSignIn, useIsAuthenticated, useAuthUser } from "react-auth-kit";
-import { loginApi, registerApi } from "../../../Api/Service";
-import { Link, useNavigate } from "react-router-dom";
+import { loginApi, registerApi, verifyReferralCodeApi } from "../../../Api/Service";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
+import {
+  Box,
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  IconButton,
+  InputAdornment,
+  Grid,
+  CircularProgress,
+  ThemeProvider,
+  createTheme,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import LogoNew from "../../../assets/newlogo/logo-blue.png";
+
+// Dark theme configuration matching Login page
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#7635dc',
+    },
+    secondary: {
+      main: '#919EAB',
+    },
+    background: {
+      default: '#25282c',
+      paper: '#141A21',
+    },
+    text: {
+      primary: '#FFFFFF',
+      secondary: '#919EAB',
+    },
+    error: {
+      main: '#ff5630',
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  components: {
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: 'rgba(145, 158, 171, 0.2)',
+            },
+            '&:hover fieldset': {
+              borderColor: 'rgba(145, 158, 171, 0.4)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#7635dc',
+            },
+          },
+          '& .MuiInputLabel-root': {
+            color: 'rgba(255, 255, 255, 0.7) !important',
+            fontWeight: 500,
+            fontSize: '0.875rem',
+          },
+          '& .MuiInputLabel-root.Mui-focused': {
+            color: '#7635dc !important',
+            fontWeight: 600,
+          },
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontWeight: 700,
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#141A21',
+          borderRadius: 8,
+        },
+        input: {
+          color: '#FFFFFF',
+        },
+      },
+    },
+  },
+});
 
 function Register(props) {
   const [isloading, setisloading] = useState(false);
@@ -22,6 +112,7 @@ function Register(props) {
   const navigate = useNavigate();
   const [type2, settype2] = useState("password");
   const [type1, settype1] = useState("password");
+  const [searchParams] = useSearchParams(); // MLM: Get ref from URL
 
   const handleTogglePassword = () => {
     type1 === "password"
@@ -49,7 +140,13 @@ function Register(props) {
     country: "",
     postalCode: "",
     cpassword: "",
+    referralCode: "", // MLM: Referral code from URL or manual input
   });
+  
+  const [referrerInfo, setReferrerInfo] = useState(null); // To show who referred them
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [isAutoVerify, setIsAutoVerify] = useState(false); // Track if verification is from URL auto-load
+  const [referralCodeError, setReferralCodeError] = useState(''); // Error message for referral code
   let handleInput = (e) => {
     let name = e.target.name;
     let value = e.target.value;
@@ -69,7 +166,6 @@ function Register(props) {
       setchkbx(false);
     }
   };
-
 
   const onSignUp = async (e) => {
     e.preventDefault();
@@ -184,6 +280,18 @@ function Register(props) {
       })
     }
 
+    // Validate referral code if provided
+    if (userData.referralCode && userData.referralCode.trim()) {
+      if (referralCodeError || !referrerInfo) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Referral Code',
+          text: 'Please remove the referral code or enter a valid one to continue registration.',
+        });
+        error = true;
+      }
+    }
+
     setErrors(errorObj);
     if (error) return;
     setisloading(true)
@@ -200,6 +308,11 @@ function Register(props) {
         country: userData.country,
         postalCode: userData.postalCode,
       };
+      
+      // MLM: Include referral code if provided and verified
+      if (userData.referralCode && userData.referralCode.trim() && referrerInfo) {
+        data.referralCode = userData.referralCode.trim().toUpperCase();
+      }
 
       const updateHeader = await registerApi(data);
 
@@ -226,325 +339,408 @@ function Register(props) {
       navigate("/admin/dashboard");
     }
   }, []);
+  
+  // MLM: Extract referral code from URL on mount
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setUserData(prev => ({ ...prev, referralCode: refCode.toUpperCase() }));
+      setIsAutoVerify(true);
+      verifyReferralCode(refCode.toUpperCase(), true); // true = auto-verify from URL
+    }
+  }, [searchParams]);
+  
+  // MLM: Verify referral code
+  const verifyReferralCode = async (code, isFromURL = false) => {
+    if (!code || code.trim().length === 0) {
+      setReferrerInfo(null);
+      setReferralCodeError('');
+      return;
+    }
+    
+    // Check minimum length (referral codes are typically 8 characters)
+    if (code.trim().length < 8) {
+      setReferrerInfo(null);
+      setReferralCodeError('Referral code must be at least 8 characters');
+      return;
+    }
+    
+    try {
+      setVerifyingCode(true);
+      setReferralCodeError('');
+      const response = await verifyReferralCodeApi(code.toUpperCase());
+      
+      if (response.success && response.valid) {
+        setReferrerInfo(response.referrer);
+        setReferralCodeError('');
+      } else {
+        setReferrerInfo(null);
+        setReferralCodeError('Invalid referral code. Please check and try again.');
+      }
+    } catch (error) {
+      setReferrerInfo(null);
+      setReferralCodeError('Invalid referral code. Please check and try again.');
+      console.error('Referral code verification error:', error);
+    } finally {
+      setVerifyingCode(false);
+      if (isFromURL) {
+        setIsAutoVerify(false);
+      }
+    }
+  };
+
   return (
-    <div className="fix-wrapper thisnnf">
-      <div className="container ">
-        <div className="row justify-content-center">
-          <div className="col-lg-5 col-md-6">
+    <ThemeProvider theme={darkTheme}>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#25282c',
+          py: 4,
+        }}
+      >
+        <Container maxWidth="md">
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3, sm: 4, md: 5 },
+              borderRadius: 2,
+              backgroundColor: '#141A21',
+              boxShadow: 'rgba(0, 0, 0, 0.2) 0px 0px 2px 0px, rgba(0, 0, 0, 0.12) 0px 12px 24px -4px',
+            }}
+          >
+            {/* Logo and Title */}
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
+              <Link to="/" style={{ display: 'inline-block' }}>
+                <img
+                  src={LogoNew}
+                  alt="Logo"
+                  style={{ width: '80px', marginBottom: '16px' }}
+                />
+              </Link>
+              <Typography
+                variant="h5"
+                component="h1"
+                fontWeight="700"
+                color="#FFFFFF"
+                gutterBottom
+              >
+                Sign up
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
+                <Typography variant="body2" color="#919EAB">
+                  Already have an account?
+                </Typography>
+                <Link
+                  to="/auth/login"
+                  style={{
+                    color: '#7635dc',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  Sign in
+                </Link>
+              </Box>
+            </Box>
 
+            {/* Error/Success Messages */}
+            {props.errorMessage && (
+              <Typography color="error" sx={{ mb: 2, textAlign: 'center' }}>
+                {props.errorMessage}
+              </Typography>
+            )}
+            {props.successMessage && (
+              <Typography color="success.main" sx={{ mb: 2, textAlign: 'center' }}>
+                {props.successMessage}
+              </Typography>
+            )}
 
-            <div className="card mb-0 h-auto">
-              <div className="card-body">
-                <div className="text-center mb-2">
-                  <Link to="/">
-                    <img style={{ width: "80px" }} src={LogoNew} alt="" />
-                  </Link>
-                </div>
-                <h4 className="text-center mb-4 ">Sign up  </h4>
-                {props.errorMessage && (
-                  <div className='text-danger'>
-                    {props.errorMessage}
-                  </div>
-                )}
-                {props.successMessage && (
-                  <div className='text-danger'>
-                    {props.successMessage}
-                  </div>
-                )}
-                <form onSubmit={onSignUp} className="MuiStack-root css-1i43dhb">
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r0:-label">
-                      First Name
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1u1jokr">
-                      <input onChange={handleInput}
-                        value={userData.firstName}
-                        name="firstName"
-                        type="text" className="MuiInputBase-input MuiOutlinedInput-input css-126sty9" id=":r0:" />
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            First Name
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.firstName && <div className="text-danger mt-2">{errors.firstName}</div>}
+            {/* Registration Form */}
+            <form onSubmit={onSignUp}>
+              <Grid container spacing={2}>
+                {/* First Name */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="First Name"
+                    name="firstName"
+                    value={userData.firstName}
+                    onChange={handleInput}
+                    error={!!errors.firstName}
+                    helperText={errors.firstName}
+                    variant="outlined"
+                  />
+                </Grid>
 
-                  </div>
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r0:-label">
-                      Last Name
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1u1jokr">
-                      <input onChange={handleInput}
-                        value={userData.lastName}
-                        name="lastName"
-                        type="text" className="MuiInputBase-input MuiOutlinedInput-input css-126sty9" id=":r0:" />
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            Last Name
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.lastName && <div className="text-danger mt-2">{errors.lastName}</div>}
+                {/* Last Name */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Last Name"
+                    name="lastName"
+                    value={userData.lastName}
+                    onChange={handleInput}
+                    error={!!errors.lastName}
+                    helperText={errors.lastName}
+                    variant="outlined"
+                  />
+                </Grid>
 
-                  </div>
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r0:-label">
-                      Email Address
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1u1jokr">
-                      <input type="email"
-                        onChange={handleInput}
-                        value={userData.email}
-                        name="email" className="MuiInputBase-input MuiOutlinedInput-input css-126sty9" id=":r0:" />
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            Email Address
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.email && <div className="text-danger mt-2">{errors.email}</div>}
+                {/* Email */}
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    value={userData.email}
+                    onChange={handleInput}
+                    error={!!errors.email}
+                    helperText={errors.email}
+                    variant="outlined"
+                  />
+                </Grid>
 
-                  </div>
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r0:-label">
-                      Phone Number
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1u1jokr">
-                      <input onChange={handleInput}
-                        type="number"
-                        onFocus={() => (window.onwheel = () => false)} // Disable scrolling on focus
-                        onBlur={() => (window.onwheel = null)}
-                        onKeyDown={(e) =>
-                          [
-                            "ArrowUp",
-                            "ArrowDown",
-                            "e",
-                            "E",
-                            "+",
-                            "-",
-                            "*",
-                            "",
-                          ].includes(e.key) && e.preventDefault()
-                        }
-                        value={userData.phone}
-                        name="phone" className="MuiInputBase-input MuiOutlinedInput-input css-126sty9" id=":r0:" />
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            Phone Number
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.phone && <div className="text-danger mt-2">{errors.phone}</div>}
+                {/* Phone */}
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    name="phone"
+                    type="number"
+                    value={userData.phone}
+                    onChange={handleInput}
+                    error={!!errors.phone}
+                    helperText={errors.phone}
+                    variant="outlined"
+                    onFocus={() => (window.onwheel = () => false)}
+                    onBlur={() => (window.onwheel = null)}
+                    onKeyDown={(e) =>
+                      ["ArrowUp", "ArrowDown", "e", "E", "+", "-", "*", ""].includes(e.key) &&
+                      e.preventDefault()
+                    }
+                  />
+                </Grid>
 
-                  </div>
+                {/* Password */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Password"
+                    name="password"
+                    type={type1}
+                    value={userData.password}
+                    onChange={handleInput}
+                    error={!!errors.password}
+                    helperText={errors.password}
+                    variant="outlined"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={handleTogglePassword}
+                            edge="end"
+                            sx={{ color: 'text.secondary' }}
+                          >
+                            {type1 === "password" ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
 
+                {/* Confirm Password */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Confirm Password"
+                    name="cpassword"
+                    type={type2}
+                    value={userData.cpassword}
+                    onChange={handleInput}
+                    error={!!errors.cpassword}
+                    helperText={errors.cpassword}
+                    variant="outlined"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={handleTogglePassword1}
+                            edge="end"
+                            sx={{ color: 'text.secondary' }}
+                          >
+                            {type2 === "password" ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
 
+                {/* Country */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Country"
+                    name="country"
+                    value={userData.country}
+                    onChange={handleInput}
+                    error={!!errors.country}
+                    helperText={errors.country}
+                    variant="outlined"
+                  />
+                </Grid>
 
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r1:-label">
-                      Password
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd css-ssv83">
-                      <input type={type1}
-                        onChange={handleInput}
-                        value={userData.password}
-                        name="password" className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd css-1puc122" id=":r1:" />
-                      <div className="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-outlined MuiInputAdornment-sizeMedium css-w8wce8">
-                        {type1 === "password" ? <button type="button" onClick={handleTogglePassword} className="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium css-1fk2kk1">
-                          <svg aria-hidden="true" className="iconify iconify--solar mnl__icon__root MuiBox-root css-cnvj7y" height="1em" role="img" viewBox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
-                            <path clipRule="evenodd" d="M1.606 6.08a1 1 0 0 1 1.313.526L2 7l.92-.394v-.001l.003.009l.021.045l.094.194c.086.172.219.424.4.729a13.4 13.4 0 0 0 1.67 2.237a12 12 0 0 0 .59.592C7.18 11.8 9.251 13 12 13a8.7 8.7 0 0 0 3.22-.602c1.227-.483 2.254-1.21 3.096-1.998a13 13 0 0 0 2.733-3.725l.027-.058l.005-.011a1 1 0 0 1 1.838.788L22 7l.92.394l-.003.005l-.004.008l-.011.026l-.04.087a14 14 0 0 1-.741 1.348a15.4 15.4 0 0 1-1.711 2.256l.797.797a1 1 0 0 1-1.414 1.415l-.84-.84a12 12 0 0 1-1.897 1.256l.782 1.202a1 1 0 1 1-1.676 1.091l-.986-1.514c-.679.208-1.404.355-2.176.424V16.5a1 1 0 0 1-2 0v-1.544c-.775-.07-1.5-.217-2.177-.425l-.985 1.514a1 1 0 0 1-1.676-1.09l.782-1.203c-.7-.37-1.332-.8-1.897-1.257l-.84.84a1 1 0 0 1-1.414-1.414l.797-.797a15.4 15.4 0 0 1-1.87-2.519a14 14 0 0 1-.591-1.107l-.033-.072l-.01-.021l-.002-.007l-.001-.002v-.001C1.08 7.395 1.08 7.394 2 7l-.919.395a1 1 0 0 1 .525-1.314" fill="currentColor" fillRule="evenodd">
-                            </path>
-                          </svg>
-                          <span className="MuiTouchRipple-root css-w0pj6f">
-                          </span>
-                        </button> : <button onClick={handleTogglePassword} className="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium css-1fk2kk1" tabIndex={0} type="button"><svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" className="iconify iconify--solar mnl__icon__root MuiBox-root css-cnvj7y" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M9.75 12a2.25 2.25 0 1 1 4.5 0a2.25 2.25 0 0 1-4.5 0" /><path fill="currentColor" fillRule="evenodd" d="M2 12c0 1.64.425 2.191 1.275 3.296C4.972 17.5 7.818 20 12 20s7.028-2.5 8.725-4.704C21.575 14.192 22 13.639 22 12c0-1.64-.425-2.191-1.275-3.296C19.028 6.5 16.182 4 12 4S4.972 6.5 3.275 8.704C2.425 9.81 2 10.361 2 12m10-3.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5" clipRule="evenodd" /></svg><span className="MuiTouchRipple-root css-w0pj6f" /></button>
-                        }
-                      </div>
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            Password
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.password && <div className="text-danger mt-2 fs-12 mt-2">{errors.password}</div>}
-                  </div>
+                {/* Postal Code */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Postal Code"
+                    name="postalCode"
+                    value={userData.postalCode}
+                    onChange={handleInput}
+                    error={!!errors.postalCode}
+                    helperText={errors.postalCode}
+                    variant="outlined"
+                  />
+                </Grid>
 
+                {/* City */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="City"
+                    name="city"
+                    value={userData.city}
+                    onChange={handleInput}
+                    error={!!errors.city}
+                    helperText={errors.city}
+                    variant="outlined"
+                  />
+                </Grid>
 
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r1:-label">
-                      Confirm	Password
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd css-ssv83">
-                      <input type={type2}
-                        onChange={handleInput}
-                        value={userData.cpassword}
-                        name="cpassword" className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd css-1puc122" id=":r1:" />
-                      <div className="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-outlined MuiInputAdornment-sizeMedium css-w8wce8">
-                        {type2 === "password" ? <button type="button" onClick={handleTogglePassword1} className="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium css-1fk2kk1">
-                          <svg aria-hidden="true" className="iconify iconify--solar mnl__icon__root MuiBox-root css-cnvj7y" height="1em" role="img" viewBox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
-                            <path clipRule="evenodd" d="M1.606 6.08a1 1 0 0 1 1.313.526L2 7l.92-.394v-.001l.003.009l.021.045l.094.194c.086.172.219.424.4.729a13.4 13.4 0 0 0 1.67 2.237a12 12 0 0 0 .59.592C7.18 11.8 9.251 13 12 13a8.7 8.7 0 0 0 3.22-.602c1.227-.483 2.254-1.21 3.096-1.998a13 13 0 0 0 2.733-3.725l.027-.058l.005-.011a1 1 0 0 1 1.838.788L22 7l.92.394l-.003.005l-.004.008l-.011.026l-.04.087a14 14 0 0 1-.741 1.348a15.4 15.4 0 0 1-1.711 2.256l.797.797a1 1 0 0 1-1.414 1.415l-.84-.84a12 12 0 0 1-1.897 1.256l.782 1.202a1 1 0 1 1-1.676 1.091l-.986-1.514c-.679.208-1.404.355-2.176.424V16.5a1 1 0 0 1-2 0v-1.544c-.775-.07-1.5-.217-2.177-.425l-.985 1.514a1 1 0 0 1-1.676-1.09l.782-1.203c-.7-.37-1.332-.8-1.897-1.257l-.84.84a1 1 0 0 1-1.414-1.414l.797-.797a15.4 15.4 0 0 1-1.87-2.519a14 14 0 0 1-.591-1.107l-.033-.072l-.01-.021l-.002-.007l-.001-.002v-.001C1.08 7.395 1.08 7.394 2 7l-.919.395a1 1 0 0 1 .525-1.314" fill="currentColor" fillRule="evenodd">
-                            </path>
-                          </svg>
-                          <span className="MuiTouchRipple-root css-w0pj6f">
-                          </span>
-                        </button> :
+                {/* Address */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Address"
+                    name="address"
+                    value={userData.address}
+                    onChange={handleInput}
+                    error={!!errors.address}
+                    helperText={errors.address}
+                    variant="outlined"
+                  />
+                </Grid>
 
+                {/* Referral Code (Optional) */}
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Referral Code (Optional)"
+                    name="referralCode"
+                    value={userData.referralCode}
+                    onChange={(e) => {
+                      const code = e.target.value.toUpperCase();
+                      setUserData({ ...userData, referralCode: code });
+                      
+                      // Clear error and referrer info when user starts typing
+                      if (code.length === 0) {
+                        setReferrerInfo(null);
+                        setReferralCodeError('');
+                      } else if (code.length >= 8) {
+                        // Verify code when user types 8+ characters
+                        verifyReferralCode(code, false);
+                      } else {
+                        // Reset states for incomplete codes
+                        setReferrerInfo(null);
+                        setReferralCodeError('');
+                      }
+                    }}
+                    variant="outlined"
+                    placeholder="Enter referral code if you have one"
+                    error={!!referralCodeError}
+                    InputProps={{
+                      endAdornment: verifyingCode ? (
+                        <InputAdornment position="end">
+                          <CircularProgress size={20} />
+                        </InputAdornment>
+                      ) : referrerInfo ? (
+                        <InputAdornment position="end">
+                          <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
+                            ✓ Valid
+                          </Typography>
+                        </InputAdornment>
+                      ) : null
+                    }}
+                    helperText={
+                      referralCodeError
+                        ? `${referralCodeError} Remove it or correct it to continue.`
+                        : referrerInfo 
+                          ? `✓ Referred by: ${referrerInfo.name}` 
+                          : "Optional: Get $100 bonus when you use a friend's referral code!"
+                    }
+                    sx={{
+                      '& .MuiFormHelperText-root': {
+                        color: referralCodeError
+                          ? 'error.main'
+                          : referrerInfo 
+                            ? 'success.main' 
+                            : 'text.secondary'
+                      }
+                    }}
+                  />
+                </Grid>
 
-
-                          <button onClick={handleTogglePassword1} className="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium css-1fk2kk1" tabIndex={0} type="button"><svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" className="iconify iconify--solar mnl__icon__root MuiBox-root css-cnvj7y" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M9.75 12a2.25 2.25 0 1 1 4.5 0a2.25 2.25 0 0 1-4.5 0" /><path fill="currentColor" fillRule="evenodd" d="M2 12c0 1.64.425 2.191 1.275 3.296C4.972 17.5 7.818 20 12 20s7.028-2.5 8.725-4.704C21.575 14.192 22 13.639 22 12c0-1.64-.425-2.191-1.275-3.296C19.028 6.5 16.182 4 12 4S4.972 6.5 3.275 8.704C2.425 9.81 2 10.361 2 12m10-3.75a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5" clipRule="evenodd" /></svg><span className="MuiTouchRipple-root css-w0pj6f" /></button>
-                        }
-                      </div>
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            Confirm		Password
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.cpassword && <div className="text-danger fs-12 mt-2">{errors.cpassword}</div>}
-                  </div>
-
-
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r0:-label">
-                      Country
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1u1jokr">
-                      <input
-
-
-                        type="text"
-                        onChange={handleInput}
-                        value={userData.country}
-                        name="country"
-
-                        className="MuiInputBase-input MuiOutlinedInput-input css-126sty9" id=":r0:" />
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            Country
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.country && <div className="text-danger mt-2">{errors.country}</div>}
-                  </div>
-
-
-
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r0:-label">
-                      Postal Code
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1u1jokr">
-                      <input
-
-
-                        type="text"
-                        onChange={handleInput}
-                        value={userData.postalCode}
-                        name="postalCode"
-
-                        className="MuiInputBase-input MuiOutlinedInput-input css-126sty9" id=":r0:" />
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            Postal Code
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>   {errors.postalCode && <div className="text-danger mt-2">{errors.postalCode}</div>}
-
-                  </div>
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r0:-label">
-                      City
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1u1jokr">
-                      <input
-
-
-                        type="text"
-                        onChange={handleInput}
-                        value={userData.city}
-                        name="city"
-
-                        className="MuiInputBase-input MuiOutlinedInput-input css-126sty9" id=":r0:" />
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            City
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.city && <div className="text-danger mt-2">{errors.city}</div>}
-
-                  </div>
-
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
-                    <label className="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeMedium MuiInputLabel-outlined css-jpp5th" id=":r0:-label">
-                      Address
-                    </label>
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1u1jokr">
-                      <input
-                        type="text"
-                        onChange={handleInput}
-                        value={userData.address}
-                        name="address"
-
-                        className="MuiInputBase-input MuiOutlinedInput-input css-126sty9" id=":r0:" />
-                      <fieldset className="MuiOutlinedInput-notchedOutline css-15bf1b4">
-                        <legend className="css-14lo706">
-                          <span>
-                            Address
-                          </span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                    {errors.address && <div className="text-danger mt-2">{errors.address}</div>}
-
-                  </div>
-
-
-
-
-                  <button type="submit" style={{ opacity: isloading ? 0.5 : 1, cursor: isloading ? "default" : "pointer" }} disabled={isloading} className="MuiButtonBase-root MuiButton-root MuiLoadingButton-root MuiButton-contained MuiButton-containedInherit MuiButton-sizeLarge MuiButton-containedSizeLarge MuiButton-colorInherit MuiButton-disableElevation MuiButton-fullWidth MuiButton-root MuiLoadingButton-root MuiButton-contained MuiButton-containedInherit MuiButton-sizeLarge MuiButton-containedSizeLarge MuiButton-colorInherit MuiButton-disableElevation MuiButton-fullWidth css-1i03yle" id=":r2:">
-
-                    Sign me up
-                    <span className="MuiTouchRipple-root css-w0pj6f">
-                    </span>
-                  </button>
-                </form>
-                <div className="new-account mt-3">
-                  <p className="">
-                    Already have an account?{" "}
-                    <Link className="text-primary" to="/auth/login">
-                      Sign in
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
+                {/* Submit Button */}
+                <Grid item xs={12}>
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    disabled={isloading}
+                    sx={{
+                      mt: 1,
+                      py: 1.5,
+                      fontSize: '0.9375rem',
+                      fontWeight: 700,
+                      height: '48px',
+                      backgroundColor: '#FFFFFF',
+                      color: '#1C252E',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: '#f5f5f5',
+                        boxShadow: 'none',
+                      },
+                      '&:disabled': {
+                        backgroundColor: '#FFFFFF',
+                        opacity: 0.5,
+                      },
+                    }}
+                  >
+                    {isloading ? (
+                      <>
+                        <CircularProgress size={24} sx={{ mr: 1, color: '#1C252E' }} />
+                        Creating Account...
+                      </>
+                    ) : (
+                      'Sign me up'
+                    )}
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+          </Paper>
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 };
-
 
 export default Register;

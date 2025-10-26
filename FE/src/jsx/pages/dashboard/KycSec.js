@@ -152,12 +152,7 @@ const Documents = ({ isLoading, setisLoading }) => {
                 setisLoading(false);
             }, 2000); // Simulate a 2-second delay
         };
-        mockAsyncOperation();
-        console.log(isLoading);
-    }, [setisLoading]);
-    console.log(isLoading);
-
-    let sendEmail = async () => {
+        mockAsyncOperation();}, [setisLoading]);let sendEmail = async () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         const isValidEmail = emailRegex.test(emailValue);
@@ -270,12 +265,12 @@ const Documents = ({ isLoading, setisLoading }) => {
                                 <Row className="mb-8">
                                     <Col sm={6}>
                                         <div className="relative">
-                                            <div style={{ minHeight: "260px" }} className="border bg-white rounded-xl p-4 position-relative">
+                                            <div style={{ minHeight: "260px" }} className="border text-white rounded-xl p-4 position-relative">
                                                 <div className="text-center">
-                                                    <p className="text-muted font-heading text-base font-medium">
+                                                    <p className="  font-heading text-base font-medium">
                                                         Upload ID
                                                     </p>
-                                                    <p className="font-alt text-xs text-muted">
+                                                    <p className="font-alt text-xs  ">
                                                         Please upload a clear image of a valid government-issued identification document (e.g., passport, national ID, or driver's license).
                                                     </p>
 
@@ -305,12 +300,12 @@ const Documents = ({ isLoading, setisLoading }) => {
                                     </Col>
                                     <Col sm={6}>
                                         <div className="relative">
-                                            <div style={{ minHeight: "260px" }} className="border bg-white rounded-xl p-4 position-relative">
+                                            <div style={{ minHeight: "260px" }} className="border text-white rounded-xl p-4 position-relative">
                                                 <div className="text-center">
-                                                    <p className="text-muted font-heading text-base font-medium">
+                                                    <p className="  font-heading text-base font-medium">
                                                         Upload Utility Bill
                                                     </p>
-                                                    <p className="font-alt text-xs text-muted">
+                                                    <p className="font-alt text-xs  ">
                                                         Please upload a clear image of a recent utility bill (e.g., electricity, water, or gas bill) in your name.
                                                     </p>
 

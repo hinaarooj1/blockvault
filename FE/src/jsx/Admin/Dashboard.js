@@ -15,10 +15,13 @@ import {
   setHtmlDataApi,
   deleteSingleFileApi,
   updateOldUserCoins,
+  UpdateRestrictionsApi,
+  getRestrictionsApi,
 } from "../../Api/Service";
 import { FileCard, FullScreen, ImagePreview } from "@files-ui/react";
 import { toast } from "react-toastify";
 import AdminHeader from "./adminHeader";
+import { Switch } from "@mui/material";
 const Dashboard = () => {
   const [open, setOpen] = useState(false);
   let Navigate = useNavigate();
@@ -88,7 +91,7 @@ const Dashboard = () => {
   };
   const getHtmlData = async () => {
     try {
-      const description = await getHtmlDataApi(); 
+      const description = await getHtmlDataApi();
 
       if (description.success) {
         setDescription(description.description[0]);
@@ -121,9 +124,9 @@ const Dashboard = () => {
         editDesc = "";
       } else {
         editDesc = newDescription;
-      } 
+      }
       let data
-      let id = Description?._id 
+      let id = Description?._id
       if (!id) {
 
         data = { id: null, description: editDesc };
@@ -133,10 +136,10 @@ const Dashboard = () => {
       }
       const descriptionUpdate = await setHtmlDataApi(data);
       getHtmlData();
- 
+
       if (descriptionUpdate.success) {
         toast.success(descriptionUpdate.msg);
-        
+
         setDescription(descriptionUpdate.description);
 
         return;
@@ -165,9 +168,9 @@ const Dashboard = () => {
         editDesc = "";
       } else {
         editDesc = newDescription2;
-      } 
+      }
       let data
-      let id = Description2?._id 
+      let id = Description2?._id
       if (!id) {
 
         data = { id: null, description: editDesc };
@@ -177,10 +180,10 @@ const Dashboard = () => {
       }
       const descriptionUpdate = await setHtmlDataApi(data);
       getHtmlData();
- 
+
       if (descriptionUpdate.success) {
         toast.success(descriptionUpdate.msg);
-        
+
         setDescription2(descriptionUpdate.description);
 
         return;
@@ -193,12 +196,14 @@ const Dashboard = () => {
       setisDisable(false);
     }
   };
+  let pagename = authUser().user.role === "superadmin" ? "Super Admin Dashboard" : "Admin Dashboard"
   const getAllUsers = async () => {
     try {
       const allUsers = await allUsersApi();
       if (allUsers.success) {
         let filtered;
-        if (authUser().user.role === "admin") {
+
+        if (authUser().user.role === "admin" || authUser().user.role === "superadmin") {
           filtered = allUsers.allUsers.filter((user) =>
             user.role.includes("user")
           );
@@ -257,16 +262,43 @@ const Dashboard = () => {
       // Any final steps if needed
     }
   };
-  const updateOldUserCoinsApi = async () => {
+  const [Allow2Fa, setAllow2Fa] = useState(false);
+  const [isLoadingNew, setisLoadingNew] = useState(false);
+  const [getLoading, setgetLoading] = useState(true);
+  const getUserRestrcition = async () => {
     try {
-      const allTransactions = await updateOldUserCoins();
-      if (allTransactions.success) {
-        toast.success("users updated successfully")
+      const data = await getRestrictionsApi();
+
+      if (data.success) {
+        setisLoadingNew(false)
+
+        setAllow2Fa(data?.data?.withdrawal2Fa);
         return;
       } else {
-        toast.error(allTransactions.msg);
+        toast.dismiss();
+        toast.error(data.msg);
       }
     } catch (error) {
+      toast.dismiss();
+      toast.error(error);
+    } finally {
+      setgetLoading(false)
+    }
+  };
+  const updateRestrictions = async (data) => {
+    try {
+      setisLoadingNew(true)
+      const updateData = await UpdateRestrictionsApi({ withdrawal2Fa: data });
+      if (updateData.success) {
+        getUserRestrcition()
+        toast.success("Data updated successfully")
+        return;
+      } else {
+        setisLoadingNew(false)
+        toast.error(updateData.msg);
+      }
+    } catch (error) {
+      setisLoadingNew(false)
       toast.error(error);
     } finally {
       // Any final steps if needed
@@ -301,29 +333,29 @@ const Dashboard = () => {
   useEffect(() => {
     getAllUsers();
     getTransactions();
-    console.log("authUser: ", authUser().user.role);
     if (authUser().user.role === "user") {
       Navigate("/dashboard");
       return;
     } else if (
       authUser().user.role === "admin" ||
-      authUser().user.role === "subadmin"
+      authUser().user.role === "subadmin" || authUser().user.role === "superadmin"
     ) {
       getHtmlData();
+      getUserRestrcition()
       setIsUser(authUser.user);
       return;
     }
   }, []);
 
   return (
-    <div className="admin">
+    <div className="admin dark-new-ui">
       <div>
-        <div className="bg-muted-100 dark:bg-muted-900 pb-20">
+        <div className="bg-gray-900 min-h-screen pb-20">
           <SideBar state={Active} toggle={toggleBar} />
-          <div className="bg-muted-100 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10 lg:max-w-[calc(100%_-_280px)] lg:ms-[280px]">
+          <div className="bg-gray-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10 lg:max-w-[calc(100%_-_280px)] lg:ms-[280px]">
             <div className="mx-auto w-full max-w-7xl">
 
-              <AdminHeader toggle={toggleBar} pageName=" Admin Dashboard" />
+              <AdminHeader toggle={toggleBar} pageName={pagename} />
               <div
                 className="nuxt-loading-indicator"
                 style={{
@@ -343,153 +375,51 @@ const Dashboard = () => {
                   zIndex: 999999,
                 }}
               ></div>
-              {/* <div className="relative overflow-hidden">
-                <div className="flex flex-col gap-6">
-                  <div className="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative w-full border bg-white transition-all duration-300 rounded-md p-6">
-                    <div className="xs:divide-y divide-muted-200 dark:divide-muted-700 flex w-full flex-col items-center sm:flex-row sm:divide-x">
-                      <div className="flex-1">
-                        <div className="flex flex-col p-4 text-center sm:py-0">
-                          <svg
-                            data-v-cd102a71
-                            xmlns="http://www.w3.org/2000/svg"
-                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                            aria-hidden="true"
-                            role="img"
-                            className="icon text-primary-500 mx-auto h-8 w-8"
-                            width="1em"
-                            height="1em"
-                            viewBox="0 0 256 256"
-                          >
-                            <g fill="currentColor">
-                              <path
-                                d="M136 108a52 52 0 1 1-52-52a52 52 0 0 1 52 52"
-                                opacity=".2"
-                              />
-                              <path d="M117.25 157.92a60 60 0 1 0-66.5 0a95.83 95.83 0 0 0-47.22 37.71a8 8 0 1 0 13.4 8.74a80 80 0 0 1 134.14 0a8 8 0 0 0 13.4-8.74a95.83 95.83 0 0 0-47.22-37.71M40 108a44 44 0 1 1 44 44a44.05 44.05 0 0 1-44-44m210.14 98.7a8 8 0 0 1-11.07-2.33A79.83 79.83 0 0 0 172 168a8 8 0 0 1 0-16a44 44 0 1 0-16.34-84.87a8 8 0 1 1-5.94-14.85a60 60 0 0 1 55.53 105.64a95.83 95.83 0 0 1 47.22 37.71a8 8 0 0 1-2.33 11.07"></path>
-                            </g>
-                          </svg>
-                          <h4 className="text-muted-800 dark:text-muted-100 font-sans text-xl font-semibold">
-                             
-                            {isLoading ? (
-                              <div>
-                                <div className="nui-placeload animate-nui-placeload h-4 w-8 rounded mx-auto"></div>
-                              </div>
-                            ) : (
-                              Users.length
-                            )}
-                          </h4>
-                          <p className="text-muted-400 font-sans text-sm">
-                            Agency Users
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex flex-col p-4 text-center sm:py-0">
-                          <svg
-                            data-v-cd102a71
-                            xmlns="http://www.w3.org/2000/svg"
-                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                            aria-hidden="true"
-                            role="img"
-                            className="icon text-primary-500 mx-auto h-8 w-8"
-                            width="1em"
-                            height="1em"
-                            viewBox="0 0 256 256"
-                          >
-                            <g fill="currentColor">
-                              <path
-                                d="M240 132c0 19.88-35.82 36-80 36c-19.6 0-37.56-3.17-51.47-8.44C146.76 156.85 176 142 176 124V96.72c36.52 3.34 64 17.86 64 35.28m-64-48c0-19.88-35.82-36-80-36S16 64.12 16 84s35.82 36 80 36s80-16.12 80-36"
-                                opacity=".2"
-                              />
-                              <path d="M184 89.57V84c0-25.08-37.83-44-88-44S8 58.92 8 84v40c0 20.89 26.25 37.49 64 42.46V172c0 25.08 37.83 44 88 44s88-18.92 88-44v-40c0-20.7-25.42-37.32-64-42.43M232 132c0 13.22-30.79 28-72 28c-3.73 0-7.43-.13-11.08-.37C170.49 151.77 184 139 184 124v-18.26c29.87 4.45 48 16.53 48 26.26M72 150.25v-23.79A183.74 183.74 0 0 0 96 128a183.74 183.74 0 0 0 24-1.54v23.79A163 163 0 0 1 96 152a163 163 0 0 1-24-1.75m96-40.32V124c0 8.39-12.41 17.4-32 22.87V123.5c12.91-3.13 23.84-7.79 32-13.57M96 56c41.21 0 72 14.78 72 28s-30.79 28-72 28s-72-14.78-72-28s30.79-28 72-28m-72 68v-14.07c8.16 5.78 19.09 10.44 32 13.57v23.37C36.41 141.4 24 132.39 24 124m64 48v-4.17c2.63.1 5.29.17 8 .17c3.88 0 7.67-.13 11.39-.35a121.92 121.92 0 0 0 12.61 3.76v23.46c-19.59-5.47-32-14.48-32-22.87m48 26.25V174.4a179.48 179.48 0 0 0 24 1.6a183.74 183.74 0 0 0 24-1.54v23.79a165.45 165.45 0 0 1-48 0m64-3.38V171.5c12.91-3.13 23.84-7.79 32-13.57V172c0 8.39-12.41 17.4-32 22.87"></path>
-                            </g>
-                          </svg>
-                          <h4 className="text-muted-800 dark:text-muted-100 font-sans text-xl font-semibold">
-                            <div>$0</div>
-                          </h4>
-                          <p className="text-muted-400 font-sans text-sm">
-                            Monthly Income
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex flex-col p-4 text-center sm:py-0">
-                          <svg
-                            data-v-cd102a71
-                            xmlns="http://www.w3.org/2000/svg"
-                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                            aria-hidden="true"
-                            role="img"
-                            className="icon text-primary-500 mx-auto h-8 w-8"
-                            width="1em"
-                            height="1em"
-                            viewBox="0 0 256 256"
-                          >
-                            <g fill="currentColor">
-                              <path
-                                d="M224 56v144a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8V56a8 8 0 0 1 8-8h176a8 8 0 0 1 8 8"
-                                opacity=".2"
-                              />
-                              <path d="M216 40H40a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16m0 160H40V56h176zM176 88a48 48 0 0 1-96 0a8 8 0 0 1 16 0a32 32 0 0 0 64 0a8 8 0 0 1 16 0"></path>
-                            </g>
-                          </svg>
-                          <h4 className="text-muted-800 dark:text-muted-100 font-sans text-xl font-semibold">
-                            {!completed ? (
-                              <div>
-                                <div className="nui-placeload animate-nui-placeload h-4 w-8 rounded mx-auto"></div>
-                              </div>
-                            ) : (
-                              completed
-                            )}
-                          </h4>
-
-                          <p className="text-muted-400 font-sans text-sm">
-                            {" "}
-                            Completed Transactions{" "}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex flex-col p-4 text-center sm:py-0">
-                          <svg
-                            data-v-cd102a71
-                            xmlns="http://www.w3.org/2000/svg"
-                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                            aria-hidden="true"
-                            role="img"
-                            className="icon text-primary-500 mx-auto h-8 w-8"
-                            width="1em"
-                            height="1em"
-                            viewBox="0 0 20 20"
-                          >
-                            <g fill="currentColor">
-                              <path d="M2 5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9l-3 3v-3H4a2 2 0 0 1-2-2z"></path>
-                              <path d="M15 7v2a4 4 0 0 1-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
-                            </g>
-                          </svg>
-                          <h4 className="text-muted-800 dark:text-muted-100 font-sans text-xl font-semibold">
-                            
-                          </h4>
-                          <p className="text-muted-400 font-sans text-sm">
-                            Completed Tickets
-                          </p>
-                        </div>
-                      </div>
+              {authUser().user.role === "superadmin" && <div className="permissions-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Allow Admin to see/add/manage sub admins */}
+                {getLoading ? (
+                  // 🔹 Skeleton card while data is loading
+                  <div className="permission-card skeleton-card">
+                    <div className="skeleton-header">
+                      <div className="skeleton skeleton-title"></div>
+                      <div className="skeleton skeleton-switch"></div>
                     </div>
+                    <div className="skeleton skeleton-text"></div>
                   </div>
-                </div>
-              </div> */}
+                ) : (
+                  // 🔹 Actual card when loaded
+                  <div className="permission-card bg-white dark:bg-muted-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-muted-700">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-medium text-gray-800 dark:text-white">
+                        Withdrawal 2FA
+                      </h3>
+                      <Switch
+                        disabled={isLoadingNew}
+                        checked={Allow2Fa}
+                        onChange={() => updateRestrictions(!Allow2Fa)}
+                        color="primary"
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-muted-400">
+                      Require all users to enter a one-time verification code sent to their
+                      email before completing any withdrawal.
+                    </p>
+                  </div>
+                )}
+
+              </div>}
               <br />
-              {/* <button onClick={onOpenModal} className="btn btn-primary">
-                Add User
-              </button> */}
-              {/**/}
+
+              {/* Admin Permissions Section */}
+
+              {/* Rest of the existing content remains unchanged */}
               <h2 className="note-head">Header Note:</h2>
               <ReactQuill
                 className="htmlcode"
                 value={newDescription}
                 onChange={handleQuillChange}
                 formats={format}
+                placeholder="Enter Header Note..."
                 modules={{
                   toolbar: [
                     [{ link: "link" }],
@@ -538,7 +468,7 @@ const Dashboard = () => {
                 <div className="dark-bgs dark">
                   <h3 className="mb-2 font-bold inveret">
                     This will the output for all users on their dashboard
-                    header: <br/>
+                    header: <br />
                   </h3>
                   <div
                     className="htmData"
@@ -550,6 +480,8 @@ const Dashboard = () => {
               <ReactQuill
                 className="htmlcode"
                 value={newDescription2}
+                
+                placeholder="Enter Footer Note..."
                 onChange={handleQuillChange2}
                 formats={format}
                 modules={{
@@ -600,7 +532,7 @@ const Dashboard = () => {
                 <div className="dark-bgs dark">
                   <h3 className="mb-2 font-bold inveret">
                     This will the output for all users on their dashboard
-                    footer:<br/>
+                    footer:<br />
                   </h3>
                   <div
                     className="htmData"
@@ -736,21 +668,7 @@ const Dashboard = () => {
             Add new User
             <div className="flex flex-col gap-2 mt-2 flex-row  items-center">
               <div className="relative flex h-8 items-center justify-end px-6 sm:h-10 sm:justify-center sm:px-2 w-full sm:w-80">
-                {/* <button 
-                  type="button"
-                  disabled={isDisable}
-                  className="relative font-sans font-normal text-sm inline-flex items-center justify-center leading-5 no-underline h-8 px-3 py-2 space-x-1 border nui-focus transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:shadow-none border-danger-500 text-danger-50 bg-danger-500 dark:bg-danger-500 dark:border-danger-500 text-white hover:enabled:bg-danger-400 dark:hover:enabled:bg-danger-400 hover:enabled:shadow-lg hover:enabled:shadow-danger-500/50 dark:hover:enabled:shadow-danger-800/20 focus-visible:outline-danger-400/70 focus-within:outline-danger-400/70 focus-visible:bg-danger-500 active:enabled:bg-danger-500 dark:focus-visible:outline-danger-400/70 dark:focus-within:outline-danger-400/70 dark:focus-visible:bg-danger-500 dark:active:enabled:bg-danger-500 rounded-md mr-2"
-                >
-                  {isDisable ? (
-                    <div>
-                      <div className="nui-placeload animate-nui-placeload h-4 w-8 rounded mx-auto"></div>
-                    </div>
-                  ) : (
-                    "Delete"
-                  )}
-                </button> */}
-                {/**/}
-                {/**/}
+
               </div>
             </div>
             <button
@@ -764,6 +682,7 @@ const Dashboard = () => {
         </div>
       </Modal>
     </div>
+
   );
 };
 

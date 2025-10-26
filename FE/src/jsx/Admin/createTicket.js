@@ -7,7 +7,6 @@ import { createTicketApi, getsignUserApi, getUserTicketsApi, sendTicketApi } fro
 import axios from 'axios';
 import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinner, Container } from 'react-bootstrap';
 
-
 const CreateTicket = () => {
     const [Active, setActive] = useState(false);
     let param = useParams()
@@ -67,7 +66,6 @@ const CreateTicket = () => {
             setisDisable(false);
         }
     };
-
 
     //
 
@@ -158,7 +156,6 @@ const CreateTicket = () => {
                                 </Form>
                             </Card.Body>
                         )}
-
 
                     </div>
                 </div>

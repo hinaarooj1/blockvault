@@ -31,10 +31,6 @@ import AllSell1 from './WidgetBasic/AllSell1';
 import AllSell2 from './WidgetBasic/AllSell2';
 import WeeklySales2 from './WidgetBasic/WeeklySales2';
 
-
-
-
-
 const TtitleCode  = (props) =>{
     return(
         <div className={`card-header border-0 ${props.design}`}>
@@ -317,7 +313,6 @@ const WidgetChart = () => {
                         </div>
                     </div>
                 </Col>
-
 
                 <Col xl={12}  xxl={12} >
                     <div className="row">

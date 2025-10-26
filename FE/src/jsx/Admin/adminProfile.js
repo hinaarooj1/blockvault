@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SideBar from "../layouts/AdminSidebar/Sidebar";
-
+import AdminHeader from "./adminHeader";
 import { useNavigate, useParams } from "react-router-dom";
 import { signleUsersApi, updateSignleUsersApi } from "../../Api/Service";
 import { toast } from "react-toastify";
@@ -19,6 +19,7 @@ const AdminProfile = () => {
     city: "",
     country: "",
     postalCode: "",
+    AiTradingPercentage: 1.25,
   });
   let handleInput = (e) => {
     let name = e.target.name;
@@ -38,15 +39,34 @@ const AdminProfile = () => {
       setActive(true);
     }
   };
+
   const getSignleUser = async () => {
     try {
-      const signleUser = await signleUsersApi(authUser().user._id);
-
-      if (signleUser.success) {
-        setUserData(signleUser.signleUser);
+      // Only fetch if we need fresh data, otherwise use authUser data
+      const currentUser = authUser().user;
+      
+      // For admin role, check permissions first
+      if (currentUser.role === 'admin') {
+        const signleUser = await signleUsersApi(currentUser._id);
+        if (signleUser.success) {
+          if (signleUser.signleUser.adminPermissions?.isProfileUpdate === false) {
+            Navigate("/admin/dashboard");
+            return;
+          }
+          setUserData(signleUser.signleUser);
+        } else {
+          toast.dismiss();
+          toast.error(signleUser.msg);
+        }
       } else {
-        toast.dismiss();
-        toast.error(signleUser.msg);
+        // For superadmin, use existing data and fetch fresh
+        const signleUser = await signleUsersApi(currentUser._id);
+        if (signleUser.success) {
+          setUserData(signleUser.signleUser);
+        } else {
+          toast.dismiss();
+          toast.error(signleUser.msg);
+        }
       }
     } catch (error) {
       toast.dismiss();
@@ -56,7 +76,6 @@ const AdminProfile = () => {
     }
   };
   const updateSignleUser = async (e) => {
-    console.log('e: ', e);
 
     e.preventDefault();
     try {
@@ -65,16 +84,16 @@ const AdminProfile = () => {
         firstName: userData.firstName,
         lastName: userData.lastName,
         email: userData.email,
-        password: userData.password,
+        password: userData.password || "",
         phone: userData.phone,
         note: userData.note,
         address: userData.address,
         city: userData.city,
         country: userData.country,
         postalCode: userData.postalCode,
-        currency: "USD"
+        currency: userData.currency || "USD",
+        AiTradingPercentage: userData.AiTradingPercentage || 1.25
       };
-      console.log('body: ', body);
       const signleUser = await updateSignleUsersApi(userData._id, body);
 
       if (signleUser.success) {
@@ -92,95 +111,78 @@ const AdminProfile = () => {
     }
   };
   useEffect(() => {
-    getSignleUser();
-    if (authUser().user.role === "user") {
+    const currentUser = authUser().user;
+    
+    // Role-based navigation
+    if (currentUser.role === "user") {
       Navigate("/dashboard");
       return;
-    } else if (authUser().user.role === "admin") {
-      setUserData(authUser().user);
-      return;
     }
+    
+    // Load user data
+    getSignleUser();
   }, []);
 
   return (
-    <div className="admin">
-      <div>
-        <div className="bg-muted-100 dark:bg-muted-900 pb-20">
-          <SideBar state={Active} toggle={toggleBar} />
-          <div className="col-span-12 sm:col-span-8">
+    <div className="admin dark-new-ui">
+      <div className="bg-gray-900 min-h-screen">
+        <SideBar state={Active} toggle={toggleBar} />
+        
+        <div className="bg-gray-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10 lg:max-w-[calc(100%_-_280px)] lg:ms-[280px]">
+          <div className="mx-auto w-full max-w-7xl">
+            <AdminHeader toggle={toggleBar} pageName="Admin Profile" />
             {isLoading ? (
-              <div className="mx-auto loading-pg w-full text-center max-w-xs">
-                <div className="mx-auto max-w-xs new">
-                  <svg
-                    data-v-cd102a71
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlnsXlink="http://www.w3.org/1999/xlink"
-                    aria-hidden="true"
-                    role="img"
-                    className="icon h-12 w-12 text-primary-500"
-                    width="1em"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                      opacity=".25"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z"
-                    >
-                      <animateTransform
-                        attributeName="transform"
-                        dur="0.75s"
-                        repeatCount="indefinite"
-                        type="rotate"
-                        values="0 12 12;360 12 12"
-                      />
-                    </path>
-                  </svg>
+              <div className="mx-auto loading-pg w-full text-center max-w-xs py-20">
+                <div className="mx-auto max-w-xs flex justify-center">
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-600 border-t-blue-500"></div>
                 </div>
-                <div className="mx-auto max-w-sm">
-                  <h4 className="font-heading text-xl font-medium leading-normal leading-normal text-muted-800 mb-1 mt-4 dark:text-white">
+                <div className="mx-auto max-w-sm mt-6">
+                  <h4 className="text-xl font-semibold mb-2" style={{ color: 'white' }}>
                     Loading Profile
                   </h4>
-                  <p className="text-muted-400 font-sans text-sm">
-                    Please wait while we load the Profile.
+                  <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                    Please wait while we load your profile information.
                   </p>
                 </div>
               </div>
             ) : (
               <form method="POST" action className="w-full pb-16">
-                <div className="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative w-full border bg-white transition-all duration-300 rounded-md">
-                  <div className="flex items-center justify-between p-4">
+                <div className="relative w-full transition-all duration-300 rounded-lg" style={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '12px',
+                  overflow: 'hidden'
+                }}>
+                  <div className="flex items-center justify-between p-6" style={{
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+                  }}>
                     <div>
                       <p
-                        className="font-heading text-sm font-medium leading-normal leading-normal uppercase tracking-wider"
+                        className="text-lg font-semibold uppercase tracking-wider"
+                        style={{ color: 'white' }}
                         tag="h2"
                       >
-                        {" "}
-                        Settings{" "}
+                        Profile Settings
                       </p>
-                      <p className="font-sans text-xs font-normal leading-normal leading-normal text-muted-400">
-                        {" "}
-                        Edit user settings{" "}
+                      <p className="text-sm mt-1" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                        Edit your admin profile information
                       </p>
                     </div>
                   </div>
-                  <div className="p-4">
+                  <div className="p-6">
                     <div className="mx-auto max-w-lg space-y-12 py-8">
                       {/**/}
                       {/**/}
                       <fieldset className="relative">
                         <div className="mb-6">
                           <p
-                            className="font-heading text-base font-medium leading-none"
+                            className="text-base font-semibold"
+                            style={{ color: 'white' }}
                             tag="h3"
                           >
                             Admin Information
                           </p>
-                          <p className="font-sans text-xs font-normal leading-normal leading-normal text-muted-400">
+                          <p className="text-sm mt-1" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
                             Basic admin information
                           </p>
                         </div>
@@ -195,7 +197,12 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.email}
                                   name="email"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
                                   placeholder="Email"
                                 />
                                 {/**/}
@@ -235,8 +242,13 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.password}
                                   name="password"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
-                                  placeholder="Password"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
+                                  placeholder="Password (leave empty to keep current)"
                                 />
                                 {/**/}
                                 {/**/}
@@ -275,7 +287,12 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.firstName}
                                   name="firstName"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
                                   placeholder="First Name"
                                 />
                                 {/**/}
@@ -315,7 +332,12 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.lastName}
                                   name="lastName"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
                                   placeholder="Last Name"
                                 />
                                 {/**/}
@@ -355,7 +377,12 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.phone}
                                   name="phone"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
                                   placeholder="Phone Number"
                                 />
                                 {/**/}
@@ -395,7 +422,12 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.address}
                                   name="address"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
                                   placeholder="Address"
                                 />
                                 {/**/}
@@ -435,7 +467,12 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.city}
                                   name="city"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
                                   placeholder="City"
                                 />
                                 {/**/}
@@ -475,7 +512,12 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.country}
                                   name="country"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
                                   placeholder="Country"
                                 />
                                 {/**/}
@@ -515,7 +557,12 @@ const AdminProfile = () => {
                                   onChange={handleInput}
                                   value={userData.postalCode}
                                   name="postalCode"
-                                  className="nui-focus border-muted-300 text-muted-600 placeholder:text-muted-300 dark:border-muted-700 dark:bg-muted-900/75 dark:text-muted-200 dark:placeholder:text-muted-500 dark:focus:border-muted-700 peer w-full border bg-white font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  className="peer w-full border font-sans transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75 px-2 h-10 py-2 text-sm leading-5 pe-4 ps-9 rounded"
+                                  style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'white'
+                                  }}
                                   placeholder="Postal Code"
                                 />
                                 {/**/}
@@ -548,20 +595,26 @@ const AdminProfile = () => {
                         </div>
                       </fieldset>
                     </div>
-                    <div className="flex items-center justify gap-2">
+                    <div className="flex items-center gap-2 pt-4" style={{
+                      borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}>
                       <button
                         disabled={isDisable}
                         onClick={updateSignleUser}
-                        data-v-71bb21a6
                         type="submit"
-                        className="is-button rounded bg-primary-500 dark:bg-primary-500 hover:enabled:bg-primary-400 dark:hover:enabled:bg-primary-400 text-white hover:enabled:shadow-lg hover:enabled:shadow-primary-500/50 dark:hover:enabled:shadow-primary-800/20 focus-visible:outline-primary-400/70 focus-within:outline-primary-400/70 focus-visible:bg-primary-500 active:enabled:bg-primary-500 dark:focus-visible:outline-primary-400 dark:focus-within:outline-primary-400 dark:focus-visible:bg-primary-500 dark:active:enabled:bg-primary-500 w-24"
+                        className="rounded px-6 py-2.5 font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                          background: isDisable ? 'rgba(33, 150, 243, 0.5)' : 'linear-gradient(45deg, #1976d2, #42a5f5)',
+                          boxShadow: isDisable ? 'none' : '0 4px 14px 0 rgba(33, 150, 243, 0.4)'
+                        }}
                       >
                         {isDisable ? (
-                          <div>
-                            <div className="nui-placeload animate-nui-placeload h-4 w-8 rounded mx-auto"></div>
+                          <div className="flex items-center justify-center">
+                            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                            <span className="ml-2">Saving...</span>
                           </div>
                         ) : (
-                          "Save"
+                          "Save Changes"
                         )}
                       </button>
                     </div>

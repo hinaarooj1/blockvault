@@ -17,7 +17,6 @@ const marketDataTable = [
     {  date:'2022-10-03 16:24', order:'Limit', filled:'-', total:'526.10',price:'200.00', logo : SVGICON.RippleDoller, name:'XRP', side:"Buy"},    
 ];
 
-
 const theadData = [
    { heading: 'Date', sortingVale:"date"},
    { heading: 'Pair', sortingVale:"name"},
@@ -65,7 +64,6 @@ const HistoryTradeTableData = () => {
 
     const [marketData, setMarketData] = useState([...marketDataTable]);
     const [iconData, setIconDate] = useState({ complete: false ,ind : Number});
-
 
     function SotingData(name){
         const sortedPeople = [...marketData]; 

@@ -97,6 +97,4 @@ const MenusBlog2 = () => {
     );
 };
 
-
-
 export default MenusBlog2;

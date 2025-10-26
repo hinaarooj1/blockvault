@@ -61,8 +61,6 @@ const tabMainData = [
     { name: 'Year', type: 'year' },
 ];
 
-
-
 const RecentTransaction = () => {
 
     const [transactionData, setTransactionData] = useState(tableData.slice(0, 3));
@@ -82,7 +80,6 @@ const RecentTransaction = () => {
     const [singleTransaction, setsingleTransaction] = useState();
     const [userDetail, setuserDetail] = useState({});
     const [liveBtc, setliveBtc] = useState(null);
-
 
     let authUser = useAuthUser();
     let Navigate = useNavigate();
@@ -251,10 +248,7 @@ const RecentTransaction = () => {
                                         UserTransactions.filter(
                                             (transaction) => !transaction.isHidden
                                         ).slice(0, 5).map((Transaction, index) => {
-                                            const { type, trxName, amount, currency } = Transaction;
-
-                                            console.log('currency: ', currency);
-                                            const rate = getCryptoRate(trxName);
+                                            const { type, trxName, amount, currency } = Transaction;const rate = getCryptoRate(trxName);
                                             const convertedAmount = convertToCurrency(amount, rate, currency);
                                             return (
                                                 <tr key={index}>

@@ -2,7 +2,6 @@ import React, { useReducer } from "react";
 import {Link} from 'react-router-dom';
 import { Row, Card, Col, Button, Modal, Container } from "react-bootstrap";
 
-
 const init =  false;
 
 const reducer = (state, active) =>{

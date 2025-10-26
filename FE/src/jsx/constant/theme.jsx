@@ -27,7 +27,6 @@ export const IMAGES = {
     Profile8 : require('../../assets/images/profile/8.jpg'),
     Profile9 : require('../../assets/images/profile/9.jpg'),
 
-
     smallpic1 : require('../../assets/images/profile/small/pic1.jpg'),
     smallpic2 : require('../../assets/images/profile/small/pic2.jpg'),
     smallpic3 : require('../../assets/images/profile/small/pic3.jpg'),

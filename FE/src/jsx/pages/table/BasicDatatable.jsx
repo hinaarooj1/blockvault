@@ -6,12 +6,7 @@ const BasicDatatable = () => {
   
   const [data, setData] = useState(
     document.querySelectorAll("#job_data tbody tr")
-  );
-
-  console.log('data');
-  console.log(data);
-  
-  const sort = 5;
+  );const sort = 5;
   const activePag = useRef(0);
   //const [test, settest] = useState(0);
 
@@ -27,12 +22,7 @@ const BasicDatatable = () => {
   };
   // use effect
   useEffect(() => {
-    setData(document.querySelectorAll("#job_data tbody tr"));
-
-    console.log('data2');
-    console.log(data);
-
-   // chackboxFun();
+    setData(document.querySelectorAll("#job_data tbody tr"));// chackboxFun();
   }, []);
 
   // Active pagginarion

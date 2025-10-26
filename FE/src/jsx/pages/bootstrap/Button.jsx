@@ -200,8 +200,6 @@ const UiButton = () => {
                   </Tab.Container>  
                 </Col>
 
-
-
                 <Col lg="12">
                   <Tab.Container defaultActiveKey="Preview"> 
                     <Card name="button-light" className="dz-card">

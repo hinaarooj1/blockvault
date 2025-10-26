@@ -1,0 +1,195 @@
+.admin .active.datas {
+  --tw-text-opacity: 1 !important;
+  color: #8b5cf6 !important;
+  color: rgb(139 92 246 / var(--tw-text-opacity)) !important;
+}
+
+.admin .active.datas {
+  background-color: #8b5cf61a !important;
+}
+
+.admin .active.datas {
+  --tw-text-opacity: 1 !important;
+  color: #8b5cf6 !important;
+  color: rgb(139 92 246 / var(--tw-text-opacity)) !important;
+}
+
+.admin .font-large {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.admin .emt {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.admin .image-row-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  row-gap: 15px;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.admin .image-row {
+  justify-content: start;
+
+  row-gap: 15px;
+  column-gap: 15px;
+
+  border-radius: 10px;
+  display: flex;
+  min-height: 80px;
+  align-items: center;
+}
+
+.admin .w-1001 {
+  width: 100%;
+}
+
+.admin .w-102 {
+  width: 120px;
+  display: inline;
+}
+
+.admin .active.datas {
+  background-color: #8b5cf61a !important;
+}
+
+.admin .justify {
+  justify-content: center;
+}
+
+.admin
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button, .admin input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.admin input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.admin .hideother:not(:first-child) {
+  display: none;
+}
+
+.admin .align-center {
+  align-items: center;
+}
+
+.admin .bg-danger-400a {
+  background-color: rgb(244 63 94) !important;
+  color: white !important;
+}
+
+.admin
+
+/* Firefox */
+.abspain {
+  position: absolute;
+  left: 20px;
+  top: 13px;
+  z-index: 58;
+}
+
+.admin .flex-wraps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: center;
+  gap: 50px;
+}
+
+.admin .fluxb li:hover {
+  background-color: rgb(237 233 254);
+  color: rgb(76 29 149);
+}
+
+.admin .bolda {
+  /* font-weight: bold; */
+  font-size: 22px;
+}
+
+.admin .bg-g {
+  background-image: url("../../../assets/images/img/home-hero-gradient.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.admin .react-responsive-modal-modal {
+  border-radius: 20px;
+  text-align: center;
+}
+
+.admin .react-responsive-modal-modal .rounded2 {
+  padding-top: 30px;
+}
+
+@media (max-width: 420px) {
+
+  .admin .verified-btn a,
+  .admin .verified-btn span,
+  .admin .verified-btn p {
+    font-size: 11px;
+  }
+
+  .admin .verified-btn {
+    margin-inline-end: 0rem !important;
+  }
+}
+
+.admin .toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 14px;
+}
+
+.admin .toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.admin .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 37px;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 14px;
+}
+
+.admin input:checked+.slider:before {
+  transform: translateX(22px);
+}
+
+.admin .chkbx:disabled~.slider {
+  opacity: 0.5 !important;
+  cursor: default;
+}
+
+.admin .slider:before {
+  position: absolute;
+  content: "";
+  height: 17px;
+  width: 17px;
+  left: -3px;
+  bottom: -1.5px;
+  background-color: rgb(234, 234, 234);
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.admin input:checked+.slider {
+  background-color: #8b5cf6;
+}

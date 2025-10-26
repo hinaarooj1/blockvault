@@ -25,7 +25,7 @@ const CustomStocksModal = ({ show, onClose, stocks, onEdit }) => {
   if (!show) return null;
 
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay ASMD">
       <div className="modal-content" style={{position:'relative', zIndex:'1000', maxWidth: '800px', width: '90%'}}>
         <div onClick={onClose} style={{position:'absolute',top:'10px',right:'10px', cursor:'pointer',color:'black'}}>X</div>
         <h3>Manage Custom Stocks</h3>
@@ -133,7 +133,7 @@ const EditStockModal = ({ show, onClose, stock, onUpdate, onDelete }) => {
     if (!show || !stock) return null;
 
     return (
-        <div className="modal-overlay">
+        <div className="modal-overlay ASMD">
             <div className="modal-content" style={{ position: 'relative', zIndex: '1000' }}>
                 <div onClick={onClose} style={{ position: 'absolute', top: '10px', right: '10px', cursor: 'pointer', color: 'black' }}>X</div>
                 <h3>Edit Custom Stock</h3>
@@ -236,7 +236,7 @@ const AddStockModal = ({ show, onClose, onAdd }) => {
     if (!show) return null;
 
     return (
-        <div className="modal-overlay"
+        <div className="modal-overlay ASMD"
         >
             <div className="modal-content" style={{ position: 'relative', zIndex: '1000' }}>
                 <div onClick={onClose} style={{ position: 'absolute', top: '10px', right: '10px', cursor: 'pointer', color: 'black' }}>X</div>
@@ -442,7 +442,6 @@ const [selectedCustomStock, setSelectedCustomStock] = useState(null);
                     setUserTransactions(null); // Set to null if stocks is not defined or not an array
                 }
 
-
                 return;
             } else {
                 toast.dismiss();
@@ -501,11 +500,7 @@ const [selectedCustomStock, setSelectedCustomStock] = useState(null);
         }
     };
     const createUserStocks = async (e) => {
-        e.preventDefault();
-
-        console.log(stocks);
-        console.log(selectedStock);
-        try {
+        e.preventDefault();try {
             setisDisable(true);
 
             if (stocks.stockName === "" || stocks.stockAmount === "" || stockValue === null) {
@@ -519,10 +514,7 @@ const [selectedCustomStock, setSelectedCustomStock] = useState(null);
                 stockSymbol: selectedStock,
                 stockValue: stockValue,
                 stockAmount: stocks.stockAmount,
-            };
-
-            console.log('body: ', body);
-            if (
+            };if (
                 !body.stockName ||
                 !body.stockSymbol ||
                 !body.stockAmount ||
@@ -559,10 +551,8 @@ const [selectedCustomStock, setSelectedCustomStock] = useState(null);
     };
     const deleteUserStock = async (coindId) => {
 
-
         try {
             setisDisableDelete(true);
-
 
             const deleteStock = await deleteUserStocksApi(coindId, id);
 
@@ -590,7 +580,6 @@ const [selectedCustomStock, setSelectedCustomStock] = useState(null);
     const [stockValue, setStockValue] = useState('');
     const [apiLoading, setapiLoading] = useState(false);
     const apiKey = 'JTJDB1ZIXDMIT0WN';
-
 
     // Predefined stock symbols and their corresponding company names
     const stockData = [
@@ -704,9 +693,7 @@ const [selectedCustomStock, setSelectedCustomStock] = useState(null);
 
     // Handle dropdown selection
     const handleStockChange = (event) => {
-        const selectedSymbol = event.target.value;
-        console.log('selectedSymbol: ', selectedSymbol);
-        setSelectedStock(selectedSymbol);
+        const selectedSymbol = event.target.value;setSelectedStock(selectedSymbol);
         getStockValue(selectedSymbol);
 
         // First check in custom stocks
@@ -720,9 +707,7 @@ const [selectedCustomStock, setSelectedCustomStock] = useState(null);
         }
 
         // If not found in custom stocks, check in predefined stocks
-        const predefinedStock = stockData.find(stock => stock.symbol === selectedSymbol);
-        console.log('predefinedStock: ', predefinedStock);
-        if (predefinedStock) {
+        const predefinedStock = stockData.find(stock => stock.symbol === selectedSymbol);if (predefinedStock) {
             setStocks(prevStocks => ({
                 ...prevStocks,
                 stockName: predefinedStock.name
@@ -750,8 +735,6 @@ const [selectedCustomStock, setSelectedCustomStock] = useState(null);
 };
     return (
         <>
-
-
 
             <div className="admin">
                 <div>

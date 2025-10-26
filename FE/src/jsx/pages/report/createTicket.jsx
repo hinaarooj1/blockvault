@@ -12,7 +12,6 @@ import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinn
 import './style.css'
 import Truncate from 'react-truncate-inside/es';
 
-
 const CreateTicket = () => {
     const [Active, setActive] = useState(false);
     let toggleBar = () => {
@@ -90,7 +89,6 @@ const CreateTicket = () => {
             setisDisable(false);
         }
     };
-
 
     //
 
@@ -182,7 +180,6 @@ const CreateTicket = () => {
                                 </Form>
                             </Card.Body>
                         )}
-
 
                     </div>
                 </div>

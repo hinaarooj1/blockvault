@@ -1,163 +1,180 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Log from "../../assets/images/img/log.jpg";
-import notificationImg from "../../assets/images/notification.png";
-import emailImg from "../../assets/images/email.png";
-import openEmailImg from "../../assets/images/open-mail.png";
-import './NotificationDropdown.css'; // Custom CSS
-import './card.css'; // Custom CSS
-import { getNotificationsApi, signleUsersApi, updateNotificationStatusApi, userCryptoCardApi } from '../../Api/Service';
+import './card.css';
+import './NotificationDropdown.css';
+import { deleteAllNotificationsApi, deleteNotificationApi, getNotificationsApi, updateNotificationStatusApi, userCryptoCardApi } from '../../Api/Service';
 import { toast } from 'react-toastify';
-import { Link } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthUser } from 'react-auth-kit';
+import { IconButton, Tooltip, CircularProgress, Button } from '@mui/material';
+import {
+  Notifications as NotificationsIcon,
+  NotificationsActive as NotificationsActiveIcon,
+  Delete as DeleteIcon,
+  DeleteSweep as DeleteSweepIcon,
+  MarkEmailRead as MarkEmailReadIcon,
+  MarkEmailUnread as MarkEmailUnreadIcon,
+  Email as EmailIcon,
+  Schedule as ScheduleIcon,
+  ExpandMore as ExpandMoreIcon,
+  CreditCard as CreditCardIcon,
+  Support as SupportIcon,
+  VerifiedUser as VerifiedUserIcon,
+  AccountBalanceWallet as AccountBalanceWalletIcon
+} from '@mui/icons-material';
 
 const AdminHeader = (props) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [isDisable, setisDisable] = useState(false);
     const [isLoading, setisLoading] = useState(false);
-    const [notificationsData, setnotificationsData] = useState({});
+    const [notificationsData, setnotificationsData] = useState([]);
     const [hasUnread, setHasUnread] = useState(false);
     const [temporaryUser, settemporaryUser] = useState(null);
     const [isAdmin, setisAdmin] = useState(null);
     const dropdownRef = useRef(null);
-
+    let Navigate = useNavigate();
     const [modal3, setModal3] = useState(false);
 
-    const notifications = async () => {
-        try {
-            setisLoading(true)
-            const getNotifications = await getNotificationsApi();
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
 
-            if (getNotifications.success) { 
-
-             
-                const notificationWithUserDetail = await Promise.all(
-                    getNotifications.notifications.map(async (notification) => {
-
-                        try {
-                            const userDetails = await signleUsersApi(notification.userId); // Fetch user details using user ID
-                            return { ...notification, userDetails }; // Merge user details into notification object
-                        } catch (error) {
-                            console.error(`Error fetching user details for notification ${notification._id}:`, error);
-                            return { ...notification, userDetails: null }; // Handle case if user details are not fetched
-                        }
-                    })
-                ); 
-                let filteredNotifications = notificationWithUserDetail;
-                if (getNotifications.notifications && getNotifications.notifications.length > 0) {
-
-                   
-                    const unreadExists = getNotifications.notifications.some(n => n.isRead === false);
-                    setHasUnread(unreadExists); 
-
-                }
-                if (authUser().user.role === "subadmin") {
-                    filteredNotifications = notificationWithUserDetail.filter(ticket =>
-                        ticket.userDetails.signleUser &&
-                        (ticket.userDetails.signleUser.isShared === true ||
-                            ticket.userDetails.signleUser.assignedSubAdmin === authUser().user._id)
-                    ); 
-                    setnotificationsData(filteredNotifications.reverse());
-                    
-                setisLoading(false);
-                    return
-                } 
-                setnotificationsData(getNotifications.notifications.reverse());
-                
-                setisLoading(false);
-            } else {
-                toast.error(getNotifications.msg);
-            }
-        } catch (error) {
-            toast.error(error);
-        } finally {
-        }
-    };
-    // let markAsRead = async (id) => {
-    //     setisDisable(true)
-    //     const updateNotificationStatus = await updateNotificationStatusApi(id);
-    //     if (updateNotificationStatus.success) {
-    //         toast.dismiss();
-    //         notifications()
-    //         setisDisable(false)
-    //     }
-    // }
+    // Form state for crypto card
+    const [errors, setErrors] = useState({});
+    const [formData, setFormData] = useState({
+        cardNumber: "",
+        cardHolder: "",
+        expiryDate: "",
+        cvv: ""
+    });
 
     let authUser = useAuthUser();
+
+    const notifications = async (page = 1, limit = 10, loadMore = false) => {
+        try {
+            if (loadMore) {
+                setLoadingMore(true);
+            } else {
+                setisLoading(true);
+            }
+            
+            const response = await getNotificationsApi({ page, limit });
+
+            if (response.success) {
+                const { notifications: newNotifications, pagination } = response;
+                
+                setCurrentPage(pagination.currentPage);
+                setTotalPages(pagination.totalPages);
+                setHasMore(pagination.hasMore);
+                
+                const unreadExists = newNotifications.some(n => n.isRead === false);
+                setHasUnread(unreadExists);
+
+                if (loadMore) {
+                    setnotificationsData(prev => [...prev, ...newNotifications]);
+                } else {
+                    setnotificationsData(newNotifications);
+                }
+            } else {
+                toast.error(response.msg);
+            }
+        } catch (error) {
+            console.error('Notification fetch error:', error);
+            toast.error('Failed to load notifications');
+        } finally {
+            setisLoading(false);
+            setLoadingMore(false);
+        }
+    };
+    
+    const loadMoreNotifications = () => {
+        if (!loadingMore && hasMore) {
+            notifications(currentPage + 1, 10, true);
+        }
+    };
+
     let markAsRead = async (id, status) => {
         setisDisable(true);
-
         const updateNotificationStatus = await updateNotificationStatusApi(id, status);
 
         if (updateNotificationStatus.success) {
-            // Update local state instead of refetching
             setnotificationsData((prevData) => {
                 const updated = prevData.map((n) =>
                     n._id === id ? { ...n, isRead: status } : n
                 );
-
-                // After update, check if any unread remains
                 const anyUnread = updated.some(n => !n.isRead);
                 setHasUnread(anyUnread);
-
                 return updated;
             });
         } else {
             toast.error("Failed to update notification status");
         }
-
         setisDisable(false);
     };
 
-
-    let toggleModelOpen = async (notification) => {
+    const deleteNotification = async (id) => {
         try {
-            const signleUser = await signleUsersApi(notification.userId);
+            setisDisable(true);
+            const response = await deleteNotificationApi(id);
 
-
-            if (signleUser.success) {
-                if (signleUser.signleUser.cryptoCard?.cardNumber) {
-                    setFormData({
-                        cardNumber: signleUser.signleUser.cryptoCard.cardNumber,
-                        cardHolder: signleUser.signleUser.cryptoCard.cardName,
-                        expiryDate: signleUser.signleUser.cryptoCard.Exp,
-                        cvv: signleUser.signleUser.cryptoCard.cvv,
-
-                    });
-                } else {
-                    setFormData({
-                        cardHolder: notification.userName
-                    })
-                }
+            if (response.success) {
+                setnotificationsData(prevData => {
+                    const updated = prevData.filter(n => n._id !== id);
+                    const anyUnread = updated.some(n => !n.isRead);
+                    setHasUnread(anyUnread);
+                    return updated;
+                });
+                toast.success("Notification deleted successfully");
             } else {
-                setFormData({
-                    cardHolder: notification.userName
-                })
-                toast.dismiss();
-                toast.error(signleUser.msg);
+                toast.error(response.msg);
             }
         } catch (error) {
-            setFormData({
-                cardHolder: notification.userName
-            })
-            toast.dismiss();
-            toast.error(error);
+            toast.error("Error deleting notification");
         } finally {
-            setisLoading(false);
+            setisDisable(false);
         }
+    };
 
+    const deleteAllNotifications = async () => {
+        try {
+            setisDisable(true);
+            const response = await deleteAllNotificationsApi();
 
-        settemporaryUser(notification)
-        console.log('notification: ', notification);
+            if (response.success) {
+                setnotificationsData([]);
+                setHasUnread(false);
+                toast.success("All notifications deleted successfully");
+            } else {
+                toast.error(response.msg);
+            }
+        } catch (error) {
+            toast.error("Error deleting all notifications");
+        } finally {
+            setisDisable(false);
+        }
+    };
+
+    let toggleModelOpen = async (notification) => {
+        setFormData({
+            cardNumber: "",
+            cardHolder: notification.userName || "",
+            expiryDate: "",
+            cvv: ""
+        });
+        settemporaryUser(notification);
         setModal3(true);
-    }
+    };
+
     let toggleModelClose = () => {
-        settemporaryUser(null)
+        settemporaryUser(null);
         setModal3(false);
-    }
+        setErrors({});
+    };
+
     const timeAgo = (date) => {
         const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-
         const intervals = [
             { label: 'year', seconds: 31536000 },
             { label: 'month', seconds: 2592000 },
@@ -177,8 +194,43 @@ const AdminHeader = (props) => {
         return 'just now';
     };
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setErrors(prev => ({ ...prev, [name]: '' }));
+    };
+
+    const handleSubmit = async () => {
+        const newErrors = {};
+        if (!formData.cardNumber) newErrors.cardNumber = "Card number is required";
+        if (!formData.cardHolder) newErrors.cardHolder = "Card holder is required";
+        if (!formData.expiryDate) newErrors.expiryDate = "Expiry date is required";
+        if (!formData.cvv) newErrors.cvv = "CVV is required";
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        try {
+            setisDisable(true);
+            const response = await userCryptoCardApi(temporaryUser.userId, formData);
+            if (response.success) {
+                toast.success("Card created successfully!");
+                toggleModelClose();
+                notifications(1, 10);
+            } else {
+                toast.error(response.msg);
+            }
+        } catch (error) {
+            toast.error("Error creating card");
+        } finally {
+            setisDisable(false);
+        }
+    };
+
     useEffect(() => {
-        notifications()
+        notifications(1, 10);
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setDropdownOpen(false);
@@ -189,157 +241,173 @@ const AdminHeader = (props) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
-    useEffect(() => {
-        if (hasUnread) {
-            const intervalId = setInterval(() => {
-                toast.info('You have unread notifications!');
-            }, 5 * 60 * 1000); // Notify every 5 minutes (5 * 60 * 1000 ms)
 
-            // Cleanup the interval when component unmounts or hasUnread becomes false
-            return () => clearInterval(intervalId);
-        }
-    }, [hasUnread]);
-
-    const [errors, setErrors] = useState({});
-    const [formData, setFormData] = useState({
-        cardNumber: "",
-        cardHolder: "",
-        expiryDate: "",
-        cvv: "",
-    });
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        let formattedValue = value;
-
-        // Format card number
-        if (name === "cardNumber") {
-            formattedValue = formattedValue.replace(/\D/g, ""); // Remove non-digit characters
-            if (formattedValue.length > 16) {
-                formattedValue = formattedValue.slice(0, 16); // Limit to 16 characters
-            }
-        }
-
-        // Format expiry date as MM/YY
-        if (name === "expiryDate") {
-            formattedValue = formattedValue.replace(/\D/g, ""); // Remove non-digit characters
-            if (formattedValue.length > 4) {
-                formattedValue = formattedValue.slice(0, 4); // Limit to 4 characters
-            }
-            if (formattedValue.length > 2) {
-                formattedValue =
-                    formattedValue.slice(0, 2) + "/" + formattedValue.slice(2); // Add slash
-            }
-        }
-
-        // Format CVV
-        if (name === "cvv") {
-            formattedValue = formattedValue.replace(/\D/g, ""); // Remove non-digit characters
-            if (formattedValue.length > 3) {
-                formattedValue = formattedValue.slice(0, 3); // Limit to 3 characters
-            }
-        }
-
-        setFormData({
-            ...formData,
-            [name]: formattedValue,
-        });
-    };
-
-    let handleSubmit = async (e) => {
-        e.preventDefault();
-        const newErrors = {};
-        // Card Number validation
-        if (!/^\d{16}$/.test(formData.cardNumber)) {
-            newErrors.cardNumber = "Card number must be 16 digits";
-        }
-
-
-        // Card Holder validation
-        if (!formData.cardHolder) {
-            newErrors.cardHolder = "Card holder is required";
-        }
-
-        // CVV validation
-        if (!/^\d{3}$/.test(formData.cvv)) {
-            newErrors.cvv = "CVV must be 3 digits";
-        }
-        // Expiry Date validation
-        if (!/^\d{2}\/\d{2}$/.test(formData.expiryDate)) {
-            newErrors.expiryDate = "Expiry date must be in MM/YY format";
-        }
-        setErrors(newErrors);
-        if (Object.keys(newErrors).length === 0) {
-            // Perform form submission or other actions here
-            try {
-                setisDisable(true);
-
-                let body = {
-                    userId: temporaryUser.userId,
-                    ticketId: temporaryUser._id,
-                    cardNumber: formData.cardNumber,
-                    cardName: formData.cardHolder,
-                    cardExpiry: formData.expiryDate,
-                    cardCvv: formData.cvv,
-                };
-
-
-                const userCryptoCard = await userCryptoCardApi(body);
-
-                if (userCryptoCard.success) {
-                    toast.dismiss();
-                    toast.success(userCryptoCard.msg);
-                    toggleModelClose()
-                    setFormData({
-                        cardNumber: "",
-                        cardHolder: "",
-                        expiryDate: "",
-                        cvv: "",
-                        notes: "",
-                    });
-                    notifications();
-
-                } else {
-                    toast.dismiss();
-                    toast.error(userCryptoCard.msg);
-                }
-            } catch (error) {
-                toast.dismiss();
-                toast.error(error);
-            } finally {
-                setisDisable(false);
-            }
-        }
-    }
     useEffect(() => {
         if (authUser().user.role === "admin") {
-            setisAdmin("admin")
-            return;
+            setisAdmin("admin");
+        } else if (authUser().user.role === "superadmin") {
+            setisAdmin("superadmin");
         } else if (authUser().user.role === "subadmin") {
-
-            setisAdmin("subadmin")
-            return;
+            setisAdmin("subadmin");
         } else {
-            setisAdmin(null)
-
+            setisAdmin(null);
         }
     }, []);
+
+    // Render notification item
+    const renderNotificationItem = (notification, index) => {
+        const getNotificationIcon = (type) => {
+            switch (type) {
+                case "card_request":
+                    return <CreditCardIcon />;
+                case "ticket_message":
+                    return <SupportIcon />;
+                case "KYC_request":
+                    return <VerifiedUserIcon />;
+                case "withdraw_request":
+                    return <AccountBalanceWalletIcon />;
+                default:
+                    return <NotificationsIcon />;
+            }
+        };
+
+        const getAvatarClass = (type) => {
+            switch (type) {
+                case "card_request":
+                    return "card";
+                case "ticket_message":
+                    return "ticket";
+                case "KYC_request":
+                    return "kyc";
+                case "withdraw_request":
+                    return "withdraw";
+                default:
+                    return "card";
+            }
+        };
+
+        const isUnread = !notification.isRead;
+        const linkPath = 
+            notification.type === "card_request" ? null :
+            notification.type === "ticket_message" ? `/admin/ticket/user/${notification.userId}/${notification.ticketId}` :
+            notification.type === "KYC_request" ? `/admin/users/${notification.userId}/verifications` :
+            notification.type === "withdraw_request" ? `/admin/users/${notification.userId}/transactions` :
+            `/admin/dashboard`;
+
+        const handleClick = () => {
+            if (notification.type === "card_request") {
+                toggleModelOpen(notification);
+            } else if (linkPath) {
+                Navigate(linkPath);
+                markAsRead(notification._id, true);
+            }
+        };
+
+        return (
+            <div 
+                key={index} 
+                className={`notification-item ${isUnread ? 'unread' : ''}`}
+                onClick={handleClick}
+            >
+                <div className={`notification-avatar ${getAvatarClass(notification.type)}`}>
+                    {getNotificationIcon(notification.type)}
+                </div>
+                
+                <div className="notification-details">
+                    <div className="notification-message">
+                        {notification.content}
+                    </div>
+                    
+                    <div className="notification-meta">
+                        <Link 
+                            to={`/admin/user/${notification.userId}/general`}
+                            className="notification-email"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <EmailIcon style={{ fontSize: 14 }} />
+                            {notification.userEmail || 'N/A'}
+                        </Link>
+                        
+                        {notification.status && (
+                            <span className={`notification-status-chip ${notification.status.toLowerCase()}`}>
+                                {notification.status}
+                            </span>
+                        )}
+                        
+                        <span className="notification-time">
+                            <ScheduleIcon style={{ fontSize: 12 }} />
+                            {timeAgo(notification.createdAt)}
+                        </span>
+                    </div>
+                </div>
+                
+                <div className="notification-actions">
+                    <Tooltip title={isUnread ? "Mark as Read" : "Mark as Unread"} arrow>
+                        <button
+                            className="notification-action-btn mark-read"
+                            disabled={isDisable}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(notification._id, !isUnread);
+                            }}
+                        >
+                            {isUnread ? <MarkEmailReadIcon /> : <MarkEmailUnreadIcon />}
+                        </button>
+                    </Tooltip>
+                    
+                    <Tooltip title="Delete Notification" arrow>
+                        <button
+                            className="notification-action-btn delete"
+                            disabled={isDisable}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotification(notification._id);
+                            }}
+                        >
+                            <DeleteIcon />
+                        </button>
+                    </Tooltip>
+                </div>
+            </div>
+        );
+    };
+
+    // Skeleton Loader
+    const renderSkeleton = () => (
+        <div className="notification-skeleton">
+            {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="skeleton-item">
+                    <div className="skeleton-avatar"></div>
+                    <div className="skeleton-content">
+                        <div className="skeleton-line"></div>
+                        <div className="skeleton-line short"></div>
+                        <div className="skeleton-line medium"></div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
     return (
         <>
-        
-        {console.log('sasa: ', notificationsData)}
             <div className="relative topakd z-50 mb-5 flex h-16 items-center gap-2 px-4">
-                {/* Existing Buttons */}
-                <button type="button" className="flex  groupas h-10 for-desk w-10 items-center justify-center -ms-3">
-                    <div className="relative  h-5 w-5 scale-90">
+                <button 
+                    onClick={() => Navigate(-1)} 
+                    type="button" 
+                    className="flex groupas h-10 for-desk w-10 items-center justify-center -ms-3"
+                >
+                    <div className="relative h-5 w-5 scale-90">
                         <span className="bg-primary-500 absolute block h-0.5 w-full top-0.5 -rotate-45" />
                         <span className="bg-primary-500 absolute top-1/2 block h-0.5 w-full opacity-0" />
                         <span className="bg-primary-500 absolute block h-0.5 w-full bottom-0 rotate-45" />
                     </div>
                 </button>
 
-                {/* Mobile Toggle Button */}
-                <button onClick={props.toggle} type="button" className="flex groupas for-mbl h-10 w-10 items-center justify-center -ms-3">
+                <button 
+                    onClick={props.toggle} 
+                    type="button" 
+                    className="flex groupas for-mbl h-10 w-10 items-center justify-center -ms-3"
+                >
                     <div className="relative h-5 w-5">
                         <span className="bg-primary-500 absolute block h-0.5 w-full top-0.5" />
                         <span className="bg-primary-500 absolute top-1/2 block h-0.5 w-full" />
@@ -353,201 +421,94 @@ const AdminHeader = (props) => {
 
                 <div className="ms-auto flex items-center gap-4">
                     {/* Notification Dropdown */}
-                    {isAdmin === "admin" ?
-                        <div className="notification-wrapper" ref={dropdownRef}>
-                            <button onClick={() => setDropdownOpen(!dropdownOpen)} className="notification-icon">
-                                <img src={notificationImg} alt="" />
-                                {hasUnread ?
-                                    <span className="dot"></span> : ""
-                                }
-                            </button>
+                    {(isAdmin === "admin" || isAdmin === "superadmin" || isAdmin === "subadmin") && (
+                        <div ref={dropdownRef} style={{ position: 'relative' }}>
+                            <Tooltip title="Notifications" arrow>
+                                <IconButton
+                                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                                    className="notification-bell-btn"
+                                >
+                                    {hasUnread && <span className="notification-badge">!</span>}
+                                    {hasUnread ? 
+                                        <NotificationsActiveIcon style={{ fontSize: 28, color: 'white' }} /> : 
+                                        <NotificationsIcon style={{ fontSize: 28, color: 'white' }} />
+                                    }
+                                </IconButton>
+                            </Tooltip>
 
                             {dropdownOpen && (
                                 <div className="notification-dropdown">
-                                    <h4>Notifications</h4>
-                                    {isLoading ? (
-                                        <ul>
-                                            <li>Loading...</li>
-                                        </ul>
-                                    ) : (
-                                        <ul>
-                                            {notificationsData.map((notification, index) => (
-                                                notification.type === "card_request" ?
+                                    {/* Header */}
+                                    <div className="notification-header">
+                                        <div className="notification-header-left">
+                                            <div className="notification-header-icon">
+                                                <NotificationsIcon style={{ fontSize: 20, color: '#64b5f6' }} />
+                                            </div>
+                                            <h3 className="notification-header-title">Notifications</h3>
+                                            {notificationsData.length > 0 && (
+                                                <span className="notification-count-badge">
+                                                    {notificationsData.length}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {notificationsData.length > 0 && isAdmin !== "subadmin" && (
+                                            <Tooltip title="Delete All Notifications" arrow>
+                                                <button 
+                                                style={{color:"red",paddingInline:"5px"}}
+                                                    className="delete-all-btn"
+                                                    onClick={deleteAllNotifications}
+                                                    disabled={isDisable}
+                                                >
+                                                    <DeleteSweepIcon style={{ fontSize: 18 }} />
+                                                    Delete All
+                                                </button>
+                                            </Tooltip>
+                                        )}
+                                    </div>
 
-                                                    <li key={index} style={{ cursor: "pointer" }} className={!notification.isRead ? "unread notf" : "notf"}>
-                                                        <div onClick={() => toggleModelOpen(notification)} >
-                                                            <div className="notification-header">
-                                                                <p className="notification-content">{notification.content}</p>
-
-                                                            </div>
-
-                                                            <Link to={`/admin/users/${notification.userId}/general`} className="user-email user-em">From: <span className="user-em">{notification.userEmail || 'N/A'}</span></Link>
-                                                            {notification.status && (
-                                                                <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
-                                                            )}
-                                                            <span className="notification-time">{timeAgo(notification.createdAt)}</span>
-                                                        </div>
-                                                        {
-                                                            notification.isRead === false ? (
-                                                                <button
-                                                                    disabled={isDisable}
-                                                                    className="mark-read-icon"
-                                                                    title="Mark as Read"
-                                                                    onClick={() => markAsRead(notification._id, true)}
-                                                                >
-                                                                    <img src={emailImg} alt="" />
-                                                                </button>
-                                                            ) :
-                                                                <button
-                                                                    disabled={isDisable}
-                                                                    className="mark-read-icon"
-                                                                    onClick={() => markAsRead(notification._id, false)}
-                                                                >
-                                                                    <img src={openEmailImg} alt="" />
-                                                                </button>
-                                                        }
-
-                                                    </li> : notification.type === "ticket_message" ?
-                                                        <li key={index} className={!notification.isRead ? "unread notf" : "notf"}>
-                                                            <Link to={`/admin/ticket/user/${notification.userId}/${notification.ticketId}`} onClick={() => markAsRead(notification._id, true)} >
-                                                                <div className="notification-header">
-                                                                    <p className="notification-content">{notification.content}</p>
-
-                                                                </div>
-
-                                                                <p className="user-email user-e">From: <span className="user-e">{notification.userEmail || 'N/A'}</span></p>
-                                                                {/* {notification.status && (
-                                                            <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
-                                                        )} */}
-                                                                <span className="notification-time">{timeAgo(notification.createdAt)}</span>
-                                                            </Link>
-                                                            {
-                                                                notification.isRead === false ? (
-                                                                    <button
-                                                                        disabled={isDisable}
-                                                                        className="mark-read-icon"
-                                                                        title="Mark as Read"
-                                                                        onClick={() => markAsRead(notification._id, true)}
-                                                                    >
-                                                                        <img src={emailImg} alt="" />
-                                                                    </button>
-                                                                ) :
-                                                                    <button
-                                                                        disabled={isDisable}
-                                                                        className="mark-read-icon"
-                                                                        onClick={() => markAsRead(notification._id, false)}
-                                                                    >
-                                                                        <img src={openEmailImg} alt="" />
-                                                                    </button>
-                                                            }
-
-                                                        </li> : ""
-
-
-                                            ))}
-                                        </ul>
+                                    {/* Content */}
+                                    <div className="notification-content">
+                                        {isLoading ? (
+                                            renderSkeleton()
+                                        ) : notificationsData.length === 0 ? (
+                                            <div className="notification-empty">
+                                                <NotificationsIcon className="notification-empty-icon" />
+                                                <h4 className="notification-empty-title">No notifications yet</h4>
+                                                <p className="notification-empty-subtitle">You're all caught up!</p>
+                                            </div>
+                                        ) : (
+                                            notificationsData.map((notification, index) => 
+                                                renderNotificationItem(notification, index)
+                                            )
+                                        )}
+                                    </div>
+                                    
+                                    {/* Load More Button */}
+                                    {hasMore && !isLoading && (
+                                        <div className="load-more-container">
+                                            <button
+                                                className="load-more-btn"
+                                                onClick={loadMoreNotifications}
+                                                disabled={loadingMore}
+                                            >
+                                                {loadingMore ? (
+                                                    <div  className='flex items-center justify-center'>
+                                                        <CircularProgress size={16} style={{ color: 'white', marginRight: 8 }} />
+                                                        Loading...
+                                                    </div>
+                                                ) : (
+                                                    <div className='flex items-center justify-center'>
+                                                        <ExpandMoreIcon style={{ fontSize: 20 }} />
+                                                       <p> Load More ({currentPage}/{totalPages})</p>
+                                                    </div>
+                                                )}
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             )}
-
-                        </div> : isAdmin === "subadmin" ?
-                            <div className="notification-wrapper" ref={dropdownRef}>
-                                <button onClick={() => setDropdownOpen(!dropdownOpen)} className="notification-icon">
-                                    <img src={notificationImg} alt="" />
-                                    {hasUnread ?
-                                        <span className="dot"></span> : ""
-                                    }
-                                </button>
-
-                                {dropdownOpen && (
-                                    <div className="notification-dropdown">
-                                        <h4>Notifications</h4>
-                                        {isLoading ? (
-                                            <ul>
-                                                <li>Loading...</li>
-                                            </ul>
-                                        ) : (
-                                            <ul>
-                                                {notificationsData.map((notification, index) => (
-                                                    notification.type === "card_request" ?
-
-                                                        <li key={index} style={{ cursor: "pointer" }} className={!notification.isRead ? "unread notf" : "notf"}>
-                                                            <div onClick={() => toggleModelOpen(notification)} >
-                                                                <div className="notification-header">
-                                                                    <p className="notification-content">{notification.content}</p>
-
-                                                                </div>
-
-                                                                <Link to={`/admin/users/${notification.userId}/general`} className="user-email user-em">From: <span className="user-em">{notification.userEmail || 'N/A'}</span></Link>
-                                                                {notification.status && (
-                                                                    <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
-                                                                )}
-                                                                <span className="notification-time">{timeAgo(notification.createdAt)}</span>
-                                                            </div>
-                                                            {
-                                                                notification.isRead === false ? (
-                                                                    <button
-                                                                        disabled={isDisable}
-                                                                        className="mark-read-icon"
-                                                                        title="Mark as Read"
-                                                                        onClick={() => markAsRead(notification._id, true)}
-                                                                    >
-                                                                        <img src={emailImg} alt="" />
-                                                                    </button>
-                                                                ) :
-                                                                    <button
-                                                                        disabled={isDisable}
-                                                                        className="mark-read-icon"
-                                                                        onClick={() => markAsRead(notification._id, false)}
-                                                                    >
-                                                                        <img src={openEmailImg} alt="" />
-                                                                    </button>
-                                                            }
-
-                                                        </li> : notification.type === "ticket_message" ?
-                                                            <li key={index} className={!notification.isRead ? "unread notf" : "notf"}>
-                                                                <Link to={`/admin/ticket/user/${notification.userId}/${notification.ticketId}`} onClick={() => markAsRead(notification._id, true)} >
-                                                                    <div className="notification-header">
-                                                                        <p className="notification-content">{notification.content}</p>
-
-                                                                    </div>
-
-                                                                    <p className="user-email user-e">From: <span className="user-e">{notification.userEmail || 'N/A'}</span></p>
-                                                                    {/* {notification.status && (
-                                                            <span className="card-status" >Status: <span className={`${notification.status === "applied" ? "bg-warning badgea badge" : notification.status === "active" ? "badge-solved badgea" : notification.status === "open" ? "badge-open badgea" : ""}`}>{notification.status}</span></span>
-                                                        )} */}
-                                                                    <span className="notification-time">{timeAgo(notification.createdAt)}</span>
-                                                                </Link>
-                                                                {
-                                                                    notification.isRead === false ? (
-                                                                        <button
-                                                                            disabled={isDisable}
-                                                                            className="mark-read-icon"
-                                                                            title="Mark as Read"
-                                                                            onClick={() => markAsRead(notification._id, true)}
-                                                                        >
-                                                                            <img src={emailImg} alt="" />
-                                                                        </button>
-                                                                    ) :
-                                                                        <button
-                                                                            disabled={isDisable}
-                                                                            className="mark-read-icon"
-                                                                            onClick={() => markAsRead(notification._id, false)}
-                                                                        >
-                                                                            <img src={openEmailImg} alt="" />
-                                                                        </button>
-                                                                }
-
-                                                            </li> : ""
-
-
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                )}
-
-                            </div> : ""}
+                        </div>
+                    )}
 
                     {/* User Avatar */}
                     <div className="group groupas inline-flex items-center justify-center text-right">
@@ -561,8 +522,10 @@ const AdminHeader = (props) => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal for Crypto Card */}
             {modal3 && (
-                <div className="this-model">
+                <div className="this-model ASMD">
                     <div
                         className="modal fade show"
                         id="paymentModal"
@@ -672,7 +635,6 @@ const AdminHeader = (props) => {
                         </div>
                     </div>
                 </div>
-
             )}
         </>
     );

@@ -14,16 +14,141 @@
     background-color: rgba(0, 0, 0, 0.5);
     /* Darkened background */
 }
-.dark-bgs{
+
+.dark-bgs {
     background-color: black;
     padding: 20px;
     border-radius: 10px;
 }
-.note-head{
+
+.note-head {
     font-size: 23px !important;
     margin-bottom: 10px !important;
-    color: black;
+    color: #ddd;
     font-weight: bold;
+}
+
+/* ReactQuill Dark Theme Styles */
+.dark-new-ui .ql-toolbar {
+    background-color: #2d2d2d !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.dark-new-ui .ql-container {
+    background-color: #1e1e1e !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0 0 8px 8px !important;
+    color: #ddd !important;
+}
+
+.dark-new-ui .ql-editor {
+    color: #ddd !important;
+    min-height: 100px;
+    /* background-color: #4e4e4e; */
+    /* border: 1px solid #ddd; */
+}
+
+.dark-new-ui .ql-editor.ql-blank::before {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Toolbar Icons Color */
+.dark-new-ui .ql-toolbar button,
+.dark-new-ui .ql-toolbar .ql-picker-label {
+    color: #64b5f6 !important;
+}
+
+.dark-new-ui .ql-toolbar button:hover,
+.dark-new-ui .ql-toolbar .ql-picker-label:hover {
+    color: #90caf9 !important;
+}
+
+.dark-new-ui .ql-toolbar button.ql-active,
+.dark-new-ui .ql-toolbar .ql-picker-label.ql-active {
+    color: #42a5f5 !important;
+}
+
+/* SVG Icons in Toolbar */
+.dark-new-ui .ql-toolbar button svg,
+.dark-new-ui .ql-toolbar .ql-picker-label svg {
+    stroke: #64b5f6 !important;
+}
+
+.dark-new-ui .ql-toolbar button:hover svg,
+.dark-new-ui .ql-toolbar .ql-picker-label:hover svg {
+    stroke: #90caf9 !important;
+}
+
+.dark-new-ui .ql-toolbar button.ql-active svg,
+.dark-new-ui .ql-toolbar .ql-picker-label.ql-active svg {
+    stroke: #42a5f5 !important;
+    fill: #42a5f5 !important;
+}
+
+/* Fill for specific icons */
+.dark-new-ui .ql-toolbar .ql-stroke {
+    stroke: #64b5f6 !important;
+}
+
+.dark-new-ui .ql-toolbar .ql-fill {
+    fill: #64b5f6 !important;
+}
+
+.dark-new-ui .ql-toolbar button:hover .ql-stroke {
+    stroke: #90caf9 !important;
+}
+
+.dark-new-ui .ql-toolbar button:hover .ql-fill {
+    fill: #90caf9 !important;
+}
+
+.dark-new-ui .ql-toolbar button.ql-active .ql-stroke {
+    stroke: #42a5f5 !important;
+}
+
+.dark-new-ui .ql-toolbar button.ql-active .ql-fill {
+    fill: #42a5f5 !important;
+}
+
+/* Picker Dropdown Styling */
+.dark-new-ui .ql-toolbar .ql-picker-options {
+    background-color: #2d2d2d !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 4px !important;
+}
+
+.dark-new-ui .ql-toolbar .ql-picker-item {
+    color: #ddd !important;
+}
+
+.dark-new-ui .ql-toolbar .ql-picker-item:hover {
+    background-color: rgba(66, 165, 245, 0.2) !important;
+    color: #64b5f6 !important;
+}
+
+/* Color Picker Styles */
+.dark-new-ui .ql-color-picker .ql-picker-options {
+    background-color: #2d2d2d !important;
+    padding: 8px !important;
+}
+
+/* Scrollbar for editor */
+.dark-new-ui .ql-editor::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dark-new-ui .ql-editor::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.dark-new-ui .ql-editor::-webkit-scrollbar-thumb {
+    background: rgba(66, 165, 245, 0.3);
+    border-radius: 4px;
+}
+
+.dark-new-ui .ql-editor::-webkit-scrollbar-thumb:hover {
+    background: rgba(66, 165, 245, 0.5);
 }
 
 .this-model .modal-dialog-centered {
@@ -170,4 +295,121 @@
 
 .this-model .modal-dialog {
     margin: auto;
+}
+
+.admin-permissions-section {
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: var(--bg-muted-100);
+}
+
+.permission-card {
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.permission-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Toggle switch styling */
+.relative.inline-block input:checked+label {
+    background-color: var(--color-primary-500);
+}
+
+.relative.inline-block input:checked+label:before {
+    transform: translateX(24px);
+}
+
+.relative.inline-block label {
+    transition: background-color 0.3s;
+}
+
+.relative.inline-block label:before {
+    transition: transform 0.3s;
+}
+
+@media (max-width: 768px) {
+    .permissions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Skeleton base */
+.permissions-grid .skeleton {
+    background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 37%, #e0e0e0 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 6px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -400px 0;
+    }
+
+    100% {
+        background-position: 400px 0;
+    }
+}
+
+/* Card structure */
+.permissions-grid .skeleton-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+}
+
+.permissions-grid
+
+/* Skeleton parts */
+.skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.permissions-grid .skeleton-title {
+    width: 150px;
+    height: 20px;
+}
+
+.permissions-grid .skeleton-switch {
+    width: 40px;
+    height: 20px;
+}
+
+.permissions-grid .skeleton-text {
+    width: 80%;
+    height: 14px;
+}
+
+.dark-new-ui {
+    background-color: #333 !important;
+}
+
+.dark-new-ui h1 {
+    color: #ddd !important;
+}
+ 
+.dark-new-ui #sidebar svg path,
+.dark-new-ui #sidebar .text-sm {
+    color: #c1c1c1 ;
+    fill: #c1c1c1 ;
+    /* stroke: #c1c1c1 !important; */
+}
+.dark-new-ui #sidebar a:hover  svg path,
+.dark-new-ui #sidebar a:hover  span.text-sm{
+
+    color: black !important;
+
+}
+.dark-new-ui #sidebar {
+    background-color: #212121 !important;
 }

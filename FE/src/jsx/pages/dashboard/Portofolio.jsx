@@ -11,7 +11,6 @@ import WeeklyColumnChart from '../../elements/WeeklyColumnChart';
 import DonughtChart from '../../elements/dashboard/DonughtChart';
 import CurrentGraphDonut from '../../elements/CurrentGraphDonut';
 
-
 const DropdownData = () =>{
     return(
         <Dropdown className="dropdown custom-dropdown mb-0 ms-3">

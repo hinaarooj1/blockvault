@@ -5,7 +5,6 @@ import {  useNavigate } from "react-router-dom";
 import logoText from "../../../assets/images/logo-full.png";
 import logoWhite from "../../../assets/images/logo-white.png";
 
-
 const LockScreen = () => {
 
   const [showPassword, setShowPassword] = useState(false);

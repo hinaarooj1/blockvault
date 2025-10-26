@@ -21,14 +21,10 @@ const Kyc = () => {
   useEffect(() => {
     if (authUser().user.role === "user") {
       return;
-    } else if (authUser().user.role === "admin") {
+    } else if (authUser().user.role === "admin"|| authUser().user.role === "superadmin"|| authUser().user.role === "subadmin") {
       Navigate("/admin/dashboard");
       return;
-    }
-    console.log(isLoading);
-  }, []);
-  console.log(isLoading);
-  return (
+    }}, []);return (
 
     <>
       {isLoading ? <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>

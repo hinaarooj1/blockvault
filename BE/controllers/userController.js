@@ -14,10 +14,13 @@ const Token = require("../models/token");
 const sendEmail = require("../utils/sendEmail");
 const htmlModel = require("../models/htmlData");
 const Ticket = require("../models/ticket");
+const MyTokens = require("../models/myTokens");
 const Message = require("../models/message");
 const { default: mongoose } = require("mongoose");
 
 const Stock = require('../models/stock');
+const UserRestriction = require("../models/usersRestrictions");
+const errorLogs = require("../models/errorLogs");
 exports.RegisterUser = catchAsyncErrors(async (req, res, next) => {
   const {
     firstName,
@@ -29,7 +32,9 @@ exports.RegisterUser = catchAsyncErrors(async (req, res, next) => {
     city,
     country,
     postalCode,
-    // role,
+    role,
+    isRole,
+    referralCode // MLM: Referral code from registration
   } = req.body;
   if (
     !firstName ||
@@ -44,6 +49,13 @@ exports.RegisterUser = catchAsyncErrors(async (req, res, next) => {
   ) {
     return next(new errorHandler("Please fill all the required fields", 500));
   }
+  if (isRole) {
+    if (!role) {
+
+      return next(new errorHandler("Please fill all the required fields", 500));
+    }
+
+  }
   let findUser = await UserModel.findOne({
     email: req.body.email,
   });
@@ -53,6 +65,21 @@ exports.RegisterUser = catchAsyncErrors(async (req, res, next) => {
     );
   }
   email.toLowerCase();
+
+  // MLM: Handle referral code if provided
+  let referrer = null;
+  if (referralCode && referralCode.trim()) {
+    referrer = await UserModel.findOne({ 
+      referralCode: referralCode.trim().toUpperCase(),
+      role: 'user' // 🔐 Only allow referrals from regular users, not admins
+    });
+    
+    if (!referrer) {
+      console.warn(`⚠️ Invalid referral code provided during registration: ${referralCode}`);
+      // Skip the referral instead of throwing error - allow registration to proceed
+      referrer = null;
+    }
+  }
 
   let createUser = await UserModel.create({
     firstName,
@@ -65,7 +92,37 @@ exports.RegisterUser = catchAsyncErrors(async (req, res, next) => {
     note: "",
     country,
     postalCode,
+    verified: isRole ? true : false,
+    referredBy: referrer ? referrer._id : null,
+    affiliateStatus: referrer ? 'inactive' : 'inactive' // Start as inactive
   });
+
+  // MLM: Generate referral code for new user
+  const newUserRefCode = await createUser.generateReferralCode();
+  createUser.referralCode = newUserRefCode;
+  await createUser.save();
+
+  // MLM: Add new user to referrer's directReferrals
+  // 🔐 Only add to referral chain if new user is regular user (not admin/superadmin)
+  if (referrer && createUser.role === 'user') {
+    referrer.directReferrals = referrer.directReferrals || [];
+    
+    // ✅ Check for duplicate before adding
+    if (!referrer.directReferrals.includes(createUser._id)) {
+      referrer.directReferrals.push(createUser._id);
+      await referrer.save();
+    }
+  }
+  // role:'superadmin',
+  // verified:'true'
+  if (isRole) {
+
+    res.status(201).send({
+      msg: `New ${role} added successfully`,
+      success: true,
+    });
+    return
+  }
   const token = await new Token({
     userId: createUser._id,
     token: crypto.randomBytes(32).toString("hex"),
@@ -77,8 +134,10 @@ exports.RegisterUser = catchAsyncErrors(async (req, res, next) => {
 ${url}
 The link will be expired after 2 hours`;
   // 
-  let sendEmailError = await sendEmail(createUser.email, subject, text);
-  if (sendEmailError) {
+  try {
+    let emailResult = await sendEmail(createUser.email, subject, text);
+    console.log("Email sent successfully:", emailResult);
+  } catch (sendEmailError) {
     // Log the error for debugging
     console.error("Failed to send email:", sendEmailError);
 
@@ -87,7 +146,6 @@ The link will be expired after 2 hours`;
       msg: "Registration successful, but email could not be sent. Please login to continue!",
       success: true,
       error: sendEmailError.message,
-      // Optional: include the error message
     });
   }
 
@@ -110,7 +168,7 @@ exports.RegisterSubAdmin = catchAsyncErrors(async (req, res, next) => {
     city,
     country,
     postalCode,
-    // role,
+    role,
   } = req.body;
   if (
     !firstName ||
@@ -121,7 +179,8 @@ exports.RegisterSubAdmin = catchAsyncErrors(async (req, res, next) => {
     !address ||
     !city ||
     !country ||
-    !postalCode
+    !postalCode ||
+    !role
   ) {
     return next(new errorHandler("Please fill all the required fields", 500));
   }
@@ -146,13 +205,14 @@ exports.RegisterSubAdmin = catchAsyncErrors(async (req, res, next) => {
     note: "",
     country,
     postalCode,
-    role: "subadmin", verified: true
+    role,
+    verified: true
   });
 
 
 
   res.status(201).send({
-    msg: "Sub admin added successfully",
+    msg: "Data updated successfully",
     success: true,
   });
   // 
@@ -275,7 +335,21 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
 ${url}
 
 The link will be expired after 2 hours`;
-      await sendEmail(UserAuth.email, subject, text);
+
+      try {
+        let emailResult = await sendEmail(UserAuth.email, subject, text);
+        console.log("Email sent successfully:", emailResult);
+      } catch (sendEmailError) {
+        // Log the error for debugging
+        console.error("Failed to send email:", sendEmailError);
+
+        // Respond with an error status and message
+        return res.status(500).send({
+          msg: "Email verification link sending failed. Please try again.",
+          success: false,
+          error: sendEmailError.message,
+        });
+      }
       //
     } else if (token) {
       await Token.findOneAndDelete({ userId: UserAuth._id });
@@ -292,9 +366,11 @@ The link will be expired after 2 hours`;
 ${url}
 
 The link will be expired after 2 hours`;
-      // await sendEmail(UserAuth.email, subject, text);
-      let sendEmailError = await sendEmail(UserAuth.email, subject, text);
-      if (sendEmailError) {
+
+      try {
+        let emailResult = await sendEmail(UserAuth.email, subject, text);
+        console.log("Email sent successfully:", emailResult);
+      } catch (sendEmailError) {
         // Log the error for debugging
         console.error("Failed to send email:", sendEmailError);
 
@@ -302,7 +378,7 @@ The link will be expired after 2 hours`;
         return res.status(500).send({
           msg: "Email verification link sending failed. Please try again.",
           success: false,
-          error: sendEmailError.message, // Optional: include the error message
+          error: sendEmailError.message,
         });
       }
 
@@ -317,7 +393,7 @@ The link will be expired after 2 hours`;
     });
   }
 
-  jwtToken(UserAuth, 200, res);
+  jwtToken(UserAuth, 200, res, req);
 });
 exports.sendTicket = catchAsyncErrors(async (req, res, next) => {
   const { title, description, id } = req.body;
@@ -330,9 +406,8 @@ exports.sendTicket = catchAsyncErrors(async (req, res, next) => {
     return next(new errorHandler("Enter some detail in description", 500));
   }
   let userEmail = await UserModel.findById(_id);
-  console.log("userEmail: ", userEmail);
 
-  let newTitle = `Blochain user ticket`;
+  let newTitle = `Blockhain user ticket`;
   let newDescription = `
 From:
 ${userEmail.firstName}
@@ -345,24 +420,21 @@ ${title}
 Ticket Description:
 ${description}`;
 
-  let sendEmailError = await sendEmail("admin@tokentrade.pro", newTitle, newDescription);
-  if (sendEmailError) {
+  try {
+    let emailResult = await sendEmail(process.env.USER, newTitle, newDescription);
+    console.log("Ticket email sent successfully:", emailResult);
+  } catch (sendEmailError) {
     // Log the error for debugging
     console.error("Failed to send email:", sendEmailError);
 
     // Respond with an error status and message
-    return res.status(500).send({
-      msg: "Ticket submission failed, please try again!",
-      success: false,
-      error: sendEmailError.message, // Optional: include the error message
-    });
+    return next(new errorHandler("Ticket submission failed, please try again!", 500));
   }
 
   res.status(200).send({
     msg: "Your ticket was sent. You will be answered by one of our representatives.",
     success: true,
   });
-  await sendEmail("admin@tokentrade.pro", newTitle, newDescription);
 
 
 });
@@ -397,26 +469,37 @@ ${description}`;
 //
 exports.sendEmailCode = catchAsyncErrors(async (req, res, next) => {
   //
-  const { email, id, code } = req.body;
+  const { email, id, code, username } = req.body;
   let _id = id;
 
   await UserModel.findById(_id);
-  let subject = `KYC Verification OTP`;
-  let text = `Your OTP for the verification of KYC: 
+  let subject = `Your Secure 2FA Verification Code`;
 
-${code}
+  let text = `
+Hello ${username || ''},
+
+We received a request to perform a secure action on your account.
+
+🔑 Your One-Time Verification Code is:
+
+    ${code}
+ 
+Do NOT share this code with anyone—even if they claim to be from our team.
+
+If you did not request this code, please ignore this email or contact our support immediately.
+
+Stay safe,
+The ${process.env.WebName} Team
 `;
-  let sendEmailError = await sendEmail(email, subject, text);
-  if (sendEmailError) {
+
+  try {
+    let emailResult = await sendEmail(email, subject, text);
+    console.log("OTP email sent successfully:", emailResult);
+  } catch (sendEmailError) {
     // Log the error for debugging
     console.error("Failed to send email:", sendEmailError);
 
-    // Respond with an error status and message
-    return res.status(500).send({
-      msg: "OTP sending failed, please try again!",
-      success: false,
-      error: sendEmailError.message, // Optional: include the error message
-    });
+    return next(new errorHandler("OTP sending failed, please try again!", 500));
   }
 
   res.status(201).send({
@@ -429,22 +512,234 @@ ${code}
 // Logout User
 
 exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
-  res.cookie("jwttoken", null, {
+  const isProd = process.env.NODE_ENV === 'production';
+  const secure = isProd || process.env.COOKIE_SECURE === 'true';
+  const sameSite = secure ? 'None' : 'Lax';
+
+  // Determine cookie domain based on request origin
+  let cookieDomain = undefined;
+  
+  if (isProd) {
+    const origin = req.headers.origin || req.headers.referer || '';
+    
+    if (origin.includes('fortivault.io')) {
+      cookieDomain = '.fortivault.io';
+    }  else if (process.env.COOKIE_DOMAIN) {
+      cookieDomain = process.env.COOKIE_DOMAIN;
+    }
+  }
+
+  // Clear cookie with all the same options as when it was set
+  const cookieOptions = {
     expires: new Date(Date.now()),
     httpOnly: true,
-  });
+    sameSite,
+    secure,
+    path: '/',
+    domain: cookieDomain,
+  };
+
+  // Clear cookie for all possible domains to ensure complete logout
+  res.clearCookie('jwttoken', { path: '/', httpOnly: true, secure, sameSite });
+  res.clearCookie('jwttoken', { path: '/', domain: '.fortivault.io', httpOnly: true, secure, sameSite });
+
+  // Set the main cookie to null with proper options
+  res.cookie("jwttoken", null, cookieOptions);
 
   res.status(200).send({
     success: true,
     msg: "User Logged out successfully",
   });
 });
+
 exports.allUser = catchAsyncErrors(async (req, res, next) => {
-  let allUsers = await UserModel.find();
+  let signedUser = req.user;
+
+  // Extract pagination and filter params
+  const {
+    search,
+    role,
+    verified,
+    page = 1,
+    limit = 50,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+    includeCounts = 'false' // For getting total counts without pagination
+  } = req.query;
+
+  // For subadmins, handle search parameter or return filtered users
+  if (signedUser.role === "subadmin") {
+    console.log("🔍 Subadmin request - search:", search);
+
+    // ✅ If searching by ID, find that specific user
+    if (search && search.trim()) {
+      const searchTrimmed = String(search).trim();
+      const isObjectId = /^[0-9a-fA-F]{24}$/.test(searchTrimmed);
+
+      if (isObjectId) {
+        console.log("🔍 Subadmin searching by ID:", searchTrimmed);
+        const specificUser = await UserModel.findById(searchTrimmed).lean();
+
+        if (specificUser) {
+          console.log("🔍 Found specific user:", { _id: specificUser._id, email: specificUser.email, role: specificUser.role });
+          return res.status(200).send({
+            success: true,
+            msg: "All Users",
+            allUsers: [specificUser],
+            pagination: {
+              total: 1,
+              page: 1,
+              limit: 1,
+              pages: 1
+            }
+          });
+        } else {
+          console.log("🔍 Specific user not found");
+          return res.status(200).send({
+            success: true,
+            msg: "All Users",
+            allUsers: [],
+            pagination: {
+              total: 0,
+              page: 1,
+              limit: 0,
+              pages: 0
+            }
+          });
+        }
+      }
+    }
+
+    // ✅ Default subadmin behavior - return all accessible users
+    const allUsers = await UserModel.find({
+      $or: [
+        { isShared: true },
+        { assignedSubAdmin: signedUser._id }
+      ]
+    }).sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 });
+
+    // ✅ Append the logged-in subadmin user to ensure they can find their own permissions data
+    const userExists = allUsers.some(user => user._id.toString() === signedUser._id.toString());
+
+    if (!userExists) {
+      // Fetch the logged-in user's latest data only if they're a subadmin
+      const currentUser = await UserModel.findById(signedUser._id).lean();
+      if (currentUser && currentUser.role === 'subadmin') {
+        allUsers.push(currentUser);  // Append subadmin to array
+      }
+    }
+
+    console.log("🔍 Subadmin returning", allUsers.length, "users");
+    return res.status(200).send({
+      success: true,
+      msg: "All Users",
+      allUsers,
+      pagination: {
+        total: allUsers.length,
+        page: 1,
+        limit: allUsers.length,
+        pages: 1
+      }
+    });
+  }
+
+  // For admin/superadmin - use pagination
+  const query = {};
+
+  // Search filter (name, email, or ID)
+  if (search && search.trim()) {
+    const searchTrimmed = String(search).trim();
+
+    // Check if search is a valid MongoDB ObjectId (24 hex characters)
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(searchTrimmed);
+
+    if (isObjectId) {
+      // Search by exact ID match
+      query._id = searchTrimmed;
+    } else {
+      // Search by name or email (regex)
+      const regexGlobal = { $regex: searchTrimmed, $options: "i" };
+      query.$or = [
+        { firstName: regexGlobal },
+        { lastName: regexGlobal },
+        { email: regexGlobal }
+      ];
+    }
+  }
+
+  // Role filter
+  if (role) {
+    query.role = role; // Exact match instead of regex
+  }
+
+  // Verified filter
+  if (verified !== undefined && verified !== '') {
+    query.verified = verified === 'true';
+  }
+
+  // If only counts requested (for initial load)
+  if (includeCounts === 'true') {
+    const total = await UserModel.countDocuments(query);
+    const verifiedCount = await UserModel.countDocuments({ ...query, verified: true, role: /user/i });
+    const unverifiedCount = await UserModel.countDocuments({ ...query, verified: false, role: /user/i });
+    const subadminCount = await UserModel.countDocuments({ ...query, role: /subadmin/i });
+
+    return res.status(200).send({
+      success: true,
+      msg: "User counts",
+      counts: {
+        total,
+        verified: verifiedCount,
+        unverified: unverifiedCount,
+        subadmins: subadminCount
+      }
+    });
+  }
+
+  // Pagination
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const skip = (pageNum - 1) * limitNum;
+
+  // Get total count
+  const total = await UserModel.countDocuments(query);
+
+  // Get paginated results
+  const allUsers = await UserModel.find(query)
+    .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
+    .skip(skip)
+    .limit(limitNum)
+    .lean();
+
+  // ✅ SECURITY: Only append logged-in user if NOT searching by ID (to avoid duplicates)
+  const isSearchingById = search && search.trim() && /^[0-9a-fA-F]{24}$/.test(search.trim());
+  const userExists = allUsers.some(user => user._id.toString() === signedUser._id.toString());
+
+  if (!userExists && !isSearchingById) {
+    // Fetch the logged-in user's latest data
+    const currentUser = await UserModel.findById(signedUser._id).lean();
+
+    // Only append if user matches the role filter (or no role filter)
+    if (currentUser) {
+      const matchesRoleFilter = !role || currentUser.role === role; // Exact match
+      const matchesVerifiedFilter = verified === undefined || verified === '' || currentUser.verified === (verified === 'true');
+
+      if (matchesRoleFilter && matchesVerifiedFilter) {
+        allUsers.push(currentUser);  // Append only if matches filters
+      }
+    }
+  }
+
   res.status(200).send({
     success: true,
     msg: "All Users",
     allUsers,
+    pagination: {
+      total,
+      page: pageNum,
+      limit: limitNum,
+      pages: Math.ceil(total / limitNum)
+    }
   });
 });
 exports.singleUser = catchAsyncErrors(async (req, res, next) => {
@@ -459,7 +754,7 @@ exports.singleUser = catchAsyncErrors(async (req, res, next) => {
 
 exports.updateSingleUser = catchAsyncErrors(async (req, res, next) => {
   let { id } = req.params;
-  const {
+  let {
     firstName,
     lastName,
     email,
@@ -471,13 +766,12 @@ exports.updateSingleUser = catchAsyncErrors(async (req, res, next) => {
     country,
     postalCode,
     note,
-    currency
+    currency, AiTradingPercentage,
   } = req.body;
   if (
     !firstName ||
     !lastName ||
     !email ||
-    !password ||
     !phone ||
     !address ||
     !city ||
@@ -485,7 +779,8 @@ exports.updateSingleUser = catchAsyncErrors(async (req, res, next) => {
     ||
     !postalCode
     ||
-    !currency
+    !currency ||
+    !AiTradingPercentage
   ) {
     return next(
       new errorHandler(
@@ -494,13 +789,14 @@ exports.updateSingleUser = catchAsyncErrors(async (req, res, next) => {
       )
     );
   }
-  let signleUser = await UserModel.findByIdAndUpdate(
-    { _id: id },
-    {
+
+  AiTradingPercentage = parseFloat(AiTradingPercentage);
+
+  // Prepare update object
+  let updateData = {
       firstName,
       lastName,
       email,
-      password,
       phone,
       progress,
       address,
@@ -508,9 +804,19 @@ exports.updateSingleUser = catchAsyncErrors(async (req, res, next) => {
       country,
       postalCode,
       note,
-      currency
-    },
-    { new: true }
+    currency, 
+    AiTradingPercentage
+  };
+
+  // Only update password if it's provided and not empty
+  if (password && password.trim() !== '') {
+    updateData.password = password;
+  }
+
+  let signleUser = await UserModel.findByIdAndUpdate(
+    { _id: id },
+    updateData,
+    { new: true, upsert: true }
   );
   res.status(200).send({
     success: true,
@@ -662,7 +968,6 @@ exports.verifySingleUser = catchAsyncErrors(async (req, res, next) => {
   }
   const cnicUrl = await uploadFileToCloudinary(cnicFile.buffer, cnicFile.originalname);
   const billUrl = await uploadFileToCloudinary(billFile.buffer, billFile.originalname);
-  console.log('billUrl: ', billUrl);
   let signleUser = await UserModel.findByIdAndUpdate(
     { _id: id },
     {
@@ -676,12 +981,45 @@ exports.verifySingleUser = catchAsyncErrors(async (req, res, next) => {
   );
 
   signleUser.save();
+  await notificationSchema.create({
+    userId: signleUser._id,
+    type: "KYC_request",
+    content: `You have a new KYC application from ${signleUser.firstName}  ${signleUser.lastName}.`,
 
+    userEmail: signleUser.email,
+    userName: `${signleUser.firstName} ${signleUser.lastName}`
+  });
+
+  // 
   res.status(200).send({
     success: true,
     msg: "Thank you for submitting KYC documents.",
     signleUser,
   });
+  const url = `${process.env.BASE_URL}/admin/users/${signleUser._id}/verifications`
+  let subject = `New KYC Request `;
+  let text = `Hi there,
+
+A user has submitted their KYC details. Please find the information below:
+
+Name: ${signleUser.firstName} ${signleUser.lastName}  
+Email: ${signleUser.email}  
+
+You can review the submitted documents by clicking the link below:  
+${url}
+
+Best regards,  
+The ${process.env.WebName} Team
+`;
+
+  try {
+    await sendEmail(process.env.USER, subject, text);
+    console.log(`KYC notification email sent successfully for user ${signleUser.email}`);
+  } catch (emailError) {
+    console.error("KYC email send error:", emailError);
+    // Don't fail the KYC submission, just log the error
+  }
+
 });
 
 exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
@@ -746,7 +1084,6 @@ exports.addCard = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
   const { cardName, cardNumber, cardNotes, cardExpiry, cardCvv, cardType } =
     req.body;
-  console.log("req.body: ", req.body);
 
   // Check if all required fields are provided
   if (!cardName || !cardNumber || !cardExpiry || !cardCvv) {
@@ -816,10 +1153,111 @@ exports.deletePayment = catchAsyncErrors(async (req, res, next) => {
 });
 exports.adminTickets = catchAsyncErrors(async (req, res, next) => {
   try {
-    // const tickets = await Ticket.find({ status: 'open' }).populate('user');
-    const tickets = await Ticket.find();
-    res.status(200).json({ success: true, tickets });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+    const status = req.query.status; // Optional status filter
+
+    const currentUserId = req.user._id;
+    const currentUserRole = req.user.role;
+
+    console.log('adminTickets API called:', { 
+      page, 
+      limit, 
+      status, 
+      currentUserRole,
+      rawStatus: req.query.status 
+    });
+
+    // Build filter query for tickets
+    let ticketFilterQuery = {};
+    if (status && status !== 'all' && status !== 'undefined') {
+      ticketFilterQuery.status = status;
+    }
+
+    console.log('Ticket Filter Query:', ticketFilterQuery);
+
+    // For subadmin, first get accessible user IDs
+    let accessibleUserIds = null;
+    if (currentUserRole === 'subadmin') {
+      const accessibleUsers = await UserModel.find({
+        $or: [
+          { isShared: true },
+          { assignedSubAdmin: currentUserId }
+        ]
+      }).select('_id').lean();
+      
+      accessibleUserIds = accessibleUsers.map(user => user._id);
+      
+      // Add user filter to ticket query
+      if (accessibleUserIds.length > 0) {
+        ticketFilterQuery.user = { $in: accessibleUserIds };
+      } else {
+        // No accessible users, return empty
+        return res.status(200).json({ 
+          success: true, 
+          tickets: [],
+          pagination: {
+            currentPage: page,
+            totalPages: 0,
+            totalCount: 0,
+            limit,
+            hasMore: false
+          }
+        });
+      }
+    }
+
+    // Get total count for pagination (after applying filters)
+    const totalCount = await Ticket.countDocuments(ticketFilterQuery);
+    console.log('Total tickets matching filter:', totalCount);
+
+    // Fetch tickets with pagination, sorted by updatedAt and createdAt
+    let tickets = await Ticket.find(ticketFilterQuery)
+      .sort({ updatedAt: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    console.log('Fetched tickets count:', tickets.length);
+
+    // Fetch user details for all tickets in one batch query
+    const userIds = [...new Set(tickets.map(ticket => ticket.user))];
+    const users = await UserModel.find({ _id: { $in: userIds } })
+      .select('_id firstName lastName email isShared assignedSubAdmin')
+      .lean();
+
+    // Create a map for quick user lookup
+    const userMap = users.reduce((acc, user) => {
+      acc[user._id.toString()] = user;
+      return acc;
+    }, {});
+
+    // Attach user details to tickets
+    const ticketsWithUserDetails = tickets.map(ticket => ({
+      ...ticket,
+      userDetails: {
+        success: true,
+        signleUser: userMap[ticket.user.toString()] || null
+      }
+    }));
+
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasMore = page < totalPages;
+
+    res.status(200).json({ 
+      success: true, 
+      tickets: ticketsWithUserDetails,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit,
+        hasMore
+      }
+    });
   } catch (error) {
+    console.error('adminTickets error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch tickets' });
   }
 });
@@ -831,15 +1269,23 @@ exports.addUserByEmail = catchAsyncErrors(async (req, res, next) => {
 
     // Find the user by email
     let user = await UserModel.findOne({ email });
-    console.log('user: ', user);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return next(new errorHandler("User not found", 404));
+    }
+    if (user._id == subAdminId) {
+      return next(new errorHandler("Sub admin cannot assign to themself", 404));
+    }
+    if (user.isShared) {
+      return next(new errorHandler("User already shared globally", 404));
+    }
+    if (user.role == "subadmin" || user.role == "admin" || user.role == "superadmin") {
+      return next(new errorHandler("Only regular users can be assigned to the sub admin", 404));
     }
 
     // Check if user is already assigned
     if (user.assignedSubAdmin) {
-      return res.status(403).json({ msg: "User already assigned to you or another admin" });
+      return next(new errorHandler("User already assigned to subadmin", 403));
     }
 
     // Assign the sub-admin
@@ -869,13 +1315,10 @@ exports.applyCreditCard = catchAsyncErrors(async (req, res, next) => {
       type: "card_request",
       status: "applied",
     });
-    console.log('existingApplication: ', existingApplication);
 
     if (existingApplication) {
-      return res.status(400).json({
-        success: false,
-        msg: "You already have a pending credit card application."
-      });
+
+      return next(new errorHandler("You already have a pending credit card application.", 400));
     }
     await notificationSchema.create({
       userId,
@@ -894,33 +1337,79 @@ exports.applyCreditCard = catchAsyncErrors(async (req, res, next) => {
 
     res.status(200).json({ success: true, msg: "Credit card applied successfully" });
   } catch (error) {
-    console.log('error: ', error);
     res.status(500).json({ success: false, msg: 'Sommething went wroong' });
   }
 });
 exports.getNotifications = catchAsyncErrors(async (req, res, next) => {
   try {
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
+    // Get current user from request (set by auth middleware)
+    const currentUserId = req.user._id;
+    const currentUserRole = req.user.role;
 
+    // Build filter query based on user role
+    let filterQuery = {};
 
-    // Find the user by email
-    let notifications = await notificationSchema.find();
+    // If subadmin, filter notifications for assigned or shared users only
+    if (currentUserRole === 'subadmin') {
+      // Find all users that are either shared or assigned to this subadmin
+      const accessibleUsers = await UserModel.find({
+        $or: [
+          { isShared: true },
+          { assignedSubAdmin: currentUserId }
+        ]
+      }).select('_id').lean();
 
+      const userIds = accessibleUsers.map(user => user._id);
 
+      // Filter notifications to only show those from accessible users
+      filterQuery = {
+        userId: { $in: userIds }
+      };
+    }
+    // Admin and superadmin see all notifications (no filter needed)
 
-    res.status(200).json({ success: true, notifications });
+    // Get total count for pagination with filter
+    const totalCount = await notificationSchema.countDocuments(filterQuery);
+
+    // Fetch notifications with pagination, sorted by most recent first
+    let notifications = await notificationSchema
+      .find(filterQuery)
+      .sort({ createdAt: -1 }) // Most recent first
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Use lean() for better performance
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasMore = page < totalPages;
+
+    res.status(200).json({ 
+      success: true, 
+      notifications,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit,
+        hasMore
+      }
+    });
   } catch (error) {
-    console.log('error: ', error);
-    res.status(500).json({ success: false, msg: 'Sommething went wroong' });
+    console.error('getNotifications error:', error);
+    res.status(500).json({ success: false, msg: 'Something went wrong' });
   }
 });
+
 exports.updateNotificationStatus = catchAsyncErrors(async (req, res, next) => {
   try {
-
     let status = req.params.status;
-    console.log('status: ', status);
-    let id = req.params.id
-    // Find the user by email
+    let id = req.params.id;
+    
     const notification = await notificationSchema.findById(id);
 
     if (!notification) {
@@ -930,31 +1419,36 @@ exports.updateNotificationStatus = catchAsyncErrors(async (req, res, next) => {
     notification.isRead = status;
     await notification.save();
 
-    res.status(200).json({ success: true, msg: 'Notification status updated', isRead: notification.isRead });
-
-
+    res.status(200).json({ 
+      success: true, 
+      msg: 'Notification status updated', 
+      isRead: notification.isRead 
+    });
   } catch (error) {
-    console.log('error: ', error);
-    res.status(500).json({ success: false, msg: 'Sommething went wroong' });
+    console.error('updateNotificationStatus error:', error);
+    res.status(500).json({ success: false, msg: 'Something went wrong' });
   }
 });
+
 exports.userCryptoCard = catchAsyncErrors(async (req, res, next) => {
   try {
-
     let { cardNumber, cardName, cardExpiry, cardCvv, ticketId, userId } = req.body;
 
-    // Find the user by email
     const user = await UserModel.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, msg: 'User not found' });
+    }
+
     user.cryptoCard = {
       status: "active",
       cardNumber: cardNumber,
       cvv: cardCvv,
       cardName: cardName,
-      Exp: cardExpiry // optional if you have more fields
+      Exp: cardExpiry
     };
     await user.save();
 
-    console.log('user: ', user);
     const notification = await notificationSchema.findById(ticketId);
 
     if (!notification) {
@@ -966,27 +1460,9 @@ exports.userCryptoCard = catchAsyncErrors(async (req, res, next) => {
     await notification.save();
 
     res.status(200).json({ success: true, msg: 'Crypto Card activated' });
-
-
   } catch (error) {
-    console.log('error: ', error);
-    res.status(500).json({ success: false, msg: 'Sommething went wroong' });
-  }
-});
-exports.getNotifications = catchAsyncErrors(async (req, res, next) => {
-  try {
-
-
-
-    // Find the user by email
-    let notifications = await notificationSchema.find();
-
-
-
-    res.status(200).json({ success: true, notifications });
-  } catch (error) {
-    console.log('error: ', error);
-    res.status(500).json({ success: false, msg: 'Sommething went wroong' });
+    console.error('userCryptoCard error:', error);
+    res.status(500).json({ success: false, msg: 'Something went wrong' });
   }
 });
 // exports.adminUpdateTicket = catchAsyncErrors(async (req, res, next) => {
@@ -1048,7 +1524,8 @@ exports.createTicket = catchAsyncErrors(async (req, res, next) => {
 
     // Validate input
     if (!title || !description || !userId) {
-      return res.status(400).json({ success: false, msg: 'title and description are required' });
+
+      return next(new errorHandler("Title and description are required", 400));
     }
     const objectId = new mongoose.Types.ObjectId(userId);
     const signleUser = await UserModel.findById({ _id: objectId })
@@ -1068,7 +1545,6 @@ exports.createTicket = catchAsyncErrors(async (req, res, next) => {
         createdAt: Date.now() // Current timestamp
       }]
     });
-    console.log('isAdmin: ', isAdmin);
     if (isAdmin === false) {
       let checkNotification = await notificationSchema.create({
         userId,
@@ -1079,7 +1555,6 @@ exports.createTicket = catchAsyncErrors(async (req, res, next) => {
         userEmail: signleUser.email,
         userName: `${signleUser.firstName} ${signleUser.lastName}`
       });
-      console.log(checkNotification);
     }
     // Save the ticket 
     await newTicket.save();
@@ -1091,34 +1566,80 @@ exports.createTicket = catchAsyncErrors(async (req, res, next) => {
       let subject = `${process.env.WebName} Customer Support - Re: ${ticketId} `;
       let text = `Hi there,
 
-We’ve opened a new request (#${ticketId}) for you.  
+We've opened a new request (#${ticketId}) for you.  
 
 You can check the details and provide any input by clicking the link below.  
 
-Here’s the link: ${process.env.BASE_URL}/tickets/${ticketId}  
+Here's the link: ${process.env.BASE_URL}/tickets/${ticketId}  
 
 Let us know if you need further assistance.  
 
 Best regards,  
 ${process.env.WebName} Team`;
-      // 
-      await sendEmail(signleUser.email, subject, text);
 
+      try {
+        await sendEmail(signleUser.email, subject, text);
+        console.log(`Ticket email sent successfully to user ${signleUser.email} for ticket ${ticketId}`);
+      } catch (emailError) {
+        console.error(`Failed to send ticket email to user ${signleUser.email}:`, emailError);
+        // Don't fail the ticket creation, just log the error
+      }
+
+    } else {
+      // Send email to admin in background (non-blocking)
+      const adminEmailSubject = `🎫 New Support Ticket #${ticketId} from ${signleUser.firstName} ${signleUser.lastName}`;
+      const adminEmailText = `Hi Admin,
+
+A new support ticket has been created by a user.
+
+📋 Ticket Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Ticket ID: #${ticketId}
+• Title: ${title}
+• Status: Open
+• Created: ${new Date().toLocaleString()}
+
+👤 User Information:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Name: ${signleUser.firstName} ${signleUser.lastName}
+• Email: ${signleUser.email}
+• User ID: ${userId}
+
+📝 Description:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${description}
+
+🔗 View & Respond:
+${process.env.BASE_URL}/admin/ticket/user/${userId}/${ticketId}
+
+Please review and respond to this ticket as soon as possible.
+
+Best regards,  
+${process.env.WebName} Support System`;
+
+      // Send email asynchronously (non-blocking)
+      setImmediate(async () => {
+      try {
+          await sendEmail(process.env.USER, adminEmailSubject, adminEmailText);
+          console.log(`✅ Admin notification email sent successfully for ticket #${ticketId} from ${signleUser.email}`);
+      } catch (emailError) {
+          console.error(`❌ Failed to send admin notification email for ticket #${ticketId}:`, emailError.message);
+          // Email failure doesn't affect ticket creation
+      }
+      });
     }
   } catch (error) {  // Log the error for debugging
-    console.log('error: ', error);
+
     res.status(500).json({ success: false, msg: 'Server error', error: error.message });
   }
 });
 exports.getUserTickets = catchAsyncErrors(async (req, res, next) => {
   try {
     const { id } = req.params;
-    console.log('id: ', id);
 
     const tickets = await Ticket.find({ user: id });
     // const tickets = await Ticket.find({ user: id }).populate('user');
 
-    console.log('tickets: ', tickets);
 
     // Respond with the created ticket
     res.status(201).json({ success: true, ticket: tickets });
@@ -1128,38 +1649,31 @@ exports.getUserTickets = catchAsyncErrors(async (req, res, next) => {
   }
 });
 exports.getIndivTicket = catchAsyncErrors(async (req, res, next) => {
-  try {
-    const { id, ticketId } = req.params;
+  const { id, ticketId } = req.params;
 
+  const tickets = await Ticket.find({ user: id, ticketId });
 
-    const tickets = await Ticket.find({ user: id, ticketId });
-
-
-    // Respond with the created ticket
-    res.status(201).json({ success: true, ticket: tickets });
-  } catch (error) {
-    console.error('Error creating ticket:', error); // Log the error for debugging
-    res.status(500).json({ success: false, msg: 'Server error', error: error.message });
+  if (!tickets || tickets.length === 0) {
+    return next(new errorHandler("Ticket not found", 404));
   }
+
+  // Respond with the found ticket
+  res.status(200).json({ success: true, ticket: tickets });
 });
 
 
 exports.updateMessage = catchAsyncErrors(async (req, res, next) => {
   const { status, userId, ticketId, description, sender } = req.body;
-  console.log('req.body: ', req.body);
+
 
   // Validate the input
   if (!userId || !ticketId || !description || !sender) {
-    return res.status(400).json({
-      success: false,
-      msg: 'User ID, Ticket ID, message content, and sender are required.',
-    });
+    return next(new errorHandler("User ID, Ticket ID, message content, and sender are required.", 400));
   }
 
   try {
     // Find the ticket by userId and ticketId
     const ticket = await Ticket.findOne({ ticketId: ticketId, user: userId });
-    console.log('ticket: ', ticket);
 
     if (!ticket) {
       return res.status(404).json({
@@ -1198,7 +1712,10 @@ exports.updateMessage = catchAsyncErrors(async (req, res, next) => {
 
       if (!signleUser) {
         console.error(`User with ID ${userId} not found.`);
-        return  // Prevents further execution if user is not found
+        return res.status(500).json({
+          success: false,
+          msg: 'User not found.',
+        });
       }
 
       let checkNotification = await notificationSchema.create({
@@ -1210,36 +1727,115 @@ exports.updateMessage = catchAsyncErrors(async (req, res, next) => {
         userEmail: signleUser.email,
         userName: `${signleUser.firstName} ${signleUser.lastName}`,
       });
-      console.log(checkNotification);
     }
+
+    // Send response immediately after ticket is saved
     res.status(200).json({
       success: true,
       msg: 'Ticket updated successfully.',
       ticket: ticket,
     });
+
+    // Handle email sending in background (non-blocking)
     if (sender === "admin") {
-      let signleUser = await UserModel.findById({ _id: userId });
+      try {
+        let signleUser = await UserModel.findById({ _id: userId });
 
-      if (!signleUser) {
-        console.error(`User with ID ${userId} not found.`);
-        return  // Prevents further execution if user is not found
-      }
+        if (!signleUser) {
+          console.error(`User with ID ${userId} not found for email.`);
+          return;
+        }
 
-      let subject = `${process.env.WebName} Customer Support - Re: ${ticketId} `;
-      let text = `Hi there,
+        let subject = `${process.env.WebName} Customer Support - Re: ${ticketId} `;
+        let text = `Hi there,
 
 We wanted to let you know that your request (#${ticketId}) has been updated.
 
 You can check out our response and add any additional comments by clicking on the link below.
 
-Here’s the link: ${process.env.BASE_URL}/tickets/${ticketId}`;
-      // 
-      await sendEmail(signleUser.email, subject, text);
+Here's the link: ${process.env.BASE_URL}/tickets/${ticketId}`;
 
+        await sendEmail(signleUser.email, subject, text);
+        console.log(`Email sent successfully to user ${userId} for ticket ${ticketId}`);
+      } catch (emailError) {
+        console.error(`Failed to send email to user ${userId} for ticket ${ticketId}:`, emailError);
+        // Add email failure flag to the last admin message for admin visibility
+        try {
+          // Find the last admin message and add email failure flag
+          const lastAdminMessage = ticket.ticketContent[ticket.ticketContent.length - 1];
+          if (lastAdminMessage && lastAdminMessage.sender === 'admin') {
+            lastAdminMessage.emailFailed = true;
+            await ticket.save();
+            console.log(`Email failure flag added to admin message for ticket ${ticketId}`);
+          } else {
+            console.log(`No admin message found to add email failure flag for ticket ${ticketId}`);
+          }
+        } catch (saveError) {
+          console.error('Failed to save email failure flag:', saveError);
+        }
+      }
+    } else {
+      // User sent a message - send email to admin in background (non-blocking)
+      const signleUser = await UserModel.findById({ _id: userId });
+      
+      if (signleUser) {
+        const adminEmailSubject = `💬 New Reply on Ticket #${ticketId} from ${signleUser.firstName} ${signleUser.lastName}`;
+        const adminEmailText = `Hi Admin,
+
+A user has replied to their support ticket.
+
+📋 Ticket Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Ticket ID: #${ticketId}
+• Title: ${ticket.title}
+• Status: ${status}
+• Last Updated: ${new Date().toLocaleString()}
+
+👤 User Information:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Name: ${signleUser.firstName} ${signleUser.lastName}
+• Email: ${signleUser.email}
+• User ID: ${userId}
+
+💬 Latest Message:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${description}
+
+🔗 View & Respond:
+${process.env.BASE_URL}/admin/ticket/user/${userId}/${ticketId}
+
+Please review and respond to this ticket update.
+
+Best regards,  
+${process.env.WebName} Support System`;
+
+        // Send email asynchronously (non-blocking)
+        setImmediate(async () => {
+          try {
+            await sendEmail(process.env.USER, adminEmailSubject, adminEmailText);
+            console.log(`✅ Admin notification email sent successfully for ticket update #${ticketId} from ${signleUser.email}`);
+      } catch (emailError) {
+            console.error(`❌ Failed to send admin notification email for ticket update #${ticketId}:`, emailError.message);
+            // Email failure doesn't affect ticket update
+            // Optionally add email failure flag to the last user message
+        try {
+          const lastUserMessage = ticket.ticketContent[ticket.ticketContent.length - 1];
+          if (lastUserMessage && lastUserMessage.sender === 'user') {
+            lastUserMessage.emailFailed = true;
+            await ticket.save();
+          }
+        } catch (saveError) {
+          console.error('Failed to save email failure flag:', saveError);
+        }
+          }
+        });
+      } else {
+        console.error(`User with ID ${userId} not found for admin email notification.`);
+      }
     }
 
   } catch (error) {
-    console.log('error: ', error);
+
     return res.status(500).json({
       success: false,
       msg: 'An error occurred while updating the ticket.',
@@ -1258,7 +1854,7 @@ exports.addNewStock = catchAsyncErrors(async (req, res, next) => {
     // Check if stock already exists
     const existingStock = await Stock.findOne({ symbol: symbol.toUpperCase() });
     if (existingStock) {
-      return res.status(400).json({ success: false, msg: 'Stock with this symbol already exists' });
+      return next(new errorHandler("Stock with this symbol already exists", 400));
     }
 
     const newStock = new Stock({
@@ -1267,7 +1863,6 @@ exports.addNewStock = catchAsyncErrors(async (req, res, next) => {
       price,
     });
 
-    console.log('newStock: ', newStock);
     await newStock.save();
 
     res.status(201).json({ success: true, stock: newStock });
@@ -1293,7 +1888,7 @@ exports.updateStock = catchAsyncErrors(async (req, res, next) => {
 
 
     const { symbol, name, price } = req.body;
-    console.log(' req.bod: ', req.body);
+
     const stockId = req.params.id;
 
     const updatedStock = await Stock.findByIdAndUpdate(
@@ -1303,7 +1898,7 @@ exports.updateStock = catchAsyncErrors(async (req, res, next) => {
     );
 
     if (!updatedStock) {
-      return res.status(404).json({ success: false, msg: 'Stock not found' });
+      return next(new errorHandler("Stock not found", 404));
     }
 
     res.json({ success: true, stock: updatedStock });
@@ -1312,6 +1907,30 @@ exports.updateStock = catchAsyncErrors(async (req, res, next) => {
     res.status(500).json({ success: false, msg: 'Server error' });
   }
 });
+// exports.updateToken = catchAsyncErrors(async (req, res, next) => {
+//   try {
+
+
+//     const { symbol, name, price } = req.body;
+
+//     const stockId = req.params.id;
+
+//     const updatedStock = await Stock.findByIdAndUpdate(
+//       stockId,
+//       { symbol: symbol.toUpperCase(), name, price },
+//       { new: true }
+//     );
+
+//     if (!updatedStock) {
+//       return res.status(404).json({ success: false, msg: 'Stock not found' });
+//     }
+
+//     res.json({ success: true, stock: updatedStock });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ success: false, msg: 'Server error' });
+//   }
+// });
 exports.deleteStock = catchAsyncErrors(async (req, res, next) => {
   try {
 
@@ -1319,7 +1938,7 @@ exports.deleteStock = catchAsyncErrors(async (req, res, next) => {
     const deletedStock = await Stock.findByIdAndDelete(stockId);
 
     if (!deletedStock) {
-      return res.status(404).json({ success: false, msg: 'Stock not found' });
+      return next(new errorHandler("Stock not found", 404));
     }
 
     res.json({ success: true, msg: 'Stock deleted successfully' });
@@ -1342,6 +1961,7 @@ exports.deleteStock = catchAsyncErrors(async (req, res, next) => {
 
 
 // Delete stock
+
 const defaultLinks = [
   {
     name: "Crypto Card",
@@ -1383,33 +2003,49 @@ const defaultLinks = [
     path: "/swap",
     enabled: true,
   },
+  {
+    name: "My Tokens",
+    path: "/tokens",
+    enabled: true,
+  },
+  {
+    name: "Referral System",
+    path: "/user/referral-promo,/user/affiliate",
+    enabled: true,
+  },
 ];
 
 exports.getLinks = catchAsyncErrors(async (req, res, next) => {
   try {
+    // 1️⃣ Get all existing DB links
+    const dbLinks = await userLink.find().sort({ _id: 1 });
 
-    let links = await userLink.find().sort({ _id: 1 });
+    // 2️⃣ Find which defaultLinks are missing in DB
+    const dbNames = dbLinks.map(link => link.name);
+    const newLinks = defaultLinks.filter(def => !dbNames.includes(def.name));
 
-    // If empty, insert defaults
-    if (links.length === 0) {
-      await userLink.insertMany(defaultLinks);
-      links = await userLink.find().sort({ _id: 1 });
+    // 3️⃣ Insert any new default links
+    if (newLinks.length > 0) {
+      await userLink.insertMany(newLinks);
     }
-    console.log('links: ', links);
- 
 
-    res.status(200).json({ success: true, links });
-  } catch (error) {
+    // 4️⃣ Fetch again to include newly inserted ones
+    const updatedLinks = await userLink.find().sort({ _id: 1 });
 
-    console.error(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    res.status(200).json({
+      success: true,
+      links: updatedLinks,
+    });
+  } catch (err) {
+    console.error("getLinks error:", err);
+    res.status(500).json({ success: false, msg: "Server error" });
   }
 });
+
 exports.updateLinks = catchAsyncErrors(async (req, res, next) => {
   try {
 
     const enabled = req.params.mode;
-    console.log('enabled: ', enabled);
     const link = await userLink.findByIdAndUpdate(
       req.params.id,
       { enabled: enabled },
@@ -1444,7 +2080,6 @@ exports.createLink = catchAsyncErrors(async (req, res, next) => {
 exports.deleteTicket = catchAsyncErrors(async (req, res, next) => {
   try {
     const { id } = req.params;
-    console.log('id: ', id);
 
     const ticketStatus = await Ticket.findByIdAndDelete(id);
 
@@ -1456,4 +2091,296 @@ exports.deleteTicket = catchAsyncErrors(async (req, res, next) => {
     console.error(err);
     res.status(500).json({ success: false, msg: "Server error" });
   }
+});
+exports.deleteNotification = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const notification = await notificationSchema.findByIdAndDelete(id);
+
+    if (!notification) {
+      return res.status(404).json({ success: false, msg: 'Notification not found' });
+    }
+    res.status(201).json({
+      success: true,
+      msg: 'Notification deleted successfully',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+exports.deleteAllNotifications = catchAsyncErrors(async (req, res, next) => {
+  try {
+    // const userId = req.params.userId; // Assuming you have user authentication
+    await notificationSchema.deleteMany({});
+
+    res.status(201).json({
+      success: true,
+      msg: 'All notifications deleted successfully',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+exports.addMyTokens = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const userId = req.params.userId; // Assuming you have user authentication
+    const { name, symbol, quantity, value, totalValue } = req.body;
+    let files = req.files
+    if (!files || files.length === 0) {
+      return next(new errorHandler("Please upload the logo", 400));
+
+    }
+    const uploadFileToCloudinary = (fileBuffer, fileName) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: "image",
+            folder: `tokenlogo/${Date.now()}`, // better: auto folder per user
+            public_id: fileName.split(".")[0], // remove extension
+            overwrite: true,
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result.secure_url);
+          }
+        );
+
+        stream.end(fileBuffer); // pipe buffer into cloudinary stream
+      });
+    };
+
+    const logoFile = files.find((file) => file.fieldname === 'logo');
+
+    const logoUrl = await uploadFileToCloudinary(logoFile.buffer, logoFile.originalname);
+
+
+    if (!name || !symbol || !quantity || !value) {
+      return next(new errorHandler("All fields are required", 400));
+    }
+
+
+    const user = await UserModel.findById(userId);
+    if (!user) return next(new errorHandler("User not found", 404));
+
+    const myToken = await MyTokens.create({
+      user: user._id,
+      logo: logoUrl,
+      name,
+      symbol,
+      quantity,
+      value,
+      totalValue
+    });
+
+
+    res.status(201).json({
+      success: true,
+      msg: 'Token added successfully',
+      myToken
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+exports.getAllTokens = catchAsyncErrors(async (req, res, next) => {
+  try {
+    let id = req.params.id
+    const allTokens = await MyTokens.find({ user: id });
+    res.json({ success: true, stocks: allTokens });
+
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+exports.getMyTokens = catchAsyncErrors(async (req, res, next) => {
+  try {
+    let id = req.params.id
+    const myTokens = await MyTokens.find({ user: id });
+    res.json({ success: true, myTokens });
+
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+exports.deleteUserTokens = catchAsyncErrors(async (req, res, next) => {
+  const { id, coindId } = req.params; // User ID
+
+  // Check if stockId is provided
+  if (!coindId) {
+    return next(new errorHandler("Token ID is required for deletion", 400));
+  }
+
+  // Find the user and pull (remove) the specific stock from the array
+  const deletedToken = await MyTokens.findOneAndDelete({
+    _id: coindId,
+    user: id,
+  });
+
+  if (!deletedToken) {
+    return next(new errorHandler("Token not found or not owned by user", 404))
+
+  }
+
+  res.status(200).send({
+    success: true,
+    msg: "Token deleted successfully",
+    deletedToken
+  });
+});
+exports.updateToken = catchAsyncErrors(async (req, res, next) => {
+  try {
+
+
+    const { logo, symbol, quantity, value, totalValue, name } = req.body;
+    console.log('req.body: ', req.body);
+
+    const tokenId = req.params.id;
+
+    const updatedToken = await MyTokens.findByIdAndUpdate(
+      tokenId,
+      {
+        $set: {
+          logo,
+          symbol: symbol.toUpperCase(),
+          name,
+          quantity,
+          value,
+          totalValue
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedToken) {
+      return next(new errorHandler("Stock not found", 404));
+    }
+
+    res.json({ success: true, stock: updatedToken });
+  } catch (err) {
+    console.error(err);
+    return next(new errorHandler(err.msg || 'Server error', 500))
+  }
+});
+exports.getUsersRestrictions = catchAsyncErrors(async (req, res) => {
+  let settings = await UserRestriction.findOne();
+  // only one document 
+  if (!settings) settings = new UserRestriction();
+
+  await settings.save();
+  if (!settings) {
+
+    return next(new errorHandler("Restrictions not found", 404))
+  }
+  res.json({ success: true, data: settings });
+});
+
+// 🔹 Create or Update the single document (admin only)
+exports.updateUsersRestrictions = catchAsyncErrors(async (req, res) => {
+  const {
+    withdrawal2Fa
+  } = req.body;
+
+  // Find the single settings doc or create if not exists
+  let settings = await UserRestriction.findOne();
+
+  if (!settings) settings = new UserRestriction();
+
+  settings.withdrawal2Fa =
+    typeof withdrawal2Fa === "boolean" ? withdrawal2Fa : settings.withdrawal2Fa;
+
+
+
+  await settings.save();
+
+  res.json({ success: true, msg: "Data updated successfully", data: settings });
+});
+
+
+exports.updateSubAdminPermissions = catchAsyncErrors(async (req, res) => {
+
+  const updated = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      $set: Object.entries(req.body).reduce((acc, [k, v]) => {
+        acc[`permissions.${k}`] = v; return acc;
+      }, {})
+    },
+    { new: true }
+  );
+
+
+  res.json({ success: true, msg: "Data updated successfully", updated });
+});
+exports.updateAdminPermissions = catchAsyncErrors(async (req, res) => {
+
+  const updated = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      $set: Object.entries(req.body).reduce((acc, [k, v]) => {
+        acc[`adminPermissions.${k}`] = v; return acc;
+      }, {})
+    },
+    { new: true, upsert: true }
+  );
+
+
+  res.json({ success: true, msg: "Data updated successfully", updated });
+});
+// ✅ GET /api/logs?page=1
+// controller
+exports.getLogs = catchAsyncErrors(async (req, res) => {
+  const user = req.user; // current logged-in superadmin
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = 20;
+  const skip = (page - 1) * limit;
+
+  // ✅ Fetch all logs normally
+  const [logs, total] = await Promise.all([
+    errorLogs
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(), // use lean() so we can safely mutate fields
+    errorLogs.countDocuments()
+  ]);
+
+  // ✅ Hide userId if the log belongs to the current superadmin
+  const filteredLogs = logs.map(log => {
+    if (log.userId?.toString() === user._id.toString()) {
+      const { userId, ...rest } = log;
+      return rest; // return log without userId
+    }
+    return log; // return as is
+  });
+
+  res.json({
+    success: true,
+    logs: filteredLogs,
+    pagination: {
+      page,
+      pages: Math.ceil(total / limit),
+      total
+    }
+  });
+});
+
+exports.deleteLogs = catchAsyncErrors(async (req, res) => {
+  const ids = req.query.ids ? req.query.ids.split(",") : [];
+  console.log("ids:", ids);
+
+  if (ids.length) {
+    await errorLogs.deleteMany({ _id: { $in: ids } });
+  } else {
+    await errorLogs.deleteMany(); // delete all
+  }
+
+  res.json({ success: true, message: "Logs deleted" });
 });

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Log from "../../../assets/newlogo/logo-blue.png";
 import { useAuthUser, useSignOut } from "react-auth-kit";
-import { logoutApi, addUserByEmailApi } from "../../../Api/Service";
+import { logoutApi, addUserByEmailApi, signleUsersApi } from "../../../Api/Service";
 import { toast } from "react-toastify";
 import './Sidebar.css'
 import 'react-responsive-modal/styles.css';
@@ -21,7 +21,7 @@ const SideBar = (props) => {
     if (authUser().user.role === "user") {
       setAdmin(authUser().user);
       return;
-    } else if (authUser().user.role === "admin") {
+    } else if (authUser().user.role === "admin" || authUser().user.role === "superadmin") {
       setAdmin(authUser().user);
       return;
     }
@@ -73,6 +73,10 @@ const SideBar = (props) => {
 
       if (logout.success) {
         signOut();
+        localStorage.removeItem("token");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("authUser");
+        localStorage.removeItem("auth_state");
 
         Navigate("/auth/login");
         return;
@@ -88,9 +92,51 @@ const SideBar = (props) => {
   };
   const onOpenModal = () => setOpen(true);
   const onCloseModal = () => setOpen(false);
+  // ////////////////////////
+  const [allowManageSubAdmins, setAllowManageSubAdmins] = useState(false);
+  const [allowEditProfile, setAllowEditProfile] = useState(false);
+  const [canManageReferrals, setCanManageReferrals] = useState(false); // MLM Permission
+  const getSignleUser = async () => {
+    try {
+      const signleUser = await signleUsersApi(authUser().user._id);
+
+      if (signleUser.success) {
+        setAllowManageSubAdmins(signleUser?.signleUser?.adminPermissions?.isSubManagement)
+        setAllowEditProfile(signleUser?.signleUser?.adminPermissions?.isProfileUpdate)
+        setCanManageReferrals(signleUser?.signleUser?.adminPermissions?.canManageReferrals) // MLM
+
+      } else {
+        toast.dismiss();
+        toast.error(signleUser.msg);
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error);
+    } finally {
+    }
+  };
+  useEffect(() => {
+    getSignleUser();
+
+    // Refresh permissions when window regains focus (e.g., after navigating back from another tab)
+    const handleFocus = () => {
+      getSignleUser();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    // Refresh permissions every 30 seconds to catch updates
+    const intervalId = setInterval(() => {
+      getSignleUser();
+    }, 30000); // 30 seconds
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(intervalId);
+    };
+  }, []);
   return (
     <>
-
 
       <div
         id="sidebar"
@@ -212,6 +258,38 @@ const SideBar = (props) => {
                 </span>
               </NavLink>
             </li>
+            {authUser().user.role === "superadmin" &&
+              <> <li>
+                <NavLink
+                  to="/superadmin/admins"
+                  className=" nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
+                  aria-current="page"
+                >
+                  <svg
+                    data-v-cd102a71
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    role="img"
+                    className="icon w-5 h-5"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill="currentColor"
+                      fillRule="evenodd"
+                      d="M5 3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm9 4a1 1 0 1 0-2 0v6a1 1 0 1 0 2 0zm-3 2a1 1 0 1 0-2 0v4a1 1 0 1 0 2 0zm-3 3a1 1 0 1 0-2 0v1a1 1 0 1 0 2 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="whitespace-nowrap font-sans text-sm block">
+                    Manage Admins
+                  </span>
+                </NavLink>
+              </li>
+              </>}
+
             <li>
               <div className="border-muted-200 dark:border-muted-700 my-3 h-px w-full border-t" />
             </li>
@@ -242,7 +320,7 @@ const SideBar = (props) => {
                 </span>
               </NavLink>
             </li>
-            <li>
+            {authUser().user.role === "superadmin" && <li>
               <NavLink
                 to="/admin/user/links"
                 className="router-link-active nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
@@ -263,15 +341,13 @@ const SideBar = (props) => {
                   </g>
                 </svg>
 
-
-
-
                 <span className="whitespace-nowrap font-sans text-sm block">
                   User Links Management
                 </span>
               </NavLink>
-            </li>
-            {authUser().user.role === "admin" ? (
+            </li>}
+
+            {authUser().user.role === "admin" && allowManageSubAdmins || authUser().user.role === "superadmin" ? (
               <li>
                 <NavLink
                   to="/admin/subadmin"
@@ -302,10 +378,10 @@ const SideBar = (props) => {
             ) : (
               ""
             )}
-            {authUser().user.role === "admin" ? (
+            {authUser().user.role === "admin" || authUser().user.role === "superadmin" ? (
               <li>
                 <NavLink
-                  to="/admin/add-user"
+                  to="/admin/add-new-member"
                   className=" router-link-active nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
                 >
                   <svg
@@ -329,47 +405,14 @@ const SideBar = (props) => {
                   </svg>
 
                   <span className="whitespace-nowrap font-sans text-sm block">
-                    Add User
+                    Add New Member
                   </span>
                 </NavLink>
               </li>
             ) : (
               ""
             )}
-            {authUser().user.role === "admin" ? (
-              <li>
-                <NavLink
-                  to="/admin/add-subadmin"
-                  className=" router-link-active nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
-                >
-                  <svg
-                    data-v-cd102a71="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlnsXlink="http://www.w3.org/1999/xlink"
-                    aria-hidden="true"
-                    role="img"
-                    className="icon h-4 w-4"
-                    width="1em"
-                    height="1em"
-                    viewBox="0 0 256 256"
-                  >
-                    <g fill="currentColor">
-                      <path
-                        d="M192 96a64 64 0 1 1-64-64a64 64 0 0 1 64 64"
-                        opacity=".2"
-                      />
-                      <path d="M230.92 212c-15.23-26.33-38.7-45.21-66.09-54.16a72 72 0 1 0-73.66 0c-27.39 8.94-50.86 27.82-66.09 54.16a8 8 0 1 0 13.85 8c18.84-32.56 52.14-52 89.07-52s70.23 19.44 89.07 52a8 8 0 1 0 13.85-8M72 96a56 56 0 1 1 56 56a56.06 56.06 0 0 1-56-56" />
-                    </g>
-                  </svg>
 
-                  <span className="whitespace-nowrap font-sans text-sm block">
-                    Add Sub Admin
-                  </span>
-                </NavLink>
-              </li>
-            ) : (
-              ""
-            )}
             {authUser().user.role === "subadmin" ? (
               <li>
                 <button onClick={onOpenModal}
@@ -404,7 +447,7 @@ const SideBar = (props) => {
               ""
             )}
 
-            {authUser().user.role === "admin" ? (
+            {authUser().user.role === "admin" || authUser().user.role === "superadmin" ? (
               <li>
                 <NavLink
                   to="/admin/transactions/pending"
@@ -465,37 +508,61 @@ const SideBar = (props) => {
               </span>
             </NavLink>
           </li> */}
-
-            <li>
-              <NavLink
-                to="/admin/profile"
-                className=" router-link-active nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
-              >
-                <svg
-                  data-v-cd102a71="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
-                  aria-hidden="true"
-                  role="img"
-                  className="icon h-4 w-4"
-                  width="1em"
-                  height="1em"
-                  viewBox="0 0 256 256"
+            {allowEditProfile || authUser().user.role === "superadmin" ?
+              <li>
+                <NavLink
+                  to="/admin/profile"
+                  className=" router-link-active nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
                 >
-                  <g fill="currentColor">
-                    <path
-                      d="M192 96a64 64 0 1 1-64-64a64 64 0 0 1 64 64"
-                      opacity=".2"
-                    />
-                    <path d="M230.92 212c-15.23-26.33-38.7-45.21-66.09-54.16a72 72 0 1 0-73.66 0c-27.39 8.94-50.86 27.82-66.09 54.16a8 8 0 1 0 13.85 8c18.84-32.56 52.14-52 89.07-52s70.23 19.44 89.07 52a8 8 0 1 0 13.85-8M72 96a56 56 0 1 1 56 56a56.06 56.06 0 0 1-56-56" />
-                  </g>
-                </svg>
+                  <svg
+                    data-v-cd102a71="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    role="img"
+                    className="icon h-4 w-4"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 256 256"
+                  >
+                    <g fill="currentColor">
+                      <path
+                        d="M192 96a64 64 0 1 1-64-64a64 64 0 0 1 64 64"
+                        opacity=".2"
+                      />
+                      <path d="M230.92 212c-15.23-26.33-38.7-45.21-66.09-54.16a72 72 0 1 0-73.66 0c-27.39 8.94-50.86 27.82-66.09 54.16a8 8 0 1 0 13.85 8c18.84-32.56 52.14-52 89.07-52s70.23 19.44 89.07 52a8 8 0 1 0 13.85-8M72 96a56 56 0 1 1 56 56a56.06 56.06 0 0 1-56-56" />
+                    </g>
+                  </svg>
 
-                <span className="whitespace-nowrap font-sans text-sm block">
-                  Update Profile
-                </span>
-              </NavLink>
-            </li>
+                  <span className="whitespace-nowrap font-sans text-sm block">
+                    Update Profile
+                  </span>
+                </NavLink>
+              </li> : ""}
+
+            {/* MLM: Referral Management - Only for superadmin or admin with canManageReferrals permission */}
+            {(authUser().user.role === "superadmin" || canManageReferrals) && (
+              <li>
+                <NavLink
+                  to="/admin/referrals"
+                  className=" router-link-active nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="icon w-5 h-5"
+                  >
+                    <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z" />
+                  </svg>
+
+                  <span className="whitespace-nowrap font-sans text-sm block">
+                    Referral Management
+                  </span>
+                </NavLink>
+              </li>
+            )}
+
             <li>
               <NavLink
                 to="/admin/support"
@@ -508,6 +575,18 @@ const SideBar = (props) => {
                 </span>
               </NavLink>
             </li>
+            {authUser().user.role==="superadmin"&&<li>
+              <NavLink
+                to="/admin/logs"
+                className=" router-link-active nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4"
+              >
+                <i class="fa-solid fa-info"></i>
+
+                <span className="whitespace-nowrap font-sans text-sm block">
+                  Error Logs
+                </span>
+              </NavLink>
+            </li>}
 
             <li onClick={() => isLoginOrLogout()}>
               <p className=" router-link-active cursor-pointer nui-focus text-muted-500 dark:text-muted-400/80 hover:bg-muted-100 dark:hover:bg-muted-700/60 hover:text-muted-600 dark:hover:text-muted-200 flex cursor-pointer items-center gap-4 rounded-lg py-3 transition-colors duration-300 px-4">

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import SideBar from "../layouts/AdminSidebar/Sidebar";
-
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { toast } from "react-toastify";
 import { useAuthUser } from "react-auth-kit";
-import { registerApi } from "../../Api/Service";
+import { registerSubAdminApi, signleUsersApi } from "../../Api/Service";
 const AddUser = () => {
   const [isDisable, setisDisable] = useState(false);
   const [userData, setUserData] = useState({
@@ -20,6 +20,13 @@ const AddUser = () => {
     country: "",
     postalCode: "",
   });
+  
+  const [role, setRole] = useState("");         // selected role
+  const [allowSubAdmin, setAllowSubAdmin] = useState(false); // state flag
+
+  const handleChange = (event) => {
+    setRole(event.target.value);
+  };
   let handleInput = (e) => {
     let name = e.target.name;
     let value = e.target.value;
@@ -53,7 +60,8 @@ const AddUser = () => {
         !userData.address ||
         !userData.city ||
         !userData.country ||
-        !userData.postalCode
+        !userData.postalCode||
+        !role
       ) {
         toast.dismiss();
         toast.error("All the fields are required");
@@ -71,11 +79,11 @@ const AddUser = () => {
         city: userData.city,
         country: userData.country,
         postalCode: userData.postalCode,
+        role,
+        isRole: true
       };
 
-      const updateHeader = await registerApi(body);
-
-      if (updateHeader.success) {
+      const updateHeader = await registerSubAdminApi(body);if (updateHeader.success) {
         toast.dismiss();
         toast.info(updateHeader.msg);
         setUserData({
@@ -105,14 +113,40 @@ const AddUser = () => {
     if (authUser().user.role === "user") {
       Navigate("/dashboard");
       return;
-    } else if (authUser().user.role === "admin") {
+    } else if (authUser().user.role === "admin" || authUser().user.role === "superadmin") {
       return;
     } else if (authUser().user.role === "subadmin") {
       Navigate("/admin/dashboard");
       return;
     }
   }, []);
+  const getActiveSignleUser = async () => {
+    try {
+      const signleUser = await signleUsersApi(authUser().user._id);
 
+      if (signleUser.success) {
+        if (signleUser.signleUser.role === "superadmin") {
+
+          setAllowSubAdmin(true)
+          return
+        }
+        if (signleUser.signleUser.role === "admin" && signleUser.signleUser.adminPermissions?.isSubManagement === true) {
+          setAllowSubAdmin(true)
+        }
+      } else {
+        toast.dismiss();
+        toast.error(signleUser.msg);
+      }
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error);
+    } finally {
+    }
+  };
+  useEffect(() => {
+
+    getActiveSignleUser()
+  }, []);
   return (
     <div className="admin">
       <div>
@@ -512,6 +546,22 @@ const AddUser = () => {
                               {/**/}
                             </div>
                           </div>
+
+                        </div>
+                        <div className="col-span-12  ">
+                          <FormControl style={{ width: "100%" }} >
+                            <InputLabel id="role-label">Select Role</InputLabel>
+                            <Select
+                              labelId="role-label"
+                              value={role}
+                              label="Select Role"
+                              onChange={handleChange}
+                            >
+                              <MenuItem value="user">User</MenuItem>
+                              {authUser().user.role === "superadmin" && <MenuItem value="admin">Admin</MenuItem>}
+                              {allowSubAdmin && <MenuItem value="subadmin">Sub Admin</MenuItem>}
+                            </Select>
+                          </FormControl>
                         </div>
                       </div>
                     </fieldset>

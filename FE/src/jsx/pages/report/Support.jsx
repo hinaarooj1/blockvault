@@ -12,7 +12,6 @@ import { Button, Card, Col, Form, DropdownDivider, InputGroup, Modal, Row, Spinn
 import './style.css'
 import Truncate from 'react-truncate-inside/es';
 
-
 const Support = () => {
     const [Active, setActive] = useState(false);
     let toggleBar = () => {
@@ -57,10 +56,7 @@ const Support = () => {
             setisLoading(true);
             let id = authUser().user._id
 
-
-
             const userTickets = await getUserTicketsApi(id);
-
 
             if (userTickets.success) {
                 const sortedTickets = userTickets.ticket.sort((a, b) => {
@@ -73,9 +69,7 @@ const Support = () => {
                 });
 
                 setallTickets(sortedTickets);
-                // setallTickets(userTickets.ticket)
-                console.log("allTickets", allTickets);
-                // setisTicket(true);
+                // setallTickets(userTickets.ticket)// setisTicket(true);
                 return;
             } else {
                 toast.dismiss();
@@ -212,7 +206,6 @@ const Support = () => {
                                 <div className="text-center my-5">
                                     <h4> No Assets found!</h4>
                                 </div>) : (
-
 
                               
                             )} */}

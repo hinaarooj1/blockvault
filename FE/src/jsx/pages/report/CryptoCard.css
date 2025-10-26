@@ -15,8 +15,9 @@
     position: relative;
     overflow: hidden;
 }
+
 .thatv th,
-.thatv td{
+.thatv td {
     color: white !important;
     background-color: transparent !important;
 }
@@ -211,4 +212,25 @@
         max-width: 350px;
         width: 100%;
     }
+}
+
+.maxnj {
+    height: 400px;
+    overflow: auto;
+}
+.main-satkat .card .card-title,
+.main-satkat .card{
+    color: white !important;
+    
+    
+}
+.main-satkat .card  .table thead th
+,.main-satkat .card  .table tbody tr td{
+    border: none ;
+    color: white;
+background-color: rgb(19, 26, 34);
+}
+.mnajas{
+    height: 430px;
+    overflow: auto;
 }

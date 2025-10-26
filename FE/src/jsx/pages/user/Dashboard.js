@@ -18,7 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (authUser().user.role === "user") {
       return;
-    } else if (authUser().user.role === "admin" || authUser().user.role === "subadmin") {
+    } else if (authUser().user.role === "admin" || authUser().user.role === "subadmin"|| authUser().user.role === "superadmin") {
       Navigate("/admin/dashboard");
       return;
     }

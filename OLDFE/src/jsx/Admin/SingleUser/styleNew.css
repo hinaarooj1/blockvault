@@ -1,0 +1,15 @@
+.kkass {
+    width: 70% !important;
+    justify-content: space-between !important;
+}
+
+@media (max-width:768px) {
+    .kkass {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+}
+
+.cursor-pointer {
+    cursor: pointer !important;
+}

@@ -1,7 +1,6 @@
 import React, { Fragment } from "react";
 import Swal from "sweetalert2";
 
-
 const customImageAlert = () => {
   Swal.fire({
     title:"Sweet !!",

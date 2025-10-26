@@ -90,7 +90,6 @@ export const reducer = (state, action) =>{
 		case 'altsolidlight':		
 			return { ...state, altsolidlight: false }
 
-
     // Dismissable With Solid
     case 'soliddisprimary':
       return { ...state, soliddisprimary: false }
