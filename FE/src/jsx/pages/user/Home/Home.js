@@ -93,9 +93,9 @@ const Home = () => {
   const faqData = [
     {
       id: 1,
-      question: "What is Fortivault Wallet?",
+      question: "What is Blockvault Wallet?",
       answer:
-        "Fortivault Wallet is a secure, easy-to-use platform for managing, sending, and receiving cryptocurrencies. It supports multiple tokens and offers advanced security features to protect your digital assets.",
+        "Blockvault Wallet is a secure, easy-to-use platform for managing, sending, and receiving cryptocurrencies. It supports multiple tokens and offers advanced security features to protect your digital assets.",
     },
     {
       id: 2,
@@ -105,7 +105,7 @@ const Home = () => {
     },
     {
       id: 3,
-      question: "Is my crypto safe in Fortivault Wallet?",
+      question: "Is my crypto safe in Blockvault Wallet?",
       answer:
         "Yes, your crypto is protected with top-level encryption, multi-layer authentication, and cold storage solutions, ensuring maximum security for your digital assets.",
     },
@@ -113,19 +113,19 @@ const Home = () => {
       id: 4,
       question: "What crypto is supported?",
       answer:
-        "Fortivault Wallet supports a wide variety of cryptocurrencies, including Bitcoin, Ethereum, and many popular altcoins. Check our supported tokens list for the full range of assets you can store and manage.",
+        "Blockvault Wallet supports a wide variety of cryptocurrencies, including Bitcoin, Ethereum, and many popular altcoins. Check our supported tokens list for the full range of assets you can store and manage.",
     },
     {
       id: 5,
-      question: "Can I stake my crypto in Fortivault Wallet?",
+      question: "Can I stake my crypto in Blockvault Wallet?",
       answer:
-        "Yes, Fortivault Wallet offers a simple staking option that allows you to earn rewards by staking your tokens directly within the app. Just choose your desired crypto, and start staking to maximize your returns.",
+        "Yes, Blockvault Wallet offers a simple staking option that allows you to earn rewards by staking your tokens directly within the app. Just choose your desired crypto, and start staking to maximize your returns.",
     },
     {
       id: 6,
-      question: "Can I connect my bank account or credit card to Fortivault Wallet?",
+      question: "Can I connect my bank account or credit card to Blockvault Wallet?",
       answer:
-        "Yes, Fortivault Wallet allows you to link your bank account or credit card for easy purchasing and transferring of cryptocurrencies. Enjoy a simple, secure way to fund your wallet and manage your assets.",
+        "Yes, Blockvault Wallet allows you to link your bank account or credit card for easy purchasing and transferring of cryptocurrencies. Enjoy a simple, secure way to fund your wallet and manage your assets.",
     },
   ];
 
@@ -621,7 +621,7 @@ const Home = () => {
                                     <div className="elementor-widget-container" >
                                       The Toka Wallet lets you store your private keys on your
                                       card while maintaining easy access to them. </div>
-                                  </div>Sign up for Fortivault Wallet today and start managing, securing, and growing your digital assets with confidence. Experience seamless transactions, top-notch security, and a wide range of features designed to help you succeed in the world of cryptocurrency. Take action now and unlock the future of finance!
+                                  </div>Sign up for Blockvault Wallet today and start managing, securing, and growing your digital assets with confidence. Experience seamless transactions, top-notch security, and a wide range of features designed to help you succeed in the world of cryptocurrency. Take action now and unlock the future of finance!
 
                                   <div className="elementor-element elementor-element-c92040a elementor-tablet-align-center elementor-align-center elementor-widget elementor-widget-button" data-id="c92040a" data-element_type="widget" data-widget_type="button.default" >
                                     <div className="elementor-widget-container" >
@@ -671,7 +671,7 @@ const Home = () => {
                         <h4 className="widget-title">Contact Us</h4>
                         <div className="textwidget" >
                           <p>Place de La Defense, Puteaux, 92400</p>
-                          <p><a href="mailto:admin@fortivault.io" >admin@fortivault.io</a></p>
+                          <p><a href="mailto:admin@blockvault.pro" >admin@blockvault.pro</a></p>
                         </div>
                       </div>
                     </div>
@@ -681,7 +681,7 @@ const Home = () => {
               </div>
               <div className="footer-bottom" >
                 <div className="footer-credits" >
-                  <p className="footer-copyright">Copyright ©2025 Fortivault. All rights reserved.
+                  <p className="footer-copyright">Copyright ©2025 Blockvault. All rights reserved.
                   </p>{/* .footer-copyright */}
                 </div>{/* .footer-credits */}
 

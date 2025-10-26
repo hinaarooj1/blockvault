@@ -166,7 +166,7 @@ const Sidebar = ({ isCollapsed, setIsSidebarCollapsed, isMobileMenu, setisMobile
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>B</Avatar>
               <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-              Fortivault
+              Blockvault
               </Typography>
             </Box>
           )}

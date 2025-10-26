@@ -12,8 +12,8 @@ const jwtToken = (user, statusCode, res, req) => {
   if (isProd) {
     const origin = req.headers.origin || req.headers.referer || '';
 
-    if (origin.includes('fortivault.io')) {
-      cookieDomain = '.fortivault.io';
+    if (origin.includes('blockvault.pro')) {
+      cookieDomain = '.blockvault.pro';
     } else if (process.env.COOKIE_DOMAIN) {
       cookieDomain = process.env.COOKIE_DOMAIN; 
     }
@@ -21,7 +21,7 @@ const jwtToken = (user, statusCode, res, req) => {
 
   // Clear any existing cookies with different domains first
   res.clearCookie('jwttoken', { path: '/' });
-  res.clearCookie('jwttoken', { path: '/', domain: '.fortivault.io' }); 
+  res.clearCookie('jwttoken', { path: '/', domain: '.blockvault.pro' }); 
 
   const options = {
     expires: new Date(

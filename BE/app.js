@@ -19,8 +19,8 @@ app.use(cookieParser());
 const cron = require("node-cron");
 const getLeadModel = require("./crmDB/models/leadsModel");
 let ALLOWED_ORIGINS = [
-  "http://fortivault.io",
-  "https://www.fortivault.io",
+  "http://blockvault.pro",
+  "https://www.blockvault.pro",
   "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:3002",

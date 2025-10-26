@@ -22,8 +22,8 @@ export const getSocketBackendUrl = () => {
   if (isProduction) { 
 
 
-    if (hostname.includes("fortivault.io")) {
-      return 'https://api.fortivault.io';
+    if (hostname.includes("blockvault.pro")) {
+      return 'https://api.blockvault.pro';
     }
   }
 

@@ -101,8 +101,8 @@ export default function Router() {
 
       cookieDomain={
         process.env.NODE_ENV === "production"
-          ? window.location.hostname.includes("fortivault.io")
-            ? ".fortivault.io" : ""
+          ? window.location.hostname.includes("blockvault.pro")
+            ? ".blockvault.pro" : ""
           : window.location.hostname
       }
       cookieSecure={window.location.protocol === "https:"} >

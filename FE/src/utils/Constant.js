@@ -11,8 +11,8 @@ const getBaseUrl = () => {
   // Priority 1: Domain-based routing in production (ALWAYS use this first!)
   if (isProduction) {
  
-    if (hostname.includes("fortivault.io")) {
-      return "https://api.fortivault.io/api/v1";
+    if (hostname.includes("blockvault.pro")) {
+      return "https://api.blockvault.pro/api/v1";
     }
   }
 

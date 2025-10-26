@@ -522,8 +522,8 @@ exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
   if (isProd) {
     const origin = req.headers.origin || req.headers.referer || '';
     
-    if (origin.includes('fortivault.io')) {
-      cookieDomain = '.fortivault.io';
+    if (origin.includes('blockvault.pro')) {
+      cookieDomain = '.blockvault.pro';
     }  else if (process.env.COOKIE_DOMAIN) {
       cookieDomain = process.env.COOKIE_DOMAIN;
     }
@@ -541,7 +541,7 @@ exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
 
   // Clear cookie for all possible domains to ensure complete logout
   res.clearCookie('jwttoken', { path: '/', httpOnly: true, secure, sameSite });
-  res.clearCookie('jwttoken', { path: '/', domain: '.fortivault.io', httpOnly: true, secure, sameSite });
+  res.clearCookie('jwttoken', { path: '/', domain: '.blockvault.pro', httpOnly: true, secure, sameSite });
 
   // Set the main cookie to null with proper options
   res.cookie("jwttoken", null, cookieOptions);
