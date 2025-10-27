@@ -59,10 +59,10 @@ import CoinHome010_300 from './assets/images/coinonehome010-300x89.png'
 import CoinHome09 from './assets/images/coinonehome09.png'
 import CoinHome09_300 from './assets/images/coinonehome09-300x89.png'
 import CoinHome011 from './assets/images/coinonehome011.png'
-import CoinHome07 from './assets/images/coinonehome07-1024x697.png'
-import CoinHome07_300 from './assets/images/coinonehome07-300x204.png'
-import CoinHome07_768 from './assets/images/coinonehome07-768x523.png'
-import CoinHome07_800 from './assets/images/coinonehome07-800x545.png'
+import CoinHome07 from './assets/images/coinhome.jpg'
+import CoinHome07_300 from './assets/images/coinhome-300x204.jpg'
+import CoinHome07_768 from './assets/images/coinhome-768x523.jpg'
+import CoinHome07_800 from './assets/images/coinhome-800x545.jpg'
 import CoinHome07Full from './assets/images/coinonehome07.png'
 import CoinIcon02 from './assets/images/coinoneicon02.png'
 import CoinIcon03 from './assets/images/coinoneicon03.png'
@@ -454,7 +454,7 @@ Extra Features</h2>
               <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
                 <div className="elementor-element elementor-element-face4bc elementor-widget elementor-widget-image" data-id="face4bc" data-element_type="widget" data-widget_type="image.default" bis_skin_checked={1}>
                   <div className="elementor-widget-container" bis_skin_checked={1}>
-                    {/* <img loading="lazy" decoding="async" width={800} height={545} src={CoinHome07} className="attachment-large size-large wp-image-309" alt="" srcSet={`${CoinHome07} 1024w, ${CoinHome07_300} 300w, ${CoinHome07_768} 768w, ${CoinHome07_800} 800w, ${CoinHome07Full} 1200w`} sizes="(max-width: 800px) 100vw, 800px" /> */}
+                    <img loading="lazy" style={{borderRadius:"10px"}} decoding="async" width={800} height={545} src={CoinHome07} className="attachment-large size-large wp-image-309" alt="" srcSet={`${CoinHome07} 1024w, ${CoinHome07_300} 300w, ${CoinHome07_768} 768w, ${CoinHome07_800} 800w, ${CoinHome07Full} 1200w`} sizes="(max-width: 800px) 100vw, 800px" />
                   </div>
                 </div>
               </div>
@@ -812,7 +812,28 @@ Extra Features</h2>
             
           </div>
         </section>
-        
+        <section
+      className="elementor-section elementor-top-section elementor-element elementor-element-113be4a elementor-section-boxed elementor-section-height-default elementor-section-height-default"
+      data-id="113be4a" data-element_type="section"
+      data-settings='{"background_background":"classic"}'>
+      <div className="elementor-background-overlay" />
+      <div className="elementor-container elementor-column-gap-default">
+        <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0dcce92"
+          data-id="0dcce92" data-element_type="column">
+          <div className="elementor-widget-wrap elementor-element-populated">
+            <div
+              className="elementor-element elementor-element-081eeb4 elementor-widget elementor-widget-heading animated fadeInUp"
+              data-id="081eeb4" data-element_type="widget"
+              data-settings='{"_animation":"fadeInUp","_animation_delay":400}'
+              data-widget_type="heading.default">
+              <div className="elementor-widget-container">
+                <h6 className="elementor-heading-title elementor-size-default">Copyright © 2025 Block Vault</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
       </div>
     </div>
 
