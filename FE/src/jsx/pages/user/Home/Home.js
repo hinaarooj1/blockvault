@@ -1,3 +1,91 @@
+
+// Home Page CSS - Imported from assets
+import './assets/post-3.css'
+import './assets/e-animation-shrink.min.css'
+import './assets/e-swiper.min.css'
+// import './assets/elementor-icons.min.css' // Commented - requires font files
+import './assets/fontawesome.min.css'
+import './home-latest.css'
+import './assets/frontend.min.css'
+import './assets/lexend.css'
+import './assets/motion-fx.min.css'
+import './assets/post-582.css'
+import './assets/post-6.css'
+import './assets/post-634.css'
+import './assets/questrial.css'
+import './assets/style.css'
+import './assets/theme.min.css'
+import './assets/widget-counter.min.css'
+import './assets/widget-divider.min.css'
+import './assets/widget-form.min.css'
+import './assets/widget-heading.min.css'
+import './assets/widget-icon-list.min.css'
+import './assets/widget-image-box.min.css'
+import './assets/widget-image.min.css'
+import './assets/widget-nav-menu.min.css'
+import './assets/widget-price-list.min.css'
+import './assets/widget-slides.min.css'
+import './assets/widget-spacer.min.css'
+import './assets/widget-text-editor.min.css'
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import "./Home.css";
+import "./style.css";
+import LogoNew from '../../../../assets/newlogo/logo-home.png'
+// Home Page Images - Imported from assets
+import Logo from './assets/images/Logo-1024x265.png'
+import Logo300 from './assets/images/Logo-300x78.png'
+import Logo768 from './assets/images/Logo-768x199.png'
+import Logo800 from './assets/images/Logo-800x207.png'
+import LogoFull from './assets/images/Logo.png'
+import Group654 from './assets/images/Group-654@2x.png'
+import Group654Small from './assets/images/Group-654@2x-297x300.png'
+import CoinHome03 from './assets/images/coinonehome03-1024x992.png'
+import CoinHome03_300 from './assets/images/coinonehome03-300x291.png'
+import CoinHome03_768 from './assets/images/coinonehome03-768x744.png'
+import CoinHome03_800 from './assets/images/coinonehome03-800x775.png'
+import CoinHome03Full from './assets/images/coinonehome03.png'
+import Cards from './assets/images/Cards.png'
+import Cards300 from './assets/images/Cards-300x300.png'
+import Cards150 from './assets/images/Cards-150x150.png'
+import Bag from './assets/images/Bag.png'
+import Bag300 from './assets/images/Bag-300x300.png'
+import Bag150 from './assets/images/Bag-150x150.png'
+import Safety from './assets/images/Safety.png'
+import Safety300 from './assets/images/Safety-300x300.png'
+import Safety150 from './assets/images/Safety-150x150.png'
+import CoinHome010 from './assets/images/coinonehome010.png'
+import CoinHome010_300 from './assets/images/coinonehome010-300x89.png'
+import CoinHome09 from './assets/images/coinonehome09.png'
+import CoinHome09_300 from './assets/images/coinonehome09-300x89.png'
+import CoinHome011 from './assets/images/coinonehome011.png'
+import CoinHome07 from './assets/images/coinonehome07-1024x697.png'
+import CoinHome07_300 from './assets/images/coinonehome07-300x204.png'
+import CoinHome07_768 from './assets/images/coinonehome07-768x523.png'
+import CoinHome07_800 from './assets/images/coinonehome07-800x545.png'
+import CoinHome07Full from './assets/images/coinonehome07.png'
+import CoinIcon02 from './assets/images/coinoneicon02.png'
+import CoinIcon03 from './assets/images/coinoneicon03.png'
+import CoinIcon06 from './assets/images/coinoneicon06.png'
+import CoinHome021 from './assets/images/coinonehome021.jpg'
+import CoinHome021_300 from './assets/images/coinonehome021-300x300.jpg'
+import CoinHome021_150 from './assets/images/coinonehome021-150x150.jpg'
+import CoinHome021_768 from './assets/images/coinonehome021-768x768.jpg'
+import CoinHome021_800 from './assets/images/coinonehome021-800x800.jpg'
+import Monitoring from './assets/images/Monitoring.png'
+import Monitoring300 from './assets/images/Monitoring-300x300.png'
+import Monitoring150 from './assets/images/Monitoring-150x150.png'
+import SelectIcon from './assets/images/Select.png'
+import Settings from './assets/images/Settings.png'
+import Settings300 from './assets/images/Settings-300x300.png'
+import Settings150 from './assets/images/Settings-150x150.png'
+import CoinHome029 from './assets/images/coinonehome029-1024x838.png'
+import CoinHome029_300 from './assets/images/coinonehome029-300x246.png'
+import CoinHome029_768 from './assets/images/coinonehome029-768x629.png'
+import CoinHome029_800 from './assets/images/coinonehome029-800x655.png'
+import CoinHome029Full from './assets/images/coinonehome029.png'
+import CoinHome030 from './assets/images/coinonehome030.png'
+import CoinHome030_300 from './assets/images/coinonehome030-300x146.png'
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -11,687 +99,715 @@ import './custom-frontend.css'
 import './custom.css'
 import './home-latest.css'
 import './bootstrapNew.css'
-import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import "./Home.css";
-import "./style.css";
-import LogoNew from '../../../../assets/newlogo/logo.png'
-import Ethan from '../../../../assets/images/ethan.jpg'
-import Leo from '../../../../assets/images/leo.jpg'
-import Lily from '../../../../assets/images/lily.jpg'
-import Sophie from '../../../../assets/images/sophie.jpg'
-
+import { useAuthUser } from 'react-auth-kit'
 const Home = () => {
-  const sliderRef = useRef(null);
-  const [openAccordion, setOpenAccordion] = useState(null);
-
-  const [activeTab, setActiveTab] = useState(null);
-
-  const toggleTab = (tabIndex) => {
-    setActiveTab((prev) => (prev === tabIndex ? null : tabIndex));
-  };
-
-  const toggleAccordion = (index) => {
-    setOpenAccordion(openAccordion === index ? null : index);
-  };
-  const settings = {
-
-    dots: true,
-    infinite: true,
-    speed: 500,
-    autoplay: true,
-    slidesToShow: 2,
-    slidesToScroll: 1,
-    arrows: false,
-    nextArrow: <button className="slider-arrow next-btn"><i className="fas fa-arrow-right"></i></button>,
-    prevArrow: <button className="slider-arrow prev-btn"><i className="fas fa-arrow-left"></i></button>,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        },
-      },
-    ],
-  };
-  const nextSlide = () => {
-    sliderRef.current.slickNext();
-  };
-
-  // Function to go to the previous slide
-  const prevSlide = () => {
-    sliderRef.current.slickPrev();
-  };
-
-  const [Bar, setBar] = useState(false);
-  const [Nav, setNav] = useState(false);
-  let toggleMenu = () => {
-    let body = document.querySelector("body")
-    body.classList.add('mobile-menu-visible')
-    setNav(true);
-    setBar(true);
-  };
-  let closeMenu = () => {
-    let body = document.querySelector("body")
-    body.classList.remove('mobile-menu-visible')
-    setNav(false);
-    setBar(false);
-  };
-  window.addEventListener("scroll", function () {
-    // let header = this.document.querySelector("#sticky-header");
-
-    // header.classList.toggle("sticky-menu", window.scrollY > 150);
-  });
-  const faqData = [
-    {
-      id: 1,
-      question: "What is Blockvault Wallet?",
-      answer:
-        "Blockvault Wallet is a secure, easy-to-use platform for managing, sending, and receiving cryptocurrencies. It supports multiple tokens and offers advanced security features to protect your digital assets.",
-    },
-    {
-      id: 2,
-      question: "How do I get started?",
-      answer:
-        "Simply register online or download the Windows app, create an account, and follow the setup instructions. You'll be able to securely store, send, and receive a wide range of cryptocurrencies in just a few steps.",
-    },
-    {
-      id: 3,
-      question: "Is my crypto safe in Blockvault Wallet?",
-      answer:
-        "Yes, your crypto is protected with top-level encryption, multi-layer authentication, and cold storage solutions, ensuring maximum security for your digital assets.",
-    },
-    {
-      id: 4,
-      question: "What crypto is supported?",
-      answer:
-        "Blockvault Wallet supports a wide variety of cryptocurrencies, including Bitcoin, Ethereum, and many popular altcoins. Check our supported tokens list for the full range of assets you can store and manage.",
-    },
-    {
-      id: 5,
-      question: "Can I stake my crypto in Blockvault Wallet?",
-      answer:
-        "Yes, Blockvault Wallet offers a simple staking option that allows you to earn rewards by staking your tokens directly within the app. Just choose your desired crypto, and start staking to maximize your returns.",
-    },
-    {
-      id: 6,
-      question: "Can I connect my bank account or credit card to Blockvault Wallet?",
-      answer:
-        "Yes, Blockvault Wallet allows you to link your bank account or credit card for easy purchasing and transferring of cryptocurrencies. Enjoy a simple, secure way to fund your wallet and manage your assets.",
-    },
-  ];
-
+  let user = useAuthUser()
   return (
     <div className="hompg homepaag">
-      <div>
-        <nav id="pr-nav" className="primary-menu navbar navbar-expand-lg navbar-dark nav-white-desktop">
-          <div className="container-fluid primary-menu-inner px-0" >
-            <div className="top-wrap" >
-              <Link className="custom-logo-link" to="/" >
-                <h5 className="m-0"><img style={{ width: "70px" }} src={LogoNew} alt="" /></h5>
-              </Link>
+      <div data-elementor-type="header" data-elementor-id={634} className="elementor elementor-634 elementor-location-header" data-elementor-post-type="elementor_library" bis_skin_checked={1}>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-aabb6c8 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="aabb6c8" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+          <div className="elementor-container elementor-column-gap-default ammajjd" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-33 elementor-top-column elementor-element elementor-element-b768278" data-id="b768278" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-5e03de4 elementor-widget elementor-widget-image" data-id="5e03de4" data-element_type="widget" data-widget_type="image.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <img fetchpriority="high" style={{width:"100px", borderRadius:"10px"}}   src={LogoNew} className="attachment-large size-large wp-image-613" alt  />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: "row" }} className="collapse fldla navbar-collapse justify-content-end"   >
-
-              {/* <div className="header-cta nnmmn" ><a target="_blank" href="https://drive.google.com/file/d/1XVfhTww7tjdo2vXMQA8SJ5z6hQuhnwtA/view?usp=sharing"  >
-                <div className="d-inline-block elementor-button-link elementor-button elementor-size-md" >Download Windows App</div>
-              </a></div> */}
-              <div className="header-cta" ><Link to="/auth/login"  >
-                <div className="d-inline-block elementor-button-link elementor-button elementor-size-md" >Sign In</div>
-              </Link></div>
+            <div className="elementor-column  elementor-hidden-phone elementor-col-33 elementor-top-column elementor-element elementor-element-0766e43" data-id="0766e43" data-element_type="column" bis_skin_checked={1}>
             </div>
-          </div>
-        </nav>
-        <main id="site-content" className="flex-grow-1 nav-white-desktop" role="main">
-          <article className="post-23310 page type-page status-publish hentry" id="post-23310">
-            <div className="post-inner" >
-              <header className="entry-header header-group">
-                <div className="entry-header-inner" >
-                </div>{/* .entry-header-inner */}
-              </header>{/* .entry-header */}
-              <div className="entry-content clearfix" >
-                <div data-elementor-type="wp-page" data-elementor-id={23310} className="elementor elementor-23310" >
-                  <section className="elementor-section elementor-top-section elementor-element elementor-element-aa23c9b elementor-reverse-tablet elementor-reverse-mobile elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="aa23c9b" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
-                    <div className="elementor-background-overlay" />
-                    <div className="elementor-container elementor-column-gap-custom" >
-                      <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-7cfe8d4 animated fadeIn" data-id="7cfe8d4" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:500}" >
-                        <div className="elementor-widget-wrap elementor-element-populated" >
-
-                          <div className="elementor-element elementor-element-b53c240 elementor-widget elementor-widget-text-editor" data-id="b53c240" data-element_type="widget" data-widget_type="text-editor.default" >
-                            <div className="elementor-widget-container" >
-
-                              Refer a Friend
+            <div className="elementor-column elementor-col-33 elementor-top-column elementor-element elementor-element-7b48a59 elementor-hidden-tablet" data-id="7b48a59" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-b59c7b3 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b59c7b3" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default " bis_skin_checked={1}>
+                    {!user() ? (
+                      <>
+                        <div className="elementor-column  elementor-hidden-phone elementor-col-50 elementor-inner-column elementor-element elementor-element-7c6da81" data-id="7c6da81" data-element_type="column" bis_skin_checked={1}>
+                          <div className="elementor-widget-wrap elementor-element-populated" style={{ width: "max-content" }} bis_skin_checked={1}>
+                            <div className="elementor-element elementor-element-cc7529d elementor-align-justify elementor-widget elementor-widget-button" data-id="cc7529d" data-element_type="widget" data-widget_type="button.default" bis_skin_checked={1}>
+                              <div className="elementor-widget-container" bis_skin_checked={1}>
+                                <div className="elementor-button-wrapper" bis_skin_checked={1}>
+                                  <Link className="elementor-button elementor-button-link elementor-size-sm" to="/auth/signup">
+                                    <span className="elementor-button-content-wrapper">
+                                      <span className="elementor-button-text">Sign Up</span>
+                                    </span>
+                                  </Link>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div className="elementor-element elementor-element-bcb0398 elementor-widget elementor-widget-text-editor" data-id="bcb0398" data-element_type="widget" data-widget_type="text-editor.default" >
-                            <div className="elementor-widget-container" >
-
-                              Refer Friends and Get 100 USDT Trading Fee Credit. </div>
+                        </div>
+                        <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-6515f55" data-id="6515f55" data-element_type="column" bis_skin_checked={1}>
+                          <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                            <div className="elementor-element elementor-element-050c9e1 elementor-align-right elementor-widget elementor-widget-button" data-id="050c9e1" data-element_type="widget" data-widget_type="button.default" bis_skin_checked={1}>
+                              <div className="elementor-widget-container" bis_skin_checked={1}>
+                                <div className="elementor-button-wrapper" bis_skin_checked={1}>
+                                  <Link className="elementor-button elementor-button-link elementor-size-sm" to="/auth/login">
+                                    <span className="elementor-button-content-wrapper">
+                                      <span className="elementor-button-text">Login</span>
+                                    </span>
+                                  </Link>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div className="elementor-element elementor-element-2dcc85d elementor-tablet-align-center elementor-widget elementor-widget-button" data-id="2dcc85d" data-element_type="widget" data-widget_type="button.default" >
-                            <div className="elementor-widget-container" >
-                              <div className="elementor-button-wrapper" >
-                                <Link className="elementor-button elementor-button-link elementor-size-xl elementor-animation-float" to="/auth/signup" >
+                        </div>
+                      </>
+                    ) : user()?.user?.role === "user" ? (
+                      <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-6515f55" data-id="6515f55" data-element_type="column" bis_skin_checked={1}>
+                        <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                          <div className="elementor-element elementor-element-050c9e1 elementor-align-right elementor-widget elementor-widget-button" data-id="050c9e1" data-element_type="widget" data-widget_type="button.default" bis_skin_checked={1}>
+                            <div className="elementor-widget-container" bis_skin_checked={1}>
+                              <div className="elementor-button-wrapper" bis_skin_checked={1}>
+                                <Link className="elementor-button elementor-button-link elementor-size-sm" to="/dashboard">
                                   <span className="elementor-button-content-wrapper">
-                                    <span className="elementor-button-text">Start now</span>
+                                    <span className="elementor-button-text">Dashboard</span>
                                   </span>
                                 </Link>
                               </div>
                             </div>
                           </div>
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-2944cb3 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2944cb3" data-element_type="section">
-                            <div className="elementor-container elementor-column-gap-default" >
-
-                            </div>
-                          </section>
                         </div>
                       </div>
-                      <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-1f98f87 animated fadeIn" data-id="1f98f87" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:0}" >
-                        <div className="elementor-widget-wrap elementor-element-populated" >
-                          <div className="elementor-element elementor-element-5301810 elementor-widget elementor-widget-image" data-id={5301810} data-element_type="widget" data-widget_type="image.default" >
-                            <div className="elementor-widget-container" >
-                              <img fetchpriority="high" decoding="async" style={{ width: "100%", maxWidth: '100%', borderRadius: "20px" }} src={Refer} className="attachment-large size-large wp-image-23315" alt
-                              />
+                    ) : (
+                      <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-6515f55" data-id="6515f55" data-element_type="column" bis_skin_checked={1}>
+                        <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                          <div className="elementor-element elementor-element-050c9e1 elementor-align-right elementor-widget elementor-widget-button" data-id="050c9e1" data-element_type="widget" data-widget_type="button.default" bis_skin_checked={1}>
+                            <div className="elementor-widget-container" bis_skin_checked={1}>
+                              <div className="elementor-button-wrapper" bis_skin_checked={1}>
+                                <Link className="elementor-button elementor-button-link elementor-size-sm" to="/admin/dashboard">
+                                  <span className="elementor-button-content-wrapper">
+                                    <span className="elementor-button-text">Dashboard</span>
+                                  </span>
+                                </Link>
+                              </div>
                             </div>
                           </div>
-
                         </div>
                       </div>
-                    </div>
-                  </section>
-                  <section className="elementor-section elementor-top-section elementor-element elementor-element-a558b12 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a558b12" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
-                    <div className="elementor-background-overlay" />
-                    <div className="elementor-container elementor-column-gap-default" >
-                      <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bb7c5ff" data-id="bb7c5ff" data-element_type="column" >
-                        <div className="elementor-widget-wrap elementor-element-populated" >
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-40b2f2a elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="40b2f2a" data-element_type="section">
-                            <div className="elementor-container elementor-column-gap-default" >
-                              <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-a6aec6c animated fadeIn" data-id="a6aec6c" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:150}" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-7bae0be elementor-widget__width-auto elementor-widget elementor-widget-image" data-id="7bae0be" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;none&quot;}" data-widget_type="image.default" >
-                                    <div className="elementor-widget-container" >
-                                      <img loading="lazy" decoding="async" width={947} height={1024} src="https://toka.peerduck.com/wp-content/uploads/2022/11/eiufvhef-947x1024.png" className="attachment-large size-large wp-image-23602" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/eiufvhef-947x1024.png 947w, https://toka.peerduck.com/wp-content/uploads/2022/11/eiufvhef-277x300.png 277w, https://toka.peerduck.com/wp-content/uploads/2022/11/eiufvhef-768x830.png 768w, https://toka.peerduck.com/wp-content/uploads/2022/11/eiufvhef-1421x1536.png 1421w, https://toka.peerduck.com/wp-content/uploads/2022/11/eiufvhef-600x649.png 600w, https://toka.peerduck.com/wp-content/uploads/2022/11/eiufvhef.png 1501w" sizes="(max-width: 947px) 100vw, 947px" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-8b50d79 animated fadeIn" data-id="8b50d79" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;}" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-eeeaa9b elementor-widget__width-auto elementor-widget elementor-widget-text-editor" data-id="eeeaa9b" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Backed by Leading Blockchain Investors </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-cbf5029 elementor-widget-mobile__width-inherit elementor-widget elementor-widget-text-editor" data-id="cbf5029" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      A trusted platform built to streamline   your cryptocurrency journey
-                                    </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-2304308 elementor-widget elementor-widget-text-editor" data-id={2304308} data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      offering secure wallets, lightning-fast exchanges, and real-time market insights
-                                      we empower you to explore the crypto world with confidence and ease.
-                                    </div>
-                                  </div>
-
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-2822b86 elementor-reverse-tablet elementor-reverse-mobile elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2822b86" data-element_type="section">
-                            <div className="elementor-container elementor-column-gap-default" >
-                              <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-a2a185f animated fadeIn" data-id="a2a185f" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:200}" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-509a20d elementor-widget__width-auto elementor-widget elementor-widget-text-editor" data-id="509a20d" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Uncompromising Security  </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-98160a8 elementor-widget-mobile__width-inherit elementor-widget elementor-widget-text-editor" data-id="98160a8" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Backup with ultra-high security
-                                    </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-938b44e elementor-widget elementor-widget-text-editor" data-id="938b44e" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      We prioritizes your safety with advanced encryption,
-                                      multi-layer authentication, and cold storage solutions.
-                                      Rest assured, your digital assets are protected.
-                                    </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-c22a729 elementor-tablet-align-center elementor-widget elementor-widget-button" data-id="c22a729" data-element_type="widget" data-widget_type="button.default" >
-                                    <div className="elementor-widget-container" >
-                                      <div className="elementor-button-wrapper" >
-                                        <Link className="elementor-button elementor-button-link elementor-size-xl elementor-animation-float" to="/auth/signup" >
-                                          <span className="elementor-button-content-wrapper">
-                                            <span className="elementor-button-text">Start
-                                              now</span>
-                                          </span>
-                                        </Link>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-6471cde animated fadeIn" data-id="6471cde" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;background_background&quot;:&quot;classic&quot;}" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-386ebce elementor-widget__width-auto elementor-widget elementor-widget-image" data-id="386ebce" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;none&quot;}" data-widget_type="image.default" >
-                                    <div className="elementor-widget-container" >
-                                      <img loading="lazy" decoding="async" width={867} height={1024} src={Refer} className="attachment-large size-large wp-image-23422" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/eygfve-867x1024.png 867w, https://toka.peerduck.com/wp-content/uploads/2022/11/eygfve-254x300.png 254w, https://toka.peerduck.com/wp-content/uploads/2022/11/eygfve-768x907.png 768w, https://toka.peerduck.com/wp-content/uploads/2022/11/eygfve-600x709.png 600w, https://toka.peerduck.com/wp-content/uploads/2022/11/eygfve.png 1200w" sizes="(max-width: 867px) 100vw, 867px" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                  <section className="elementor-section elementor-top-section elementor-element elementor-element-d8647f7 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d8647f7" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
-                    <div className="elementor-background-overlay" />
-                    <div className="elementor-container elementor-column-gap-default" >
-                      <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-84fb7ba" data-id="84fb7ba" data-element_type="column" >
-                        <div className="elementor-widget-wrap elementor-element-populated" >
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-51fcf7f elementor-section-boxed elementor-section-height-default elementor-section-height-default animated fadeIn" data-id="51fcf7f" data-element_type="section" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:100}">
-                            <div className="elementor-container elementor-column-gap-no" >
-                              <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-ced4232" data-id="ced4232" data-element_type="column" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-965343f elementor-widget__width-auto elementor-widget elementor-widget-text-editor" data-id="965343f" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Main Features </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-0c882c7 elementor-widget-mobile__width-inherit elementor-widget elementor-widget-heading" data-id="0c882c7" data-element_type="widget" data-widget_type="heading.default" >
-                                    <div className="elementor-widget-container" >
-                                      <style dangerouslySetInnerHTML={{ __html: "\n                                                                    /*! elementor - v3.21.0 - 24-04-2024 */\n                                                                    .elementor-heading-title {\n                                                                        padding: 0;\n                                                                        margin: 0;\n                                                                        line-height: 1\n                                                                    }\n\n                                                                    .elementor-widget-heading .elementor-heading-title[class*=elementor-size-]>a {\n                                                                        color: inherit;\n                                                                        font-size: inherit;\n                                                                        line-height: inherit\n                                                                    }\n\n                                                                    .elementor-widget-heading .elementor-heading-title.elementor-size-small {\n                                                                        font-size: 15px\n                                                                    }\n\n                                                                    .elementor-widget-heading .elementor-heading-title.elementor-size-medium {\n                                                                        font-size: 19px\n                                                                    }\n\n                                                                    .elementor-widget-heading .elementor-heading-title.elementor-size-large {\n                                                                        font-size: 29px\n                                                                    }\n\n                                                                    .elementor-widget-heading .elementor-heading-title.elementor-size-xl {\n                                                                        font-size: 39px\n                                                                    }\n\n                                                                    .elementor-widget-heading .elementor-heading-title.elementor-size-xxl {\n                                                                        font-size: 59px\n                                                                    }\n                                                                " }} />
-                                      <h2 className="elementor-heading-title elementor-size-default">
-                                        A new generation wallet</h2>
-                                    </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-270179f elementor-widget elementor-widget-text-editor" data-id="270179f" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Experience the ultimate combination of security, simplicity, and speed for all your crypto needs. </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-1eb3ef6 elementor-section-full_width elementor-section-height-default elementor-section-height-default animated fadeIn" data-id="1eb3ef6" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;gradient&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:100}">
-                            <div className="elementor-container elementor-column-gap-default" >
-                              <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-c496e1d" data-id="c496e1d" data-element_type="column" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <section className="elementor-section elementor-inner-section elementor-element elementor-element-e464b44 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e464b44" data-element_type="section">
-                                    <div className="elementor-container elementor-column-gap-default" >
-                                      <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-ef5e75a" data-id="ef5e75a" data-element_type="column" >
-                                        <div className="elementor-widget-wrap elementor-element-populated" >
-                                          <div className="elementor-element elementor-element-dcb275e elementor-position-left elementor-vertical-align-top elementor-widget elementor-widget-image-box" data-id="dcb275e" data-element_type="widget" data-widget_type="image-box.default" >
-                                            <div className="elementor-widget-container" >
-                                              <style dangerouslySetInnerHTML={{ __html: "\n                                                                                    /*! elementor - v3.21.0 - 24-04-2024 */\n                                                                                    .elementor-widget-image-box .elementor-image-box-content {\n                                                                                        width: 100%\n                                                                                    }\n\n                                                                                    @media (min-width:768px) {\n\n                                                                                        .elementor-widget-image-box.elementor-position-left .elementor-image-box-wrapper,\n                                                                                        .elementor-widget-image-box.elementor-position-right .elementor-image-box-wrapper {\n                                                                                            display: flex\n                                                                                        }\n\n                                                                                        .elementor-widget-image-box.elementor-position-right .elementor-image-box-wrapper {\n                                                                                            text-align: end;\n                                                                                            flex-direction: row-reverse\n                                                                                        }\n\n                                                                                        .elementor-widget-image-box.elementor-position-left .elementor-image-box-wrapper {\n                                                                                            text-align: start;\n                                                                                            flex-direction: row\n                                                                                        }\n\n                                                                                        .elementor-widget-image-box.elementor-position-top .elementor-image-box-img {\n                                                                                            margin: auto\n                                                                                        }\n\n                                                                                        .elementor-widget-image-box.elementor-vertical-align-top .elementor-image-box-wrapper {\n                                                                                            align-items: flex-start\n                                                                                        }\n\n                                                                                        .elementor-widget-image-box.elementor-vertical-align-middle .elementor-image-box-wrapper {\n                                                                                            align-items: center\n                                                                                        }\n\n                                                                                        .elementor-widget-image-box.elementor-vertical-align-bottom .elementor-image-box-wrapper {\n                                                                                            align-items: flex-end\n                                                                                        }\n                                                                                    }\n\n                                                                                    @media (max-width:767px) {\n                                                                                        .elementor-widget-image-box .elementor-image-box-img {\n                                                                                            margin-left: auto !important;\n                                                                                            margin-right: auto !important;\n                                                                                            margin-bottom: 15px\n                                                                                        }\n                                                                                    }\n\n                                                                                    .elementor-widget-image-box .elementor-image-box-img {\n                                                                                        display: inline-block\n                                                                                    }\n\n                                                                                    .elementor-widget-image-box .elementor-image-box-title a {\n                                                                                        color: inherit\n                                                                                    }\n\n                                                                                    .elementor-widget-image-box .elementor-image-box-wrapper {\n                                                                                        text-align: center\n                                                                                    }\n\n                                                                                    .elementor-widget-image-box .elementor-image-box-description {\n                                                                                        margin: 0\n                                                                                    }\n                                                                                " }} />
-                                              <div className="elementor-image-box-wrapper" >
-                                                <figure className="elementor-image-box-img">
-                                                  <img loading="lazy" decoding="async" width={160} height={160} src="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png" className="attachment-full size-full wp-image-23481" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png 160w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-150x150.png 150w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-100x100.png 100w" sizes="(max-width: 160px) 100vw, 160px" />
-                                                </figure>
-                                                <div className="elementor-image-box-content" ><span className="elementor-image-box-title">User-Friendly Design</span>
-                                                  <p className="elementor-image-box-description">
-                                                    Effortlessly manage your crypto with an intuitive interface.
-                                                  </p>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-c7b39fd" data-id="c7b39fd" data-element_type="column" >
-                                        <div className="elementor-widget-wrap elementor-element-populated" >
-                                          <div className="elementor-element elementor-element-4289a80 elementor-position-left elementor-vertical-align-top elementor-widget elementor-widget-image-box" data-id="4289a80" data-element_type="widget" data-widget_type="image-box.default" >
-                                            <div className="elementor-widget-container" >
-                                              <div className="elementor-image-box-wrapper" >
-                                                <figure className="elementor-image-box-img">
-                                                  <img loading="lazy" decoding="async" width={160} height={160} src="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png" className="attachment-full size-full wp-image-23481" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png 160w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-150x150.png 150w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-100x100.png 100w" sizes="(max-width: 160px) 100vw, 160px" />
-                                                </figure>
-                                                <div className="elementor-image-box-content" ><span className="elementor-image-box-title">Top-Tier Security </span>
-                                                  <p className="elementor-image-box-description">
-
-                                                    Advanced encryption to safeguard your digital assets.
-                                                  </p>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-c806738" data-id="c806738" data-element_type="column" >
-                                        <div className="elementor-widget-wrap elementor-element-populated" >
-                                          <div className="elementor-element elementor-element-d1347bb elementor-position-left elementor-vertical-align-top elementor-widget elementor-widget-image-box" data-id="d1347bb" data-element_type="widget" data-widget_type="image-box.default" >
-                                            <div className="elementor-widget-container" >
-                                              <div className="elementor-image-box-wrapper" >
-                                                <figure className="elementor-image-box-img">
-                                                  <img loading="lazy" decoding="async" width={160} height={160} src="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png" className="attachment-full size-full wp-image-23481" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png 160w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-150x150.png 150w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-100x100.png 100w" sizes="(max-width: 160px) 100vw, 160px" />
-                                                </figure>
-                                                <div className="elementor-image-box-content" ><span className="elementor-image-box-title">Password
-                                                  protection</span>
-                                                  <p className="elementor-image-box-description">
-
-                                                    Secure access with robust, customizable password options.
-                                                  </p>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </section>
-                                  <section className="elementor-section elementor-inner-section elementor-element elementor-element-1b5e8d8 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1b5e8d8" data-element_type="section">
-                                    <div className="elementor-container elementor-column-gap-default" >
-                                      <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-c1a0b28" data-id="c1a0b28" data-element_type="column" >
-                                        <div className="elementor-widget-wrap elementor-element-populated" >
-                                          <div className="elementor-element elementor-element-1d9315d elementor-position-left elementor-vertical-align-top elementor-widget elementor-widget-image-box" data-id="1d9315d" data-element_type="widget" data-widget_type="image-box.default" >
-                                            <div className="elementor-widget-container" >
-                                              <div className="elementor-image-box-wrapper" >
-                                                <figure className="elementor-image-box-img">
-                                                  <img loading="lazy" decoding="async" width={160} height={160} src="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png" className="attachment-full size-full wp-image-23481" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png 160w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-150x150.png 150w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-100x100.png 100w" sizes="(max-width: 160px) 100vw, 160px" />
-                                                </figure>
-                                                <div className="elementor-image-box-content" ><span className="elementor-image-box-title">Multi-Token</span>
-                                                  <p className="elementor-image-box-description">
-                                                    Store, send, and Stake a wide variety of cryptocurrencies.
-                                                  </p>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-d0a9de6" data-id="d0a9de6" data-element_type="column" >
-                                        <div className="elementor-widget-wrap elementor-element-populated" >
-                                          <div className="elementor-element elementor-element-5e983ee elementor-position-left elementor-vertical-align-top elementor-widget elementor-widget-image-box" data-id="5e983ee" data-element_type="widget" data-widget_type="image-box.default" >
-                                            <div className="elementor-widget-container" >
-                                              <div className="elementor-image-box-wrapper" >
-                                                <figure className="elementor-image-box-img">
-                                                  <img loading="lazy" decoding="async" width={160} height={160} src="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png" className="attachment-full size-full wp-image-23481" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png 160w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-150x150.png 150w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-100x100.png 100w" sizes="(max-width: 160px) 100vw, 160px" />
-                                                </figure>
-                                                <div className="elementor-image-box-content" ><span className="elementor-image-box-title">Unmatched Safety</span>
-                                                  <p className="elementor-image-box-description">
-                                                    Cold storage solutions to keep your funds secure from threats.
-                                                  </p>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-e47aa9c" data-id="e47aa9c" data-element_type="column" >
-                                        <div className="elementor-widget-wrap elementor-element-populated" >
-                                          <div className="elementor-element elementor-element-4c457de elementor-position-left elementor-vertical-align-top elementor-widget elementor-widget-image-box" data-id="4c457de" data-element_type="widget" data-widget_type="image-box.default" >
-                                            <div className="elementor-widget-container" >
-                                              <div className="elementor-image-box-wrapper" >
-                                                <figure className="elementor-image-box-img">
-                                                  <img loading="lazy" decoding="async" width={160} height={160} src="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png" className="attachment-full size-full wp-image-23481" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb.png 160w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-150x150.png 150w, https://toka.peerduck.com/wp-content/uploads/2022/11/ewfvrb-100x100.png 100w" sizes="(max-width: 160px) 100vw, 160px" />
-                                                </figure>
-                                                <div className="elementor-image-box-content" ><span className="elementor-image-box-title">Staking+</span>
-                                                  <p className="elementor-image-box-description">
-                                                    Earn rewards by staking your tokens directly in the wallet.
-                                                  </p>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </section>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                  <section className="elementor-section elementor-top-section elementor-element elementor-element-01dd347 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="01dd347" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
-                    <div className="elementor-background-overlay" />
-                    <div className="elementor-container elementor-column-gap-default" >
-                      <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d3dea06" data-id="d3dea06" data-element_type="column" >
-                        <div className="elementor-widget-wrap elementor-element-populated" >
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-d862441 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d862441" data-element_type="section">
-                            <div className="elementor-container elementor-column-gap-default" >
-                              <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-678334d animated fadeIn" data-id="678334d" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:200}" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-4bde5b0 elementor-widget elementor-widget-image" data-id="4bde5b0" data-element_type="widget" data-widget_type="image.default" >
-                                    <div className="elementor-widget-container" >
-                                      <img loading="lazy" decoding="async" width={890} height={1024} src="https://toka.peerduck.com/wp-content/uploads/2022/11/efvhjef-890x1024.png" className="attachment-large size-large wp-image-23512" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/efvhjef-890x1024.png 890w, https://toka.peerduck.com/wp-content/uploads/2022/11/efvhjef-261x300.png 261w, https://toka.peerduck.com/wp-content/uploads/2022/11/efvhjef-768x883.png 768w, https://toka.peerduck.com/wp-content/uploads/2022/11/efvhjef-600x690.png 600w, https://toka.peerduck.com/wp-content/uploads/2022/11/efvhjef.png 931w" sizes="(max-width: 890px) 100vw, 890px" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-d32966a animated fadeIn" data-id="d32966a" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;}" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-fad5859 elementor-widget__width-auto elementor-widget elementor-widget-text-editor" data-id="fad5859" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      More possibilities </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-49f092c elementor-widget-mobile__width-inherit elementor-widget elementor-widget-text-editor" data-id="49f092c" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Stake, swap and trade in one place </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-1e475b5 elementor-widget elementor-widget-text-editor" data-id="1e475b5" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Manage, trade, stake, and grow your crypto portfolio all in one secure and intuitive platform. Explore the future of finance with confidence.
-                                    </div>
-                                  </div>
-
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-78582c5 elementor-reverse-tablet elementor-reverse-mobile elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="78582c5" data-element_type="section">
-                            <div className="elementor-container elementor-column-gap-default" >
-                              <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-6a64521 animated fadeIn" data-id="6a64521" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:200}" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-5d8c7ca elementor-widget__width-auto elementor-widget elementor-widget-text-editor" data-id="5d8c7ca" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      WMulti-Token Support </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-b44c8e9 elementor-widget-mobile__width-inherit elementor-widget elementor-widget-text-editor" data-id="b44c8e9" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Effortlessly store a wide range of cryptocurrencies </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-1130466 elementor-widget elementor-widget-text-editor" data-id={1130466} data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Whether you're managing Bitcoin, Ethereum,
-                                      or altcoins, we provide seamless compatibility for your diverse digital assets.
-                                    </div>
-                                  </div>
-
-                                </div>
-                              </div>
-                              <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-191c4f9 animated fadeIn" data-id="191c4f9" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;background_background&quot;:&quot;classic&quot;}" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-745fb57 elementor-widget elementor-widget-image" data-id="745fb57" data-element_type="widget" data-widget_type="image.default" >
-                                    <div className="elementor-widget-container" >
-                                      <img loading="lazy" decoding="async" width={1024} height={797} src="https://toka.peerduck.com/wp-content/uploads/2022/11/t8gbhtg-1024x797.png" className="attachment-large size-large wp-image-23507" alt srcSet="https://toka.peerduck.com/wp-content/uploads/2022/11/t8gbhtg-1024x797.png 1024w, https://toka.peerduck.com/wp-content/uploads/2022/11/t8gbhtg-300x233.png 300w, https://toka.peerduck.com/wp-content/uploads/2022/11/t8gbhtg-768x598.png 768w, https://toka.peerduck.com/wp-content/uploads/2022/11/t8gbhtg-1536x1195.png 1536w, https://toka.peerduck.com/wp-content/uploads/2022/11/t8gbhtg-2048x1594.png 2048w, https://toka.peerduck.com/wp-content/uploads/2022/11/t8gbhtg-600x467.png 600w" sizes="(max-width: 1024px) 100vw, 1024px" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                  <section className="elementor-section elementor-top-section elementor-element elementor-element-9ed58fe elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9ed58fe" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
-                    <div className="elementor-background-overlay" />
-                    <div className="elementor-container elementor-column-gap-default" >
-                      <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2530493" data-id={2530493} data-element_type="column" >
-                        <div className="elementor-widget-wrap elementor-element-populated" >
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-cfbacae elementor-section-boxed elementor-section-height-default elementor-section-height-default animated fadeIn" data-id="cfbacae" data-element_type="section" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:100}">
-                            <div className="elementor-container elementor-column-gap-no" >
-                              <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-972db4f" data-id="972db4f" data-element_type="column" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-57d7e81 elementor-widget__width-auto elementor-widget elementor-widget-text-editor" data-id="57d7e81" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      FAQ </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-bac89af elementor-widget-mobile__width-inherit elementor-widget elementor-widget-heading" data-id="bac89af" data-element_type="widget" data-widget_type="heading.default" >
-                                    <div className="elementor-widget-container" >
-                                      <h2 className="elementor-heading-title elementor-size-default">
-                                        Frequently asked questions
-                                      </h2>
-                                    </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-101d19f elementor-widget elementor-widget-text-editor" data-id="101d19f" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Check Out Our FAQ for All the Information You Need to Get Started.</div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-2c660bf elementor-section-boxed elementor-section-height-default elementor-section-height-default animated fadeIn" data-id="2c660bf" data-element_type="section" data-settings="{&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:100}">
-                            <div className="elementor-container elementor-column-gap-default" >
-                              <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-d8fc851" data-id="d8fc851" data-element_type="column" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-615039f elementor-widget elementor-widget-toggle" data-id="615039f" data-element_type="widget" data-widget_type="toggle.default" >
-                                    <div className="elementor-widget-container" >
-                                      <style dangerouslySetInnerHTML={{ __html: "\n                                                                    /*! elementor - v3.21.0 - 24-04-2024 */\n                                                                    .elementor-toggle {\n                                                                        text-align: start\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title {\n                                                                        font-weight: 700;\n                                                                        line-height: 1;\n                                                                        margin: 0;\n                                                                        padding: 15px;\n                                                                        border-bottom: 1px solid #d5d8dc;\n                                                                        cursor: pointer;\n                                                                        outline: none\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title .elementor-toggle-icon {\n                                                                        display: inline-block;\n                                                                        width: 1em\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title .elementor-toggle-icon svg {\n                                                                        margin-inline-start: -5px;\n                                                                        width: 1em;\n                                                                        height: 1em\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title .elementor-toggle-icon.elementor-toggle-icon-right {\n                                                                        float: right;\n                                                                        text-align: right\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title .elementor-toggle-icon.elementor-toggle-icon-left {\n                                                                        float: left;\n                                                                        text-align: left\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title .elementor-toggle-icon .elementor-toggle-icon-closed {\n                                                                        display: block\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title .elementor-toggle-icon .elementor-toggle-icon-opened {\n                                                                        display: none\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title.elementor-active {\n                                                                        border-bottom: none\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title.elementor-active .elementor-toggle-icon-closed {\n                                                                        display: none\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-title.elementor-active .elementor-toggle-icon-opened {\n                                                                        display: block\n                                                                    }\n\n                                                                    .elementor-toggle .elementor-tab-content {\n                                                                        padding: 15px;\n                                                                        border-bottom: 1px solid #d5d8dc;\n                                                                        display: none\n                                                                    }\n\n                                                                    @media (max-width:767px) {\n                                                                        .elementor-toggle .elementor-tab-title {\n                                                                            padding: 12px\n                                                                        }\n\n                                                                        .elementor-toggle .elementor-tab-content {\n                                                                            padding: 12px 10px\n                                                                        }\n                                                                    }\n\n                                                                    .e-con-inner>.elementor-widget-toggle,\n                                                                    .e-con>.elementor-widget-toggle {\n                                                                        width: var(--container-widget-width);\n                                                                        --flex-grow: var(--container-widget-flex-grow)\n                                                                    }\n                                                                " }} />
-                                      <div className="elementor-toggle">
-                                        {faqData.map((item) => (
-                                          <div
-                                            className="elementor-toggle-item"
-                                            key={item.id}
-                                            onClick={() => toggleTab(item.id)}
-                                          >
-                                            <div
-                                              id={`elementor-tab-title-${item.id}`}
-                                              className="elementor-tab-title"
-                                              data-tab={item.id}
-                                              role="button"
-                                              aria-controls={`elementor-tab-content-${item.id}`}
-                                              aria-expanded={activeTab === item.id}
-                                            >
-                                              <span className="elementor-toggle-icon elementor-toggle-icon-right" aria-hidden="true">
-                                                <span className={`elementor-toggle-icon-closed ${activeTab === item.id ? "rotatef" : "rotateaf"}`}>
-                                                  <i className="fas fa-chevron-down" />
-                                                </span>
-                                                {/* <span className={`elementor-toggle-icon-opened ${activeTab === item.id ? "" : "hidden"}`}>
-                                                  <i className="fas fa-chevron-up" />
-                                                </span> */}
-                                              </span>
-                                              <a className="elementor-toggle-title" tabIndex={0}>
-                                                {item.question}
-                                              </a>
-                                            </div>
-                                            <div
-                                              id={`elementor-tab-content-${item.id}`}
-                                              className={`elementor-tab-content elementor-clearfix ${activeTab === item.id ? "dblock" : "hidden"
-                                                }`}
-                                              data-tab={item.id}
-                                              role="region"
-                                              aria-labelledby={`elementor-tab-title-${item.id}`}
-                                            >
-                                              {item.answer}
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                          <section className="elementor-section elementor-inner-section elementor-element elementor-element-f0db96b elementor-section-boxed elementor-section-height-default elementor-section-height-default animated fadeIn" data-id="f0db96b" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;gradient&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:150}">
-                            <div className="elementor-background-overlay" />
-                            <div className="elementor-container elementor-column-gap-default" >
-                              <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-9bb5d4f" data-id="9bb5d4f" data-element_type="column" >
-                                <div className="elementor-widget-wrap elementor-element-populated" >
-                                  <div className="elementor-element elementor-element-774b677 elementor-widget elementor-widget-text-editor" data-id="774b677" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      Ready to Take Control of Your Crypto?
-                                    </div>
-                                  </div>
-                                  <div className="elementor-element elementor-element-9db2b7c elementor-widget elementor-widget-text-editor" data-id="9db2b7c" data-element_type="widget" data-widget_type="text-editor.default" >
-                                    <div className="elementor-widget-container" >
-                                      The Toka Wallet lets you store your private keys on your
-                                      card while maintaining easy access to them. </div>
-                                  </div>Sign up for Blockvault Wallet today and start managing, securing, and growing your digital assets with confidence. Experience seamless transactions, top-notch security, and a wide range of features designed to help you succeed in the world of cryptocurrency. Take action now and unlock the future of finance!
-
-                                  <div className="elementor-element elementor-element-c92040a elementor-tablet-align-center elementor-align-center elementor-widget elementor-widget-button" data-id="c92040a" data-element_type="widget" data-widget_type="button.default" >
-                                    <div className="elementor-widget-container" >
-                                      <div className="elementor-button-wrapper" >
-                                        <Link className="elementor-button elementor-button-link elementor-size-xl elementor-animation-float" to="/auth/signup" >
-                                          <span className="elementor-button-content-wrapper">
-                                            <span className="elementor-button-text">Start
-                                              now</span>
-                                          </span>
-                                        </Link>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
+                    )}
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div data-elementor-type="wp-page" data-elementor-id={6} className="elementor elementor-6" data-elementor-post-type="page" bis_skin_checked={1}>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-b63fbaf elementor-section-height-min-height elementor-section-boxed elementor-section-height-default elementor-section-items-middle" data-id="b63fbaf" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+          <div className="elementor-background-overlay" bis_skin_checked={1} />
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-be0fa84" data-id="be0fa84" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-d2f17fb elementor-widget elementor-widget-heading animated fadeIn" data-id="d2f17fb" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:200}" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h1 className="elementor-heading-title elementor-size-default"> Exchange & <br/> non-custodial wallet </h1>
+                  </div>
                 </div>
-              </div>{/* .entry-content */}
-            </div>{/* .post-inner */}
-            <div className="section-inner clearfix" />{/* .section-inner */}
-          </article>{/* .post */}
-        </main>{/* #site-content */}
-        <footer id="site-footer" className="nav-white-desktop" role="contentinfo">
-          <div id="footer-wave" />
-          <div className="footer-bg" >
-            <div className="footer-inner container-xl" >
-              <div className="footer-top" >
-                <div className="row" >
-                  <div className="ft-col-1 col-sm-12 col-lg-4" >
-                    <div className="widget widget_text" >
-                      <div className="widget-content" >
-                        <div className="textwidget" >
-                          <h4><img src={LogoNew} style={{ width: "80px" }} alt="" /></h4>
-
-                        </div>
-                      </div>
+                <div className="elementor-element elementor-element-f5bc79d elementor-widget elementor-widget-heading animated fadeIn" data-id="f5bc79d" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:400}" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h1 className="elementor-heading-title elementor-size-default"></h1>
+                  </div>
+                </div>
+                <div className="elementor-element elementor-element-06a5288 elementor-widget elementor-widget-heading animated fadeIn" data-id="06a5288" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:600}" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h5 className="elementor-heading-title elementor-size-default">Trade. Store. Grow Your Crypto — All in One Place.</h5>
+                  </div>
+                </div>
+                <div className="elementor-element elementor-element-deafccb elementor-widget elementor-widget-button animated fadeIn" data-id="deafccb" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:800}" data-widget_type="button.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <div className="elementor-button-wrapper" bis_skin_checked={1}>
+                      <Link className="elementor-button elementor-button-link elementor-size-sm"  to="/auth/signup">
+                        <span className="elementor-button-content-wrapper">
+                          <span className="elementor-button-text">Start Now</span>
+                        </span>
+                      </Link>
                     </div>
                   </div>
-                  <div className="ft-col-2 col-sm-12 col-lg-4" >
-                    <div className="widget widget_text" >
-                      <div className="widget-content" >
-                        <h4 className="widget-title">Contact Us</h4>
-                        <div className="textwidget" >
-                          <p>Place de La Defense, Puteaux, 92400</p>
-                          <p><a href="mailto:admin@blockvault.pro" >admin@blockvault.pro</a></p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
               </div>
-              <div className="footer-bottom" >
-                <div className="footer-credits" >
-                  <p className="footer-copyright">Copyright ©2025 Blockvault. All rights reserved.
-                  </p>{/* .footer-copyright */}
-                </div>{/* .footer-credits */}
-
-              </div>{/* .footer-bottom  */}
-            </div>{/* .footer-inner */}
+            </div>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-a6d8c60" data-id="a6d8c60" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-e03dc75 elementor-widget elementor-widget-image elementor-motion-effects-parent animated fadeIn" data-id="e03dc75" data-element_type="widget" data-settings="{&quot;motion_fx_motion_fx_mouse&quot;:&quot;yes&quot;,&quot;motion_fx_mouseTrack_effect&quot;:&quot;yes&quot;,&quot;motion_fx_mouseTrack_speed&quot;:{&quot;unit&quot;:&quot;px&quot;,&quot;size&quot;:0.20000000000000001,&quot;sizes&quot;:[]},&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:200}" data-widget_type="image.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container elementor-motion-effects-element" bis_skin_checked={1}  >
+                    <img decoding="async" width={399} height={403} src={Group654} className="attachment-large size-large wp-image-119" alt="" srcSet={`${Group654} 399w, ${Group654Small} 297w`} sizes="(max-width: 399px) 100vw, 399px" />
+                  </div>
+                </div>
+                <div className="elementor-element elementor-element-93685ed elementor-widget elementor-widget-image animated fadeIn" data-id="93685ed" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:400}" data-widget_type="image.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <img decoding="async" width={800} height={775} src={CoinHome03} className="attachment-large size-large wp-image-94" alt="" srcSet={`${CoinHome03} 1024w, ${CoinHome03_300} 300w, ${CoinHome03_768} 768w, ${CoinHome03_800} 800w, ${CoinHome03Full} 1115w`} sizes="(max-width: 800px) 100vw, 800px" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </footer>{/* #site-footer */}
+        </section>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-b30fbaa elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b30fbaa" data-element_type="section">
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-33 elementor-top-column elementor-element elementor-element-fadb85a animated fadeIn" data-id="fadb85a" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:200}" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-background-overlay" bis_skin_checked={1} />
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-c33f4f9 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c33f4f9" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-9c37018" data-id="9c37018" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap" bis_skin_checked={1}>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+            <div className="elementor-column elementor-col-33 elementor-top-column elementor-element elementor-element-6c8ddc5 animated fadeIn" data-id="6c8ddc5" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:200}" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-background-overlay" bis_skin_checked={1} />
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-e68afd8 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e68afd8" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-dd33d6a" data-id="dd33d6a" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap" bis_skin_checked={1}>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+            <div className="elementor-column elementor-col-33 elementor-top-column elementor-element elementor-element-6c2c6d1 animated fadeIn" data-id="6c2c6d1" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:200}" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-background-overlay" bis_skin_checked={1} />
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-881e7be elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="881e7be" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-62fb430" data-id="62fb430" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap" bis_skin_checked={1}>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-8e33f15 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8e33f15" data-element_type="section">
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-a4efbc9" data-id="a4efbc9" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-351838d elementor-widget elementor-widget-heading" data-id="351838d" data-element_type="widget" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h3 className="elementor-heading-title elementor-size-default">Refer a Friend </h3>
+                  </div>
+                </div>
+                <div className="elementor-element elementor-element-cee0870 elementor-widget elementor-widget-text-editor" data-id="cee0870" data-element_type="widget" data-widget_type="text-editor.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <p>Refer a Friend and Get 100 USDT Trading Fee Credit.</p>
+                  </div>
+                </div>
+                <div className="elementor-element elementor-element-6f99068 elementor-widget elementor-widget-button animated fadeIn" data-id="6f99068" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:800}" data-widget_type="button.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <div className="elementor-button-wrapper" bis_skin_checked={1}>
+                      <Link className="elementor-button elementor-button-link elementor-size-sm" to="/auth/signup">
+                        <span className="elementor-button-content-wrapper">
+                          <span className="elementor-button-text">Get Started</span>
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-48d5339" data-id="48d5339" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap" bis_skin_checked={1}>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-72297b4 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="72297b4" data-element_type="section">
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3a79e10" data-id="3a79e10" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-3cd3267 elementor-widget elementor-widget-heading animated fadeInUp" data-id="3cd3267" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;,&quot;_animation_delay&quot;:200}" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h2 className="elementor-heading-title elementor-size-default">Core Services</h2>
+                  </div>
+                </div>
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-ef38b02 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ef38b02" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-7dadf13 animated fadeIn" data-id="7dadf13" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:200}" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-background-overlay" bis_skin_checked={1} />
+                        <div className="elementor-element elementor-element-668067d elementor-position-left elementor-vertical-align-bottom elementor-widget elementor-widget-image-box" data-id="668067d" data-element_type="widget" data-widget_type="image-box.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <div className="elementor-image-box-wrapper" bis_skin_checked={1}>
+                              <figure className="elementor-image-box-img"><img loading="lazy" decoding="async" width={512} height={512} src={Cards} className="attachment-full size-full wp-image-238" alt="" srcSet={`${Cards} 512w, ${Cards300} 300w, ${Cards150} 150w`} sizes="(max-width: 512px) 100vw, 512px" /></figure>
+                              <div className="elementor-image-box-content" bis_skin_checked={1}>
+                                <h3 className="elementor-image-box-title">Exchange Platform</h3>
+                                <p className="elementor-image-box-description">Buy, sell, or swap cryptocurrencies in real time with transparent pricing, advanced charting tools, and reliable performance.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-39bba48 animated fadeIn" data-id="39bba48" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:400}" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-background-overlay" bis_skin_checked={1} />
+                        <div className="elementor-element elementor-element-f454171 elementor-position-left elementor-vertical-align-bottom elementor-widget elementor-widget-image-box" data-id="f454171" data-element_type="widget" data-widget_type="image-box.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <div className="elementor-image-box-wrapper" bis_skin_checked={1}>
+                              <figure className="elementor-image-box-img"><img loading="lazy" decoding="async" width={512} height={512} src={Bag} className="attachment-full size-full wp-image-234" alt="" srcSet={`${Bag} 512w, ${Bag300} 300w, ${Bag150} 150w`} sizes="(max-width: 512px) 100vw, 512px" /></figure>
+                              <div className="elementor-image-box-content" bis_skin_checked={1}>
+                                <h3 className="elementor-image-box-title">Smart Wallet</h3>
+                                <p className="elementor-image-box-description">Securely store, send, and receive crypto assets. You control the keys, we provide the seamless interface.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-cd57fa5 elementor-hidden-tablet animated fadeIn" data-id="cd57fa5" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:600}" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-background-overlay" bis_skin_checked={1} />
+                        <div className="elementor-element elementor-element-77876f5 elementor-position-left elementor-vertical-align-bottom elementor-widget elementor-widget-image-box" data-id="77876f5" data-element_type="widget" data-widget_type="image-box.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <div className="elementor-image-box-wrapper" bis_skin_checked={1}>
+                              <figure className="elementor-image-box-img"><img loading="lazy" decoding="async" width={512} height={512} src={Safety} className="attachment-full size-full wp-image-250" alt="" srcSet={`${Safety} 512w, ${Safety300} 300w, ${Safety150} 150w`} sizes="(max-width: 512px) 100vw, 512px" /></figure>
+                              <div className="elementor-image-box-content" bis_skin_checked={1}>
+                                <h3 className="elementor-image-box-title">Staking & Earn</h3>
+                                <p className="elementor-image-box-description">Grow your portfolio automatically. Stake top tokens and earn passive rewards every day.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-38deae4 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="38deae4" data-element_type="section">
+          <div className="elementor-background-overlay" bis_skin_checked={1} />
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-6172c17" data-id="6172c17" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-c1bcbb8 elementor-widget elementor-widget-heading" data-id="c1bcbb8" data-element_type="widget" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h2 className="elementor-heading-title elementor-size-default">
+Extra Features</h2>
+                  </div>
+                </div>
+                 
+                <div className="elementor-element elementor-element-9557597 elementor-widget elementor-widget-text-editor" data-id={9557597} data-element_type="widget" data-widget_type="text-editor.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <p>Live charts, analytics and performance tracking. 24/7 Support: Get instant help. Designed for both individual traders and corporate clients.</p>
+                  </div>
+                </div>
+                <div className="elementor-element elementor-element-ea3e871 elementor-widget elementor-widget-heading" data-id="ea3e871" data-element_type="widget" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h6 className="elementor-heading-title elementor-size-default">Download our platfom on </h6>
+                  </div>
+                </div>
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-c019f0f elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c019f0f" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-31af91a" data-id="31af91a" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-59a2e34 elementor-widget elementor-widget-image" data-id="59a2e34" data-element_type="widget" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img loading="lazy" decoding="async" width={592} height={175} src={CoinHome010} className="elementor-animation-shrink attachment-large size-large wp-image-332" alt="" srcSet={`${CoinHome010} 592w, ${CoinHome010_300} 300w`} sizes="(max-width: 592px) 100vw, 592px" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-a97004b" data-id="a97004b" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-a4a2195 elementor-widget elementor-widget-image" data-id="a4a2195" data-element_type="widget" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img loading="lazy" decoding="async" width={592} height={175} src={CoinHome09} className="elementor-animation-shrink attachment-large size-large wp-image-331" alt="" srcSet={`${CoinHome09} 592w, ${CoinHome09_300} 300w`} sizes="(max-width: 592px) 100vw, 592px" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-5f2e5fe" data-id="5f2e5fe" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-02a4447 elementor-widget elementor-widget-image" data-id="02a4447" data-element_type="widget" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img loading="lazy" decoding="async" width={234} height={68} src={CoinHome011} className="elementor-animation-shrink attachment-large size-large wp-image-336" alt="" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-34cff6d" data-id="34cff6d" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-face4bc elementor-widget elementor-widget-image" data-id="face4bc" data-element_type="widget" data-widget_type="image.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    {/* <img loading="lazy" decoding="async" width={800} height={545} src={CoinHome07} className="attachment-large size-large wp-image-309" alt="" srcSet={`${CoinHome07} 1024w, ${CoinHome07_300} 300w, ${CoinHome07_768} 768w, ${CoinHome07_800} 800w, ${CoinHome07Full} 1200w`} sizes="(max-width: 800px) 100vw, 800px" /> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-3ef3e61 elementor-section-height-min-height elementor-section-boxed elementor-section-height-default elementor-section-items-middle" data-id="3ef3e61" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+          <div className="elementor-background-overlay" bis_skin_checked={1} />
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-0a2bed7" data-id="0a2bed7" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated e-swiper-container" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-1a1e3e6 elementor--h-position-left elementor--v-position-middle elementor-pagination-position-inside elementor-widget elementor-widget-slides e-widget-swiper" data-id="1a1e3e6" data-element_type="widget" data-settings="{&quot;navigation&quot;:&quot;dots&quot;,&quot;autoplay_speed&quot;:4000,&quot;autoplay&quot;:&quot;yes&quot;,&quot;pause_on_hover&quot;:&quot;yes&quot;,&quot;pause_on_interaction&quot;:&quot;yes&quot;,&quot;infinite&quot;:&quot;yes&quot;,&quot;transition&quot;:&quot;slide&quot;,&quot;transition_speed&quot;:500}" data-widget_type="slides.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <div className="elementor-swiper" bis_skin_checked={1}>
+                      <div className="elementor-slides-wrapper elementor-main-swiper swiper swiper-initialized swiper-horizontal swiper-pointer-events" role="region" aria-roledescription="carousel" aria-label="Slides" dir="ltr" data-animation="fadeInUp" bis_skin_checked={1}>
+                        <div className="swiper-wrapper elementor-slides" bis_skin_checked={1} id="swiper-wrapper-ea94b83203ee34c9" aria-live="off" style={{ cursor: 'grab', transitionDuration: '0ms', transform: 'translate3d(-4060px, 0px, 0px)' }}><div className="elementor-repeater-item-707fc82 swiper-slide swiper-slide-duplicate" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={0} style={{ width: '580px' }} aria-label="1 / 4">
+                          <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                          <div className="swiper-slide-inner" bis_skin_checked={1}>
+                            <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                          </div>
+                        </div><div className="elementor-repeater-item-1b4bfeb swiper-slide swiper-slide-duplicate" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={1} style={{ width: '580px' }} aria-label="2 / 4">
+                            <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div><div className="elementor-repeater-item-aeaec7e swiper-slide swiper-slide-duplicate swiper-slide-duplicate-prev" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={2} style={{ width: '580px' }} aria-label="3 / 4">
+                            <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div><div className="elementor-repeater-item-d2e04e3 swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={3} style={{ width: '580px' }} aria-label="4 / 4">
+                            <div className="swiper-slide-bg elementor-ken-burns--active" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div>
+                          <div className="elementor-repeater-item-707fc82 swiper-slide swiper-slide-duplicate-next" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={0} style={{ width: '580px' }} aria-label="1 / 4">
+                            <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div>
+                          <div className="elementor-repeater-item-1b4bfeb swiper-slide" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={1} style={{ width: '580px' }} aria-label="2 / 4">
+                            <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div>
+                          <div className="elementor-repeater-item-aeaec7e swiper-slide swiper-slide-prev" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={2} style={{ width: '580px' }} aria-label="3 / 4">
+                            <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div>
+                          <div className="elementor-repeater-item-d2e04e3 swiper-slide swiper-slide-active" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={3} style={{ width: '580px' }} aria-label="4 / 4">
+                            <div className="swiper-slide-bg elementor-ken-burns--active" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div>
+                          <div className="elementor-repeater-item-707fc82 swiper-slide swiper-slide-duplicate swiper-slide-next" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={0} style={{ width: '580px' }} aria-label="1 / 4">
+                            <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div><div className="elementor-repeater-item-1b4bfeb swiper-slide swiper-slide-duplicate" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={1} style={{ width: '580px' }} aria-label="2 / 4">
+                            <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div><div className="elementor-repeater-item-aeaec7e swiper-slide swiper-slide-duplicate swiper-slide-duplicate-prev" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={2} style={{ width: '580px' }} aria-label="3 / 4">
+                            <div className="swiper-slide-bg" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div><div className="elementor-repeater-item-d2e04e3 swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" role="group" aria-roledescription="slide" bis_skin_checked={1} data-swiper-slide-index={3} style={{ width: '580px' }} aria-label="4 / 4">
+                            <div className="swiper-slide-bg elementor-ken-burns--active" role="img" bis_skin_checked={1} />
+                            <div className="swiper-slide-inner" bis_skin_checked={1}>
+                              <div className="swiper-slide-contents animated fadeInUp" bis_skin_checked={1} style={{}} />
+                            </div>
+                          </div></div>
+                        <div className="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal" bis_skin_checked={1}><span className="swiper-pagination-bullet" tabIndex={0} role="button" aria-label="Go to slide 1" /><span className="swiper-pagination-bullet" tabIndex={0} role="button" aria-label="Go to slide 2" /><span className="swiper-pagination-bullet" tabIndex={0} role="button" aria-label="Go to slide 3" /><span className="swiper-pagination-bullet swiper-pagination-bullet-active" tabIndex={0} role="button" aria-label="Go to slide 4" aria-current="true" /></div>
+                        <span className="swiper-notification" aria-live="assertive" aria-atomic="true" />
+                        <span className="swiper-notification" aria-live="assertive" aria-atomic="true" /></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-99e6575" data-id="99e6575" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-be6d41b elementor-widget elementor-widget-heading" data-id="be6d41b" data-element_type="widget" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h2 className="elementor-heading-title elementor-size-default">Control your </h2>
+                  </div>
+                </div>
+                <div className="elementor-element elementor-element-0acfef2 elementor-widget elementor-widget-heading" data-id="0acfef2" data-element_type="widget" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h2 className="elementor-heading-title elementor-size-default">Crypto journey</h2>
+                  </div>
+                </div>
+                
+                <div className="elementor-element elementor-element-86544f1 elementor-widget elementor-widget-price-list" data-id="86544f1" data-element_type="widget" data-widget_type="price-list.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <ul className="elementor-price-list">
+                      <li><a className="elementor-price-list-item" href="#">
+                        <div className="elementor-price-list-image" bis_skin_checked={1}>
+                          <img decoding="async" src={CoinIcon02} alt="Manage  Crypto" loading="lazy" />
+                        </div>
+                        <div className="elementor-price-list-text" bis_skin_checked={1}>
+                        
+                          <p className="elementor-price-list-description">
+                           Stake top tokens and earn passive rewards every day.</p>
+                        </div>
+                      </a></li>
+                      <li><a className="elementor-price-list-item" href="#">
+                        <div className="elementor-price-list-image" bis_skin_checked={1}>
+                          <img decoding="async" src={CoinIcon03} alt="Mobile Apps" loading="lazy" />
+                        </div>
+                        <div className="elementor-price-list-text" bis_skin_checked={1}>
+                          
+                          <p className="elementor-price-list-description">
+                         Swap Crypto assets cross-chain with ease. </p>
+                        </div>
+                      </a></li>
+                      <li><a className="elementor-price-list-item" href="#">
+                        <div className="elementor-price-list-image" bis_skin_checked={1}>
+                          <img decoding="async" src={CoinIcon06} alt="Capital Market" loading="lazy" />
+                        </div>
+                        <div className="elementor-price-list-text" bis_skin_checked={1}>
+                          
+                          <p className="elementor-price-list-description">
+                           Deposit using card, bank transfer or stablecoins. </p>
+                        </div>
+                      </a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      
+        
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-7013a27 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7013a27" data-element_type="section">
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-cd3d05d animated fadeIn" data-id="cd3d05d" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:200}" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-background-overlay" bis_skin_checked={1} />
+                <div className="elementor-element elementor-element-d8546c8 elementor-widget elementor-widget-heading" data-id="d8546c8" data-element_type="widget" data-widget_type="heading.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <h2 className="elementor-heading-title elementor-size-default">Trusted crypto<br /> platform</h2>
+                  </div>
+                </div>
+                <div className="elementor-element elementor-element-8cc8df8 elementor-widget elementor-widget-text-editor" data-id="8cc8df8" data-element_type="widget" data-widget_type="text-editor.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <p>Trade, earn, and store your assets with confidence. Our platform delivers institutional-grade security and lightning execution speeds.</p>
+                  </div>
+                </div>
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-9089766 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id={9089766} data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-26dbefd" data-id="26dbefd" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-4851e29 elementor-widget elementor-widget-image" data-id="4851e29" data-element_type="widget" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img loading="lazy" decoding="async" width={592} height={175} src={CoinHome010} className="elementor-animation-shrink attachment-large size-large wp-image-332" alt="" srcSet={`${CoinHome010} 592w, ${CoinHome010_300} 300w`} sizes="(max-width: 592px) 100vw, 592px" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-21163d2" data-id="21163d2" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-91d6081 elementor-widget elementor-widget-image" data-id="91d6081" data-element_type="widget" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img loading="lazy" decoding="async" width={592} height={175} src={CoinHome09} className="elementor-animation-shrink attachment-large size-large wp-image-331" alt="" srcSet={`${CoinHome09} 592w, ${CoinHome09_300} 300w`} sizes="(max-width: 592px) 100vw, 592px" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+            <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-1b68880" data-id="1b68880" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-9a22afe elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9a22afe" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-b8a2467 animated fadeIn" data-id="b8a2467" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:400}" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-6753513 elementor-position-top elementor-widget elementor-widget-image-box" data-id={6753513} data-element_type="widget" data-widget_type="image-box.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <div className="elementor-image-box-wrapper" bis_skin_checked={1}>
+                              <figure className="elementor-image-box-img"><img decoding="async" src={Safety} title="Safety" alt="Safety" loading="lazy" /></figure>
+                              <div className="elementor-image-box-content" bis_skin_checked={1}>
+                                <h3 className="elementor-image-box-title">Safe and Secure</h3>
+                                <p className="elementor-image-box-description">Your funds, your control. We use multi-layer encryption and decentralized storage to protect every transaction.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-074ff8c animated fadeIn" data-id="074ff8c" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:600}" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-2f920fc elementor-position-top elementor-widget elementor-widget-image-box" data-id="2f920fc" data-element_type="widget" data-widget_type="image-box.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <div className="elementor-image-box-wrapper" bis_skin_checked={1}>
+                              <figure className="elementor-image-box-img"><img loading="lazy" decoding="async" width={512} height={512} src={Monitoring} className="attachment-full size-full wp-image-246" alt="" srcSet={`${Monitoring} 512w, ${Monitoring300} 300w, ${Monitoring150} 150w`} sizes="(max-width: 512px) 100vw, 512px" /></figure>
+                              <div className="elementor-image-box-content" bis_skin_checked={1}>
+                                <h3 className="elementor-image-box-title">Real-time Data</h3>
+                                <p className="elementor-image-box-description">Access live market prices, volume trends, and analytics — updated every second for smarter trading decisions.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-87e6d17 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="87e6d17" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-b1b321a animated fadeIn" data-id="b1b321a" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:800}" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-ba1aa31 elementor-position-top elementor-widget elementor-widget-image-box" data-id="ba1aa31" data-element_type="widget" data-widget_type="image-box.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <div className="elementor-image-box-wrapper" bis_skin_checked={1}>
+                              <figure className="elementor-image-box-img"><img decoding="async" src={SelectIcon} title="Select" alt="Select" loading="lazy" /></figure>
+                              <div className="elementor-image-box-content" bis_skin_checked={1}>
+                                <h3 className="elementor-image-box-title">Track Profit</h3>
+                                <p className="elementor-image-box-description">Monitor your holdings and trading performance with automated profit/loss reports and portfolio insights.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-0a818a0 animated fadeIn" data-id="0a818a0" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;animation&quot;:&quot;fadeIn&quot;,&quot;animation_delay&quot;:1000}" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-c6f250e elementor-position-top elementor-widget elementor-widget-image-box" data-id="c6f250e" data-element_type="widget" data-widget_type="image-box.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <div className="elementor-image-box-wrapper" bis_skin_checked={1}>
+                              <figure className="elementor-image-box-img"><img loading="lazy" decoding="async" width={512} height={512} src={Settings} className="attachment-full size-full wp-image-252" alt="" srcSet={`${Settings} 512w, ${Settings300} 300w, ${Settings150} 150w`} sizes="(max-width: 512px) 100vw, 512px" /></figure>
+                              <div className="elementor-image-box-content" bis_skin_checked={1}>
+                                <h3 className="elementor-image-box-title">Customizable Charts</h3>
+                                <p className="elementor-image-box-description">Tailor your trading view with advanced chart tools, indicators, and multi-asset comparisons for a personalized experience.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-      <div id="google_translate_element"></div>
 
+      <div data-elementor-type="footer" data-elementor-id={582} className="elementor elementor-582 elementor-location-footer" data-elementor-post-type="elementor_library" bis_skin_checked={1}>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-f5c7696 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f5c7696" data-element_type="section">
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b6c1931" data-id="b6c1931" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-731a3d4 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="731a3d4" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-25 elementor-inner-column elementor-element elementor-element-8d87f94" data-id="8d87f94" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-0851529 elementor-widget elementor-widget-heading animated fadeInUp" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;,&quot;_animation_delay&quot;:200}" data-widget_type="heading.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <h2 className="elementor-heading-title elementor-size-default">Be part of the future</h2>
+                          </div>
+                        </div>
+                        <div className="elementor-element elementor-element-83d1b7a elementor-widget elementor-widget-heading animated fadeInUp" data-id="83d1b7a" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;,&quot;_animation_delay&quot;:400}" data-widget_type="heading.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <h6 className="elementor-heading-title elementor-size-default">thousands of crypto pioneers are already trading, earning, and building with us every day.</h6>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-25 elementor-inner-column elementor-element elementor-element-7760c54" data-id="7760c54" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-52c232d elementor-widget elementor-widget-image animated fadeInUp" data-id="52c232d" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;,&quot;_animation_delay&quot;:200}" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img width={592} height={175} src={CoinHome010} className="elementor-animation-shrink attachment-large size-large wp-image-332" alt="" srcSet={`${CoinHome010} 592w, ${CoinHome010_300} 300w`} sizes="(max-width: 592px) 100vw, 592px" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-25 elementor-inner-column elementor-element elementor-element-66457a1" data-id="66457a1" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-e4d5c6c elementor-widget elementor-widget-image animated fadeInUp" data-id="e4d5c6c" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;,&quot;_animation_delay&quot;:400}" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img width={592} height={175} src={CoinHome09} className="elementor-animation-shrink attachment-large size-large wp-image-331" alt="" srcSet={`${CoinHome09} 592w, ${CoinHome09_300} 300w`} sizes="(max-width: 592px) 100vw, 592px" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-25 elementor-inner-column elementor-element elementor-element-15801da elementor-hidden-phone" data-id="15801da" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-3f30b9c elementor-widget elementor-widget-image animated fadeInUp" data-id="3f30b9c" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;,&quot;_animation_delay&quot;:600}" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img width={234} height={68} src={CoinHome011} className="elementor-animation-shrink attachment-large size-large wp-image-336" alt="" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-54a2ebf elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="54a2ebf" data-element_type="section">
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-afba3d9" data-id="afba3d9" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;gradient&quot;}" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <section className="elementor-section elementor-inner-section elementor-element elementor-element-c8fce66 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c8fce66" data-element_type="section">
+                  <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+                    <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-f318752" data-id="f318752" data-element_type="column" bis_skin_checked={1}>
+                      <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                        <div className="elementor-element elementor-element-2fa9851 elementor-widget elementor-widget-image animated fadeIn" data-id="2fa9851" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:400}" data-widget_type="image.default" bis_skin_checked={1}>
+                          <div className="elementor-widget-container" bis_skin_checked={1}>
+                            <img width={800} height={655} src={CoinHome029} className="attachment-large size-large wp-image-591" alt="" srcSet={`${CoinHome029} 1024w, ${CoinHome029_300} 300w, ${CoinHome029_768} 768w, ${CoinHome029_800} 800w, ${CoinHome029Full} 1250w`} sizes="(max-width: 800px) 100vw, 800px" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-53ad710" data-id="53ad710" data-element_type="column" bis_skin_checked={1}>
+                      
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="elementor-section elementor-top-section elementor-element elementor-element-6445f69 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6445f69" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+          <div className="elementor-container elementor-column-gap-default" bis_skin_checked={1}>
+            <div className="elementor-column elementor-col-20 elementor-top-column elementor-element elementor-element-61906ae" data-id="61906ae" data-element_type="column" bis_skin_checked={1}>
+              <div className="elementor-widget-wrap elementor-element-populated" bis_skin_checked={1}>
+                <div className="elementor-element elementor-element-85102d6 elementor-widget elementor-widget-image animated fadeInUp" data-id="85102d6" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;,&quot;_animation_delay&quot;:100}" data-widget_type="image.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <img src={LogoNew} className="attachment-large size-large wp-image-613" alt=""   />
+                  </div>
+                </div>
+                
+                <div className="elementor-element elementor-element-2baed1f elementor-widget elementor-widget-image animated fadeInUp" data-id="2baed1f" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;,&quot;_animation_delay&quot;:400}" data-widget_type="image.default" bis_skin_checked={1}>
+                  <div className="elementor-widget-container" bis_skin_checked={1}>
+                    <img width={600} height={292} src={CoinHome030} className="attachment-large size-large wp-image-629" alt="" srcSet={`${CoinHome030} 600w, ${CoinHome030_300} 300w`} sizes="(max-width: 600px) 100vw, 600px" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </section>
+        
+      </div>
     </div>
 
   );

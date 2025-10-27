@@ -1,0 +1,242 @@
+:root {
+    --e-global-color-primary: #1262FF;
+    --e-global-color-secondary: #54595F;
+    --e-global-color-text: #81859E;
+    --e-global-color-accent: #190C2D;
+    --e-global-color-62c0f51: #1EC47B;
+    --e-global-color-73c8682: #FF061B;
+    --e-global-color-fa3f9fc: #D2D2D278;
+    --e-global-color-f2cfd0f: #FFFFFF;
+    --e-global-typography-primary-font-family: "Lexend";
+    --e-global-typography-primary-font-size: 21px;
+    --e-global-typography-primary-font-weight: 600;
+    --e-global-typography-secondary-font-family: "Lexend";
+    --e-global-typography-secondary-font-size: 18px;
+    --e-global-typography-secondary-font-weight: 500;
+    --e-global-typography-secondary-letter-spacing: 1px;
+    --e-global-typography-text-font-family: "Questrial";
+    --e-global-typography-text-font-size: 16px;
+    --e-global-typography-text-font-weight: 400;
+    --e-global-typography-text-letter-spacing: 1px;
+    --e-global-typography-accent-font-family: "Questrial";
+    --e-global-typography-accent-font-size: 15px;
+    --e-global-typography-accent-font-weight: 500;
+    --e-global-typography-accent-letter-spacing: 1px;
+    --e-global-typography-c2b9d98-font-family: "Questrial";
+    --e-global-typography-c2b9d98-font-size: 17px;
+    --e-global-typography-c2b9d98-font-weight: 500;
+    --e-global-typography-c2b9d98-letter-spacing: 1.1px;
+    --e-global-typography-fa1ce82-font-family: "Questrial";
+    --e-global-typography-fa1ce82-font-size: 15px;
+    --e-global-typography-fa1ce82-font-weight: 700;
+    --e-global-typography-93e7542-font-family: "Questrial";
+    --e-global-typography-93e7542-font-size: 16px;
+    --e-global-typography-93e7542-font-weight: 600;
+    --e-global-typography-93e7542-letter-spacing: 1px;
+    --e-global-typography-aae8d6e-font-family: "Questrial";
+    --e-global-typography-aae8d6e-font-size: 20px;
+    --e-global-typography-aae8d6e-font-weight: 600;
+    --e-global-typography-aae8d6e-line-height: 1em;
+    --e-global-typography-aae8d6e-letter-spacing: 1px;
+    --e-global-typography-c7b9afd-font-family: "Questrial";
+    --e-global-typography-c7b9afd-font-size: 13px;
+    --e-global-typography-c7b9afd-font-weight: 500;
+    --e-global-typography-c7b9afd-line-height: 0.1em;
+    --e-global-typography-c7b9afd-letter-spacing: 1px;
+    --e-global-typography-eabf5f0-font-family: "Lexend";
+    --e-global-typography-eabf5f0-font-size: 45px;
+    --e-global-typography-eabf5f0-font-weight: 700;
+    --e-global-typography-dcd2daa-font-family: "Lexend";
+    --e-global-typography-dcd2daa-font-size: 37px;
+    --e-global-typography-dcd2daa-font-weight: 700;
+    --e-global-typography-845e595-font-family: "Questrial";
+    --e-global-typography-845e595-font-size: 16px;
+    --e-global-typography-845e595-font-weight: 600;
+    --e-global-typography-845e595-letter-spacing: 1px;
+    background-color: transparent;
+    background-image: linear-gradient(200deg, #FFFFFF 42%, #EEF6FF 100%);
+}
+
+.elementor-kit-3 e-page-transition {
+    background-color: #FFBC7D;
+}
+
+.elementor-kit-3 h1 {
+    color: var(--e-global-color-primary);
+    font-family: "Lexend", Sans-serif;
+    font-size: 60px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+@media (max-width: 768px) {
+    .ammajjd{
+        display: flex !important; 
+        flex-wrap: nowrap !important;
+    }
+}
+.elementor-kit-3 h2 {
+    color: var(--e-global-color-accent);
+    font-family: "Lexend", Sans-serif;
+    font-size: 40px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+.elementor-price-list-item{
+    align-items: center !important;
+}
+
+.elementor-kit-3 h3 {
+    color: var(--e-global-color-primary);
+    font-family: "Lexend", Sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.elementor-kit-3 h4 {
+    color: var(--e-global-color-primary);
+    font-family: "Lexend", Sans-serif;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.elementor-kit-3 h5 {
+    color: var(--e-global-color-accent);
+    font-family: "Questrial", Sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 0.7px;
+}
+
+.elementor-kit-3 h6 {
+    color: var(--e-global-color-text);
+    font-family: "Questrial", Sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.elementor-kit-3 button,
+.elementor-kit-3 input[type="button"],
+.elementor-kit-3 input[type="submit"],
+.elementor-kit-3 .elementor-button {
+    border-radius: 5px 5px 5px 5px;
+}
+
+.elementor-kit-3 input:not([type="button"]):not([type="submit"]),
+.elementor-kit-3 textarea,
+.elementor-kit-3 .elementor-field-textual {
+    border-radius: 5px 5px 5px 5px;
+}
+
+.elementor-section.elementor-section-boxed>.elementor-container {
+    max-width: 1140px;
+}
+
+.e-con {
+    --container-max-width: 1140px;
+}
+
+.elementor-widget:not(:last-child) {
+    margin-block-end: 20px;
+}
+
+.elementor-element {
+    --widgets-spacing: 20px 20px;
+    --widgets-spacing-row: 20px;
+    --widgets-spacing-column: 20px;
+}
+
+    {}
+
+h1.entry-title {
+    display: var(--page-title-display);
+}
+
+.site-header .site-branding {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.site-header {
+    padding-inline-end: 0px;
+    padding-inline-start: 0px;
+}
+
+.site-footer .site-branding {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+@media(max-width:1024px) {
+    .elementor-kit-3 {
+        --e-global-typography-primary-font-size: 18px;
+        --e-global-typography-c2b9d98-font-size: 17px;
+        --e-global-typography-eabf5f0-font-size: 40px;
+        --e-global-typography-dcd2daa-font-size: 35px;
+    }
+
+    .elementor-kit-3 h1 {
+        font-size: 42px;
+    }
+
+    .elementor-kit-3 h2 {
+        font-size: 35px;
+    }
+
+    .elementor-kit-3 h3 {
+        font-size: 28px;
+    }
+
+    .elementor-kit-3 h4 {
+        font-size: 22px;
+    }
+
+    .elementor-kit-3 h5 {
+        font-size: 19px;
+    }
+
+    .elementor-section.elementor-section-boxed>.elementor-container {
+        max-width: 1024px;
+    }
+
+    .e-con {
+        --container-max-width: 1024px;
+    }
+}
+
+@media(max-width:767px) {
+    .elementor-kit-3 {
+        --e-global-typography-primary-font-size: 19px;
+        --e-global-typography-c2b9d98-font-size: 17px;
+        --e-global-typography-eabf5f0-font-size: 40px;
+        --e-global-typography-dcd2daa-font-size: 35px;
+    }
+
+    .elementor-kit-3 h1 {
+        font-size: 35px;
+    }
+
+    .elementor-kit-3 h2 {
+        font-size: 30px;
+        line-height: 1.2em;
+    }
+
+    .elementor-kit-3 h3 {
+        font-size: 25px;
+    }
+
+    .elementor-kit-3 h4 {
+        font-size: 20px;
+    }
+
+    .elementor-kit-3 h5 {
+        font-size: 18px;
+    }
+
+    .elementor-section.elementor-section-boxed>.elementor-container {
+        max-width: 767px;
+    }
+
+    .e-con {
+        --container-max-width: 767px;
+    }
+}

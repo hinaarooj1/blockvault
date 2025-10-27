@@ -1,0 +1,9 @@
+.site-navigation-toggle-holder:not(.elementor-active)+.site-navigation-dropdown {
+    transform: scaleY(0);
+    max-height: 0
+}
+
+.site-navigation-toggle-holder.elementor-active+.site-navigation-dropdown {
+    transform: scaleY(1);
+    max-height: 100vh
+}
