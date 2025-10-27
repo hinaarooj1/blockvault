@@ -219,9 +219,12 @@ const Home = () => {
                 <div className="elementor-element elementor-element-deafccb elementor-widget elementor-widget-button animated fadeIn" data-id="deafccb" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:800}" data-widget_type="button.default" bis_skin_checked={1}>
                   <div className="elementor-widget-container" bis_skin_checked={1}>
                     <div className="elementor-button-wrapper" bis_skin_checked={1}>
-                      <Link className="elementor-button elementor-button-link elementor-size-sm"  to="/auth/signup">
+                      <Link className="elementor-button elementor-button-link elementor-size-sm" to={!user() ? "/auth/signup" : user()?.user?.role === "user" ? "/dashboard" : "/admin/dashboard"}>
                         <span className="elementor-button-content-wrapper">
-                          <span className="elementor-button-text">Start Now</span>
+                          <span className="elementor-button-text">
+                            
+                          {!user() ? "Start Now" : "Dashboard"}
+                            </span>
                         </span>
                       </Link>
                     </div>
@@ -305,9 +308,12 @@ const Home = () => {
                 <div className="elementor-element elementor-element-6f99068 elementor-widget elementor-widget-button animated fadeIn" data-id="6f99068" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeIn&quot;,&quot;_animation_delay&quot;:800}" data-widget_type="button.default" bis_skin_checked={1}>
                   <div className="elementor-widget-container" bis_skin_checked={1}>
                     <div className="elementor-button-wrapper" bis_skin_checked={1}>
-                      <Link className="elementor-button elementor-button-link elementor-size-sm" to="/auth/signup">
+                      <Link className="elementor-button elementor-button-link elementor-size-sm" to={!user() ? "/auth/signup" : user()?.user?.role === "user" ? "/dashboard" : "/admin/dashboard"}>
                         <span className="elementor-button-content-wrapper">
-                          <span className="elementor-button-text">Get Started</span>
+                          <span className="elementor-button-text">
+                            
+                            
+                          {!user() ? "Get Started" : "Dashboard"}</span>
                         </span>
                       </Link>
                     </div>
