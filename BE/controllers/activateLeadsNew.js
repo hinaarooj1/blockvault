@@ -36,7 +36,7 @@ const sanitizePhone = (phoneValue) => {
  * This is FAST and shows real-time progress in blocking modal
  */
 exports.bulkActivateLeads = catchAsyncErrors(async (req, res, next) => {
-    const { leadIds } = req.body;
+    const { leadIds, sendWelcomeEmail = true } = req.body;
     const Lead = await getLeadModel();
 
     if (!leadIds || !Array.isArray(leadIds) || leadIds.length === 0) {
@@ -79,6 +79,8 @@ exports.bulkActivateLeads = catchAsyncErrors(async (req, res, next) => {
         let skippedCount = 0;
         let failedCount = 0;
         const pendingEmails = [];
+        const credentials = []; // Store credentials for CSV download
+        const skippedUsers = []; // Track skipped users
 
         // Send start event
         sendProgress({
@@ -102,6 +104,12 @@ exports.bulkActivateLeads = catchAsyncErrors(async (req, res, next) => {
                 
                 if (existingUser) {
                     skippedCount++;
+                    skippedUsers.push({
+                        email: lead.email,
+                        firstName: lead.firstName,
+                        lastName: lead.lastName,
+                        reason: 'User already exists in the system'
+                    });
                     
                     sendProgress({
                         type: 'progress',
@@ -137,15 +145,25 @@ exports.bulkActivateLeads = catchAsyncErrors(async (req, res, next) => {
 
                 activatedCount++;
                 
-                // Store for pending email
-                pendingEmails.push({
-                    userId: newUser._id,
+                // Store credentials for CSV download (if emails disabled)
+                credentials.push({
                     email: newUser.email,
-                    firstName: newUser.firstName,
-                    lastName: newUser.lastName,
                     password: tempPassword,
-                    leadId: lead._id
+                    firstName: newUser.firstName,
+                    lastName: newUser.lastName
                 });
+                
+                // Store for pending email (only if sendWelcomeEmail is true)
+                if (sendWelcomeEmail) {
+                    pendingEmails.push({
+                        userId: newUser._id,
+                        email: newUser.email,
+                        firstName: newUser.firstName,
+                        lastName: newUser.lastName,
+                        password: tempPassword,
+                        leadId: lead._id
+                    });
+                }
 
                 // Send progress
                 sendProgress({
@@ -176,8 +194,8 @@ exports.bulkActivateLeads = catchAsyncErrors(async (req, res, next) => {
             }
         }
 
-        // Add all to pending emails collection (BATCH INSERT)
-        if (pendingEmails.length > 0) {
+        // Add all to pending emails collection (BATCH INSERT) - only if sendWelcomeEmail is true
+        if (sendWelcomeEmail && pendingEmails.length > 0) {
             console.log(`📝 Inserting ${pendingEmails.length} emails to pending queue...`);
             await PendingActivationEmail.insertMany(pendingEmails);
             console.log(`✅ Added ${pendingEmails.length} emails to pending queue successfully`);
@@ -208,6 +226,14 @@ exports.bulkActivateLeads = catchAsyncErrors(async (req, res, next) => {
             }
         }
 
+        // Build completion message
+        let completionMsg = `Completed! ${activatedCount} users created.`;
+        if (sendWelcomeEmail && pendingEmails.length > 0) {
+            completionMsg += ` ${pendingEmails.length} emails queued for background sending.`;
+        } else if (!sendWelcomeEmail) {
+            completionMsg += ` Credentials ready for download.`;
+        }
+
         // Send completion
         sendProgress({
             type: 'complete',
@@ -216,9 +242,11 @@ exports.bulkActivateLeads = catchAsyncErrors(async (req, res, next) => {
             skipped: skippedCount,
             failed: failedCount,
             percentage: 100,
-            msg: `Completed! ${activatedCount} users created. Emails will be sent in background.`,
+            msg: completionMsg,
             completed: true,
-            emailsQueued: pendingEmails.length
+            emailsQueued: sendWelcomeEmail ? pendingEmails.length : 0,
+            credentials: !sendWelcomeEmail ? credentials : [], // Return credentials only if emails disabled
+            skippedUsers: skippedUsers // Return list of skipped users
         });
 
         res.end();

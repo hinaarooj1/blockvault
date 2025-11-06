@@ -568,14 +568,14 @@ export const searchCommentsApi = (leadId, params = {}) => {
 
 // Activate bulk leads with progress tracking (SSE) - NEW APPROACH
 // This ONLY creates users, emails are queued for background processing
-export const activateLeadsBulkWithProgress = async (leadIds, onProgress) => {try {
+export const activateLeadsBulkWithProgress = async (leadIds, sendWelcomeEmail = true, onProgress) => {try {
     const response = await fetch(`${baseUrl}/crm/bulkActivateLeads`, {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ leadIds })
+      body: JSON.stringify({ leadIds, sendWelcomeEmail })
     });if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Response not OK:', errorText);

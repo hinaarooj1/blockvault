@@ -1390,6 +1390,7 @@ const LeadsPage = () => {
     const [activating, setActivating] = useState(false); // Track activation state
     const [activateConfirmOpen, setActivateConfirmOpen] = useState(false); // Confirmation dialog
     const [activationModalOpen, setActivationModalOpen] = useState(false); // Blocking modal for activation
+    const [sendWelcomeEmail, setSendWelcomeEmail] = useState(true); // Option to send welcome email
     const [activationProgress, setActivationProgress] = useState({
         total: 0,
         activated: 0,
@@ -1797,8 +1798,8 @@ const LeadsPage = () => {
         });
 
         try {
-            // Call API with progress callback - NO localStorage, NO sessionId!
-            const result = await activateLeadsBulkWithProgress(leadIds, (progressData) => {
+            // Call API with progress callback - Pass sendWelcomeEmail option
+            const result = await activateLeadsBulkWithProgress(leadIds, sendWelcomeEmail, (progressData) => {
                 // Update modal progress in real-time
                 setActivationProgress({
                     total: progressData.total || leadIds.length,
@@ -1818,20 +1819,78 @@ const LeadsPage = () => {
             fetchLeads(pagination.currentPage, pagination.limit);
             setSelectedLeads(new Set()); // Clear selection
 
-            // Show success toast with email info
-            const emailsQueued = result.emailsQueued || result.activated || 0;
-            toast.success(
-                `✅ ${result.activated} users created successfully! ${emailsQueued > 0 ? `${emailsQueued} welcome emails are being sent in the background.` : ''}`,
-                { autoClose: 6000 }
-            );
-            
-            if (emailsQueued > 0) {
+            // Show skipped users toast if any
+            if (result.skippedUsers && result.skippedUsers.length > 0) {
+                setTimeout(() => {
+                    toast.warning(
+                        `⚠️ ${result.skippedUsers.length} User(s) Already Exist in the system`,
+                        { 
+                            autoClose: 8000
+                        }
+                    );
+                }, 1500);
+            }
+
+            // If emails were not sent, download CSV with credentials
+            if (!sendWelcomeEmail && result.credentials && result.credentials.length > 0) {
+                // Generate CSV content
+                const csvHeaders = ['Email', 'Password', 'First Name', 'Last Name', 'Status'];
+                const csvRows = result.credentials.map(cred => [
+                    cred.email,
+                    cred.password,
+                    cred.firstName || '',
+                    cred.lastName || '',
+                    'Active'
+                ]);
+
+                // Combine headers and rows
+                const csvContent = [
+                    csvHeaders.join(','),
+                    ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+                ].join('\n');
+
+                // Create and download CSV file
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `user-credentials-${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                toast.success(
+                    `✅ ${result.activated} users created successfully! Credentials CSV downloaded.`,
+                    { autoClose: 6000 }
+                );
                 setTimeout(() => {
                     toast.info(
-                        '📧 Check the Email Queue page to monitor email sending progress.',
+                        '📥 User credentials have been downloaded. Please share them securely with the users.',
                         { autoClose: 5000 }
                     );
                 }, 1000);
+            } else if (sendWelcomeEmail) {
+                // Show success toast with email info
+                const emailsQueued = result.emailsQueued || 0;
+                if (emailsQueued > 0) {
+                    toast.success(
+                        `✅ ${result.activated} users created successfully! ${emailsQueued} welcome emails are being sent in the background.`,
+                        { autoClose: 6000 }
+                    );
+                    setTimeout(() => {
+                        toast.info(
+                            '📧 Check the Email Queue page to monitor email sending progress.',
+                            { autoClose: 5000 }
+                        );
+                    }, 1000);
+                } else {
+                    toast.success(
+                        `✅ ${result.activated} users created successfully!`,
+                        { autoClose: 6000 }
+                    );
+                }
             }
 
         } catch (error) {
@@ -2926,11 +2985,56 @@ const LeadsPage = () => {
                         <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
                             <li>Create user accounts for each lead (fast - ~30 seconds)</li>
                             <li>Generate random passwords</li>
-                            <li>Queue welcome emails for background sending</li>
+                            {sendWelcomeEmail && <li>Queue welcome emails for background sending</li>}
                         </ul>
                     </Alert>
+
+                    {/* Email Option Toggle */}
+                    <Box sx={{ 
+                        p: 2, 
+                        bgcolor: 'grey.50', 
+                        borderRadius: 2, 
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        mb: 2 
+                    }}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={sendWelcomeEmail}
+                                    onChange={(e) => setSendWelcomeEmail(e.target.checked)}
+                                    color="primary"
+                                />
+                            }
+                            label={
+                                <Box>
+                                    <Typography variant="body2" fontWeight="medium">
+                                        📧 Send Welcome Emails
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        {sendWelcomeEmail 
+                                            ? 'Welcome emails with login credentials will be sent to all activated users'
+                                            : 'Users will be created without sending welcome emails'}
+                                    </Typography>
+                                </Box>
+                            }
+                        />
+                    </Box>
+
+                    {!sendWelcomeEmail && (
+                        <Alert severity="warning" sx={{ mb: 2 }}>
+                            <Typography variant="body2" fontWeight="medium" gutterBottom>
+                                📥 CSV Download
+                            </Typography>
+                            <Typography variant="caption">
+                                A CSV file containing email addresses and passwords will be automatically downloaded after user creation. 
+                                You can use this file to share credentials with users manually.
+                            </Typography>
+                        </Alert>
+                    )}
+
                     <Typography variant="body2" color="text.secondary">
-                        ℹ️ User creation is fast! After completion, emails will be sent in the background automatically.
+                        ℹ️ User creation is fast! {sendWelcomeEmail && 'After completion, emails will be sent in the background automatically.'}
                     </Typography>
                 </DialogContent>
                 <DialogActions>

@@ -263,6 +263,7 @@ const Dashboard = () => {
     }
   };
   const [Allow2Fa, setAllow2Fa] = useState(false);
+  const [requireEmailVerification, setRequireEmailVerification] = useState(true);
   const [isLoadingNew, setisLoadingNew] = useState(false);
   const [getLoading, setgetLoading] = useState(true);
   const getUserRestrcition = async () => {
@@ -273,6 +274,8 @@ const Dashboard = () => {
         setisLoadingNew(false)
 
         setAllow2Fa(data?.data?.withdrawal2Fa);
+        // Default to true (require verification) if not explicitly set to false
+        setRequireEmailVerification(data?.data?.requireEmailVerification ?? true);
         return;
       } else {
         toast.dismiss();
@@ -288,7 +291,7 @@ const Dashboard = () => {
   const updateRestrictions = async (data) => {
     try {
       setisLoadingNew(true)
-      const updateData = await UpdateRestrictionsApi({ withdrawal2Fa: data });
+      const updateData = await UpdateRestrictionsApi(data);
       if (updateData.success) {
         getUserRestrcition()
         toast.success("Data updated successfully")
@@ -376,7 +379,7 @@ const Dashboard = () => {
                 }}
               ></div>
               {authUser().user.role === "superadmin" && <div className="permissions-grid grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Allow Admin to see/add/manage sub admins */}
+                {/* Withdrawal 2FA */}
                 {getLoading ? (
                   // 🔹 Skeleton card while data is loading
                   <div className="permission-card skeleton-card">
@@ -396,13 +399,43 @@ const Dashboard = () => {
                       <Switch
                         disabled={isLoadingNew}
                         checked={Allow2Fa}
-                        onChange={() => updateRestrictions(!Allow2Fa)}
+                        onChange={() => updateRestrictions({ withdrawal2Fa: !Allow2Fa })}
                         color="primary"
                       />
                     </div>
                     <p className="text-sm text-gray-600 dark:text-muted-400">
                       Require all users to enter a one-time verification code sent to their
                       email before completing any withdrawal.
+                    </p>
+                  </div>
+                )}
+
+                {/* Email Verification on Registration */}
+                {getLoading ? (
+                  // 🔹 Skeleton card while data is loading
+                  <div className="permission-card skeleton-card">
+                    <div className="skeleton-header">
+                      <div className="skeleton skeleton-title"></div>
+                      <div className="skeleton skeleton-switch"></div>
+                    </div>
+                    <div className="skeleton skeleton-text"></div>
+                  </div>
+                ) : (
+                  // 🔹 Actual card when loaded
+                  <div className="permission-card bg-white dark:bg-muted-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-muted-700">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-medium text-gray-800 dark:text-white">
+                        Email Verification on Registration
+                      </h3>
+                      <Switch
+                        disabled={isLoadingNew}
+                        checked={requireEmailVerification}
+                        onChange={() => updateRestrictions({ requireEmailVerification: !requireEmailVerification })}
+                        color="primary"
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-muted-400">
+                      Require new users to verify their email address before they can login. When disabled, users can login immediately after registration.
                     </p>
                   </div>
                 )}

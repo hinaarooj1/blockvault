@@ -123,6 +123,25 @@ exports.RegisterUser = catchAsyncErrors(async (req, res, next) => {
     });
     return
   }
+
+  // Check if email verification is required
+  const restrictions = await UserRestriction.findOne();
+  // Default to true (require verification) if setting doesn't exist or is not explicitly set to false
+  const requireEmailVerification = restrictions?.requireEmailVerification ?? true;
+
+  if (requireEmailVerification === false) {
+    // Only skip email verification if admin explicitly disabled it
+    createUser.verified = true;
+    await createUser.save();
+
+    res.status(201).send({
+      msg: "Registration successful! You can now login.",
+      success: true,
+    });
+    return;
+  }
+
+  // Email verification is required - send verification email
   const token = await new Token({
     userId: createUser._id,
     token: crypto.randomBytes(32).toString("hex"),
@@ -2284,7 +2303,8 @@ exports.getUsersRestrictions = catchAsyncErrors(async (req, res) => {
 // 🔹 Create or Update the single document (admin only)
 exports.updateUsersRestrictions = catchAsyncErrors(async (req, res) => {
   const {
-    withdrawal2Fa
+    withdrawal2Fa,
+    requireEmailVerification
   } = req.body;
 
   // Find the single settings doc or create if not exists
@@ -2294,6 +2314,9 @@ exports.updateUsersRestrictions = catchAsyncErrors(async (req, res) => {
 
   settings.withdrawal2Fa =
     typeof withdrawal2Fa === "boolean" ? withdrawal2Fa : settings.withdrawal2Fa;
+  
+  settings.requireEmailVerification =
+    typeof requireEmailVerification === "boolean" ? requireEmailVerification : settings.requireEmailVerification;
 
 
 

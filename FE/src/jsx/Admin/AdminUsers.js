@@ -1683,6 +1683,7 @@ const AdminUsers = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Email Input */}
             <Box>
+              <br/>
               <TextField
                 fullWidth
                 label="User Email"
@@ -1705,13 +1706,15 @@ const AdminUsers = () => {
                   },
                   '& .MuiInputLabel-root': {
                     color: 'grey.400',
+                    backgroundColor: '#1e1e1e',
+                    paddingX: '4px',
                   },
                   '& .MuiInputLabel-root.Mui-focused': {
                     color: 'primary.main',
                   },
-                }}
-                InputLabelProps={{
-                  shrink: true,
+                  '& .MuiInputLabel-shrink': {
+                    backgroundColor: '#1e1e1e',
+                  },
                 }}
               />
             </Box>

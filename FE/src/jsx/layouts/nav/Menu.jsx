@@ -173,13 +173,13 @@ const useMenuList = () => {
             : [])
         ,
 
-        {
-            title: 'Legal',
-            classsChange: 'mm-active',
-            to: '/legal',
-            iconStyle: <i className="material-symbols-outlined">lab_profile</i>,
+        // {
+        //     title: 'Legal',
+        //     classsChange: 'mm-active',
+        //     to: '/legal',
+        //     iconStyle: <i className="material-symbols-outlined">lab_profile</i>,
 
-        },
+        // },
 
         ...(Array.isArray(Links) && Links[0]?.enabled
             ? [
