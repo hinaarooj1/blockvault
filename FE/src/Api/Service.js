@@ -686,3 +686,28 @@ export const addCommissionManuallyApi = (userId, data) => {
   return postApi(`referral/admin/commission/${userId}`, data);
 };
 
+// Call-related API functions
+export const initiateCallApi = (leadId, phoneNumber) => {
+  return postApi(`/crm/call/initiate`, { leadId, phoneNumber });
+};
+
+export const bulkCallLeadsApi = (leadIds, options = {}) => {
+  return postApi(`/crm/call/bulk`, { leadIds, options });
+};
+
+export const scheduleCallApi = (leadId, phoneNumber, scheduledAt) => {
+  return postApi(`/crm/call/schedule`, { leadId, phoneNumber, scheduledAt });
+};
+
+export const getCallStatusApi = (sessionId) => {
+  return getApi(`/crm/call/status/${sessionId}`);
+};
+
+export const getCallHistoryApi = (leadId) => {
+  return getApi(`/crm/call/history/${leadId}`);
+};
+
+export const cancelCallApi = (sessionId) => {
+  return postApi(`/crm/call/cancel/${sessionId}`);
+};
+

@@ -98,6 +98,12 @@ import {
     assignLeadsApi,
     activateLeadApi,
     activateLeadsBulkApi,
+    initiateCallApi,
+    bulkCallLeadsApi,
+    scheduleCallApi,
+    getCallStatusApi,
+    getCallHistoryApi,
+    cancelCallApi,
     activateLeadsBulkWithProgress,
     getEmailQueueStatusApi
 } from "../../../Api/Service";
@@ -1383,6 +1389,8 @@ const LeadsPage = () => {
     const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [selectedLeads, setSelectedLeads] = useState(new Set());
+    const [callStatuses, setCallStatuses] = useState({}); // Track call status per lead
+    const [socket, setSocket] = useState(null);
     const [expandedLead, setExpandedLead] = useState(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [deleteType, setDeleteType] = useState(''); // 'single', 'bulk', 'all'
@@ -1417,9 +1425,9 @@ const LeadsPage = () => {
         msg: ''
     });
 
-    // ✅ Socket.io connection for real-time email queue updates
+    // ✅ Socket.io connection for real-time email queue updates and call status
     useEffect(() => { 
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000/api';
         
         // Parse URL properly to avoid malformed URLs
         let backendUrl;
@@ -1428,7 +1436,7 @@ const LeadsPage = () => {
             backendUrl = `${url.protocol}//${url.host}`; // Get protocol + host only
         } catch (e) {
             console.error('Invalid REACT_APP_API_URL:', apiUrl);
-            backendUrl = 'http://localhost:5000'; // Fallback
+            backendUrl = 'http://localhost:4000'; // Fallback
         }
         
         const socket = io(backendUrl, {
@@ -1445,6 +1453,32 @@ const LeadsPage = () => {
                 total: data.total || 0
             });
         });
+
+        // Call status updates
+        socket.on('call:status:update', (data) => {
+            if (data.leadId) {
+                setCallStatuses(prev => ({
+                    ...prev,
+                    [data.leadId]: data.status
+                }));
+            }
+        });
+
+        // Call summary ready
+        socket.on('call:summary:ready', (data) => {
+            if (data.leadId) {
+                toast.success(`Call summary ready for lead`);
+                // Refresh leads to show updated call history
+                fetchLeads(pagination.currentPage);
+            }
+        });
+
+        // Bulk call progress
+        socket.on('bulk:call:progress', (data) => {
+            toast.info(`Bulk call progress: ${data.completed}/${data.total}`);
+        });
+
+        setSocket(socket);
 
         socket.on('disconnect', () => {});
 
@@ -1600,6 +1634,56 @@ const LeadsPage = () => {
 
     const handleLeadUpdated = () => {
         fetchLeads(pagination.currentPage);
+    };
+
+    // Call handlers
+    const handleCallLead = async (lead) => {
+        if (!lead.phone) {
+            toast.error('Lead has no phone number');
+            return;
+        }
+
+        try {
+            setCallStatuses(prev => ({ ...prev, [lead._id]: 'ringing' }));
+            const response = await initiateCallApi(lead._id, lead.phone);
+            if (response.success) {
+                toast.success(`Calling ${lead.firstName} ${lead.lastName}...`);
+            } else {
+                toast.error(response.msg || 'Failed to initiate call');
+                setCallStatuses(prev => ({ ...prev, [lead._id]: null }));
+            }
+        } catch (error) {
+            console.error('Error initiating call:', error);
+            toast.error('Failed to initiate call');
+            setCallStatuses(prev => ({ ...prev, [lead._id]: null }));
+        }
+    };
+
+    const handleBulkCall = async () => {
+        if (selectedLeads.size === 0) {
+            toast.error('Please select leads to call');
+            return;
+        }
+
+        const selectedLeadIds = Array.from(selectedLeads);
+        const leadsToCall = leads.filter(lead => selectedLeadIds.includes(lead._id) && lead.phone);
+
+        if (leadsToCall.length === 0) {
+            toast.error('Selected leads have no phone numbers');
+            return;
+        }
+
+        try {
+            const response = await bulkCallLeadsApi(selectedLeadIds, { delay: 5000 });
+            if (response.success) {
+                toast.success(`Queued ${response.calls.length} calls`);
+            } else {
+                toast.error(response.msg || 'Failed to initiate bulk calls');
+            }
+        } catch (error) {
+            console.error('Error initiating bulk calls:', error);
+            toast.error('Failed to initiate bulk calls');
+        }
     };
 
     // Selection handlers
@@ -2211,6 +2295,19 @@ const LeadsPage = () => {
                                             {activating ? 'Activating...' : `Activate (${selectedLeads.size})`}
                                         </Button>
                                     )}
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<Phone />}
+                                        onClick={handleBulkCall}
+                                        size="small"
+                                        sx={{ 
+                                            flex: { xs: '1 1 auto', sm: '0 0 auto' },
+                                            fontWeight: 'bold',
+                                        }}
+                                    >
+                                        Call Selected ({selectedLeads.size})
+                                    </Button>
                                         <Button
                                             variant="outlined"
                                             startIcon={<Close sx={{ display: { xs: 'none', sm: 'block' } }} />}
@@ -2572,12 +2669,25 @@ const LeadsPage = () => {
                                                             </Typography>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={(e) => handleMenuOpen(e, lead)}
-                                                            >
-                                                                <MoreVert />
-                                                            </IconButton>
+                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                                {lead.phone && (
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        color="primary"
+                                                                        onClick={() => handleCallLead(lead)}
+                                                                        disabled={callStatuses[lead._id] === 'ringing' || callStatuses[lead._id] === 'in-progress'}
+                                                                        title="Call Lead"
+                                                                    >
+                                                                        <Phone />
+                                                                    </IconButton>
+                                                                )}
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={(e) => handleMenuOpen(e, lead)}
+                                                                >
+                                                                    <MoreVert />
+                                                                </IconButton>
+                                                            </Box>
                                                         </TableCell>
                                                     </TableRow>
                                                     <TableRow>

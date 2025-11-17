@@ -23,6 +23,7 @@ const leadSchema = new mongoose.Schema({
     default: "New",
   },
   notes: [noteSchema],
+  callHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Call' }],
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },

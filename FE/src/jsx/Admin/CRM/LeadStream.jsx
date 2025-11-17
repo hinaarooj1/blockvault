@@ -2049,6 +2049,63 @@ const LeadStream = () => {
                                                                     ? highlightMentions(activity.comment || activity.description || 'No description')
                                                                     : (activity.description || activity.comment || 'No description')}
                                                             </Typography>
+
+                                                            {/* ✅ Call Summary Display */}
+                                                            {activity.type === 'call_logged' && activity.metadata && (
+                                                                <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.08)', borderRadius: 2, borderLeft: '3px solid', borderColor: 'primary.main' }}>
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                                                                        <Phone sx={{ fontSize: 18, color: 'primary.main' }} />
+                                                                        <Typography variant="subtitle2" fontWeight="bold" color="primary.main">
+                                                                            Call Summary
+                                                                        </Typography>
+                                                                        {activity.metadata.duration && (
+                                                                            <Chip 
+                                                                                label={`${Math.floor(activity.metadata.duration / 60)}:${String(activity.metadata.duration % 60).padStart(2, '0')}`}
+                                                                                size="small"
+                                                                                sx={{ height: 20, fontSize: '0.7rem', bgcolor: 'primary.light', color: 'white' }}
+                                                                            />
+                                                                        )}
+                                                                    </Box>
+                                                                    <Typography 
+                                                                        variant="body2" 
+                                                                        sx={{ 
+                                                                            fontSize: '0.875rem',
+                                                                            lineHeight: 1.6,
+                                                                            whiteSpace: 'pre-wrap',
+                                                                            wordBreak: 'break-word',
+                                                                            color: 'text.primary',
+                                                                            mb: activity.metadata.transcript ? 1.5 : 0
+                                                                        }}
+                                                                    >
+                                                                        {activity.comment || activity.description || 'No summary available'}
+                                                                    </Typography>
+                                                                    {activity.metadata.transcript && (
+                                                                        <Box sx={{ mt: 1.5 }}>
+                                                                            <Typography variant="caption" fontWeight="bold" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                                                                Full Transcript:
+                                                                            </Typography>
+                                                                            <Typography 
+                                                                                variant="body2" 
+                                                                                sx={{ 
+                                                                                    fontSize: '0.813rem',
+                                                                                    lineHeight: 1.5,
+                                                                                    whiteSpace: 'pre-wrap',
+                                                                                    wordBreak: 'break-word',
+                                                                                    color: 'text.secondary',
+                                                                                    fontStyle: 'italic',
+                                                                                    maxHeight: '200px',
+                                                                                    overflowY: 'auto',
+                                                                                    p: 1,
+                                                                                    bgcolor: 'rgba(0,0,0,0.02)',
+                                                                                    borderRadius: 1
+                                                                                }}
+                                                                            >
+                                                                                {activity.metadata.transcript}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    )}
+                                                                </Box>
+                                                            )}
                                                             
                                                             {/* ✅ Show Mentions Below Comment */}
                                                             {activity.mentions && activity.mentions.length > 0 && (

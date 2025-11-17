@@ -329,5 +329,7 @@ app.use("/api/v1", coins);
 app.use("/api/v1", user);
 app.use("/api/v1", file);
 app.use("/api/v1", crm);
+const call = require("./routes/callRoutes");
+app.use("/api/v1", call);
 
 module.exports = app;
